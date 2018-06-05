@@ -1,0 +1,66 @@
+#
+# CDDL HEADER START
+#
+# The contents of this file are subject to the terms of the Common Development
+# and Distribution License Version 1.0 (the "License").
+#
+# You can obtain a copy of the license at
+# http://www.opensource.org/licenses/CDDL-1.0.  See the License for the
+# specific language governing permissions and limitations under the License.
+#
+# When distributing Covered Code, include this CDDL HEADER in each file and
+# include the License file in a prominent location with the name LICENSE.CDDL.
+# If applicable, add the following below this CDDL HEADER, with the fields
+# enclosed by brackets "[]" replaced with your own identifying information:
+#
+# Portions Copyright (c) [yyyy] [name of copyright owner]. All rights reserved.
+#
+# CDDL HEADER END
+#
+#
+#
+# Author: Daniel S. Karls (implementation adapted from Martin Z. Bazant's original code)
+#
+# Copyright (c) 2012-2018, Regents of the University of Minnesota.  All rights reserved.
+#
+
+This MODEL DRIVER implementation of the EDIP bond-order model computes energy, forces, and virial using the CLUSTER, NEIGH_PURE_F, or MI_OPBC_F NBC methods.
+
+This version supports flexible unit handling and model parameter publishing (all parameters are 'free' to be changed by the test).
+
+NOTE: I've eliminated the 'delta' parameter that was in the original version of this model (for Silicon this has a value of delta = 78.7590539) and, instead, directly used 'eta' as a free parameter.
+'delta' and 'eta' are related through eta = delta/Q0 (Q0 is another free parameter), but because the latest EDIP publication lists a value for eta rather than delta, it seemed more appropriate to use
+'eta' as a free parameter in its own right and forget about delta.  For Silicon, eta = 0.2523244 is the value cited in the EDIP papers.
+
+Note: Since forces are required to compute the virial, the forces will be computed even if the Test asks only for the virial.
+
+-----------------------------------------
+A note on how this model is implemented:
+
+I adapted this model from Prof. Martin Z. Bazant's (bazant@math.mit.edu) code (thanks also to Prof. Joao F. Justo for an additional FORTRAN reference code).
+Because of the coordination-dependency of the 2-body and 3-body terms, we're forced to do multiple loops over all of the atoms.
+The first inner loop (the "Pre-pass loop") goes over all of the other atoms and determines which ones are inside the cutoff radius of the atom being considered by the outer loop.
+For those within the cutoff radius, it computes part of the 2-body interaction (the part that doesn't require the coordination to be known)
+and the radial parts of the 3-body interaction.  Finally, the coordination of each of the atoms within the cutoff
+is added onto the total coordination, Z, for that atom.  Having Z, we now have to loop over all other atoms once more
+in order to calculate the coordination-dependent portion of the 2-body energy and get the final 2-body energy for the atom
+being considered in the outermost loop, V2.  Note also that we are unable to perform a "half-summation" for the two-body terms
+(with an outer loop over i and an inner loop over j>i) because of the asymmetry the coordination introduces into the 2-body energy (V2(R_ij,Z_i) != V2(R_ji,Z_j)).
+We also need to use Z to perform another set of nested loops in order to calculate the coordination-dependent portion of the
+3-body energy, h(l,Z).  This will give us the total 3-body energy for the atom being considered in the outermost loop, V3.
+Since we are forced to loop over the same atoms multiple times (first to get the coordination and then to compute the energies),
+it makes sense to reduce the computational expense of the subsequent looping by only looping over the atoms which have already been
+determined to fall within the cutoff radius.  To this end, this code generates its own *internal* neighbor list even if it is not provided
+by the test i.e. the test only supports the CLUSTER NBC mode.
+
+The original EDIP publications can be found at:
+
+     1.  M. Z. Bazant and E. Kaxiras, Phys. Rev. Lett. 77, 4370 (1996).
+     2.  M. Z. Bazant, E. Kaxiras, J. F. Justo, Phys. Rev. B 56, 8542 (1997).
+     3.  J. F. Justo, M. Z. Bazant, E. Kaxiras, V. V. Bulatov, and S. Yip,
+	   Phys. Rev. B 58, 2539 (1998).
+
+If you are interested in an explanation of the looping structure, etc., in this code and why it was chosen, I highly recommend looking at chapter 6 of Prof. Bazant's 1997 Ph.D. thesis, available at http://web.mit.edu/bazant/www/thesis/md.html.
+Page 156 of this thesis includes a pseudocode of what has been implemented here.
+
+Written by Daniel S. Karls (University of Minnesota). Contact: karl0100@umn.edu.

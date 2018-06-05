@@ -1,0 +1,24 @@
+{
+  "title" "Original EDIP potential for elemental silicon"
+  "extended-id" "EDIP_BOP_Bazant_Kaxiras_Si__MO_958932894036_002"
+  "model-driver" "EDIP_BOP_C__MD_506186535567_002"
+  "author" "Daniel S. Karls"
+  "species" ["Si"]
+  "description" "This Model contains parameters for the EDIP three-body bond-order potential for pure silicon, as given in J. F. Justo, M. Z. Bazant, E. Kaxiras, V. V. Bulatov, and S. Yip, Phys. Rev. B 58, 2539 (1998).  This is a general purpose potential for studying a wide array of bulk structures and defects in silicon."
+  "source-citations" {"author" "Justo, Jo\\~{a}o F. and Bazant, Martin Z. and Kaxiras, Efthimios and Bulatov, V. V. and Yip, Sidney"
+                      "title" "Interatomic potential for silicon defects and disordered phases"
+                      "journal" "Physical Review B"
+                      "volume" "58"
+                      "issue" "5"
+                      "pages" "2539--2550"
+                      "year" "1998"
+                      "month" "Aug"
+                      "publisher" "American Physical Society"
+                      "doi" "10.1103/PhysRevB.58.2539"
+                      "url" "https://link.aps.org/doi/10.1103/PhysRevB.58.2539"}
+  "contributor-id" "4d62befd-21c4-42b8-a472-86132e6591f3"
+  "maintainer-id" "4d62befd-21c4-42b8-a472-86132e6591f3"
+  "publication-year" "2018"
+  "kim-api-version" "2.0"
+  "domain" "openkim.org"
+}

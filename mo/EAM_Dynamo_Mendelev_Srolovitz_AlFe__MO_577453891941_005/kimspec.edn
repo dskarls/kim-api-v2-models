@@ -1,0 +1,18 @@
+{
+  "title" "FS potential for Al-Fe"
+  "extended-id" "EAM_Dynamo_Mendelev_Srolovitz_AlFe__MO_577453891941_004"
+  "model-driver" "EAM_Dynamo__MD_120291908751_004"
+  "species" [
+    "Al"
+    "Fe"
+  ]
+  "author" "Mikhail I. Mendelev"
+  "description" "The potential was designed to simulate the Fe impurities in Al."
+  "source-citations" "M.I. Mendelev,  D.J. Srolovitz,  G.J. Ackland and  S. Han, J. Mater. Res. 20, 208-218 (2005)."
+  "content-origin" "http://www.ctcms.nist.gov/potentials/Al.html"
+  "contributor-id" "f3251c9e-5721-45a2-a0fc-1e48977d95e2"
+  "maintainer-id" "f3251c9e-5721-45a2-a0fc-1e48977d95e2"
+  "publication-year" "2018"
+  "kim-api-version" "1.6"
+  "domain" "openkim.org"
+}
