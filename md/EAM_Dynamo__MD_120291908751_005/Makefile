@@ -28,6 +28,7 @@
 #    Stephen M. Whalen
 #
 
+
 # load all basic KIM make configuration
 KIM_API_BUILD_CONFIG = kim-api-v2-build-config
 ifeq ($(shell $(KIM_API_BUILD_CONFIG) --version 2> /dev/null),)
@@ -65,6 +66,7 @@ LOCALCLEAN = EAM_ImplementationComputeDispatch.cpp EAM_Spline.hpp
 #CFLAGS   +=
 #CXXFLAGS +=
 #LDFLAGS  +=
+#LDLIBS   +=
 
 # load remaining KIM make configuration
 include $(KIM_DIR)/$(builddir)/Makefile.ModelDriver

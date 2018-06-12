@@ -37,7 +37,7 @@ printf "   switch(GetComputeIndex(isComputeProcess_dEdr,\n"    >  $flName
 printf "                          isComputeProcess_d2Edr2,\n"  >> $flName
 printf "                          isComputeEnergy,\n"          >> $flName
 printf "                          isComputeForces,\n"          >> $flName
-printf "                          isComputeParticleEnergy))\n"  >> $flName
+printf "                          isComputeParticleEnergy))\n" >> $flName
 printf "   {\n"                                                >> $flName
 
 i=0
@@ -46,25 +46,25 @@ for processdE in false true; do
     for energy in false true; do
       for force in false true; do
         for particleEnergy in false true; do
-            printf "      case $i:\n"                                              >> $flName
-            printf "         ier = Compute< $processdE, $processd2E,\n"            >> $flName
-            printf "                        $energy, $force,\n"                    >> $flName
-            printf "                        $particleEnergy >(\n"         >> $flName
-            printf "                  modelCompute,\n"                             >> $flName
-            printf "                  modelComputeArguments,\n"                    >> $flName
-            printf "                  particleSpeciesCodes,\n"                     >> $flName
-            printf "                  particleContributing,\n"                     >> $flName
-            printf "                  coordinates,\n"                              >> $flName
-            printf "                  energy,\n"                                   >> $flName
-            printf "                  forces,\n"                                   >> $flName
-            printf "                  particleEnergy);\n"                          >> $flName
-            printf "         break;\n"                                             >> $flName
+            printf "      case $i:\n"                                   >> $flName
+            printf "         ier = Compute< $processdE, $processd2E,\n" >> $flName
+            printf "                        $energy, $force,\n"         >> $flName
+            printf "                        $particleEnergy >(\n"       >> $flName
+            printf "                  modelCompute,\n"                  >> $flName
+            printf "                  modelComputeArguments,\n"         >> $flName
+            printf "                  particleSpeciesCodes,\n"          >> $flName
+            printf "                  particleContributing,\n"          >> $flName
+            printf "                  coordinates,\n"                   >> $flName
+            printf "                  energy,\n"                        >> $flName
+            printf "                  forces,\n"                        >> $flName
+            printf "                  particleEnergy);\n"               >> $flName
+            printf "         break;\n"                                  >> $flName
             i=`expr $i + 1`
-        done # particleEnergy
-      done # force
-    done # energy
-  done # processd2E
-done # processdE
+        done  # particleEnergy
+      done  # force
+    done  # energy
+  done  # processd2E
+done  # processdE
 
 printf "      default:\n"                                                         >> $flName
 printf "         std::cout << \"Unknown compute function index\" << std::endl;\n" >> $flName

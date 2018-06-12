@@ -34,11 +34,11 @@
 #include <fstream>
 #include <iostream>
 
-#include "EAM.hpp"
 #include "EAM_Implementation.hpp"
 #include "KIM_ModelDriverHeaders.hpp"
 
 #define IGNORE_RESULT(fn) if(fn){}
+
 
 //==============================================================================
 //
@@ -56,22 +56,18 @@ EAM_Implementation::EAM_Implementation(
     KIM::TemperatureUnit const requestedTemperatureUnit,
     KIM::TimeUnit const requestedTimeUnit,
     int * const ier)
-: particleNumber_(0),
-  particleMass_(0),
-  latticeConstant_(0),
-  latticeType_(0),
-  embeddingData_(0),
-  densityData_(0),
-  rPhiData_(0),
-  publishDensityData_(0),
-  publish_rPhiData_(0),
-  embeddingCoeff_(0),
-  densityCoeff_(0),
-  rPhiCoeff_(0),
-  cachedNumberOfParticles_(0),
-  densityValue_(0),
-  embeddingDerivativeValue_(0),
-  embeddingSecondDerivativeValue_(0)
+    : embeddingData_(0),
+      densityData_(0),
+      rPhiData_(0),
+      publishDensityData_(0),
+      publish_rPhiData_(0),
+      embeddingCoeff_(0),
+      densityCoeff_(0),
+      rPhiCoeff_(0),
+      cachedNumberOfParticles_(0),
+      densityValue_(0),
+      embeddingDerivativeValue_(0),
+      embeddingSecondDerivativeValue_(0)
 {
   // initialize comments to null strings and set pointers for comment fields
   for (int i = 0; i < MAX_PARAMETER_FILES; ++i)
@@ -83,13 +79,21 @@ EAM_Implementation::EAM_Implementation(
   // set particleNames to null string
   particleNames_[0] = 0;
 
+  // initialize private parameters
+  for (int i = 0; i < MAX_NUMBER_OF_SPECIES; ++i)
+  {
+    particleNumber_[i] = 0;
+    particleMass_[i] = 0.0;
+    latticeConstant_[i] = 0.0;
+    latticeType_[i][0] = 0;
+  }
 
   FILE* parameterFilePointers[MAX_PARAMETER_FILES];
   int numberParameterFiles;
   modelDriverCreate->GetNumberOfParameterFiles(
       &numberParameterFiles);
-  *ier = OpenParameterFiles(modelDriverCreate,
-                            numberParameterFiles, parameterFilePointers);
+  *ier = OpenParameterFiles(modelDriverCreate, numberParameterFiles,
+                            parameterFilePointers);
   if (*ier) return;
 
   eamFileType_ = DetermineParameterFileTypes(modelDriverCreate,
@@ -107,17 +111,16 @@ EAM_Implementation::EAM_Implementation(
                                      numberParameterFiles, funcflData);
   if (*ier)
   {
-    CloseParameterFiles(parameterFilePointers, numberParameterFiles);
+    CloseParameterFiles(numberParameterFiles, parameterFilePointers);
     return;
   }
 
-  AllocateFixedParameterMemory();
-  AllocateFreeParameterMemory();
+  AllocateParameterMemory();
 
   *ier = ProcessParameterFileData(modelDriverCreate,
                                   eamFileType_, parameterFilePointers,
                                   numberParameterFiles, funcflData);
-  CloseParameterFiles(parameterFilePointers, numberParameterFiles);
+  CloseParameterFiles(numberParameterFiles, parameterFilePointers);
   if (*ier) return;
 
   *ier = ConvertUnits(modelDriverCreate,
@@ -126,10 +129,9 @@ EAM_Implementation::EAM_Implementation(
                       requestedChargeUnit,
                       requestedTemperatureUnit,
                       requestedTimeUnit);
-
   if (*ier) return;
 
-  *ier = SetReinitMutableValues(modelDriverCreate);
+  *ier = SetRefreshMutableValues(modelDriverCreate);
   if (*ier) return;
 
   *ier = RegisterKIMModelSettings(modelDriverCreate);
@@ -151,24 +153,7 @@ EAM_Implementation::~EAM_Implementation()
 { // note: it is ok to delete a null pointer and we have ensured that
   // everything is initialized to null
 
-  // Memory that was allocated in AllocateFixedParameterMemory
-  delete [] particleNumber_;
-  delete [] particleMass_;
-  delete [] latticeConstant_;
-  if (latticeType_ != 0)
-  {
-    delete [] latticeType_[0];
-    latticeType_[0] = 0;
-  }
-  delete [] latticeType_;
-
-  // Nullify pointers
-  particleNumber_ = 0;
-  particleMass_ = 0;
-  latticeConstant_ = 0;
-  latticeType_ = 0;
-
-  // Memory that was allocated in AllocateFreeParameterMemory
+  // Memory that was allocated in AllocateParameterMemory
   Deallocate2DArray(embeddingData_);
   Deallocate3DArray(densityData_);
   Deallocate3DArray(rPhiData_);
@@ -204,7 +189,7 @@ int EAM_Implementation::Refresh(KIM::ModelRefresh * const modelRefresh)
 
     ier = true;
     LOG_ERROR("Model has cutoff value outside of the pair function"
-        " interpolation domain");
+              " interpolation domain");
     return ier;
   }
 
@@ -230,7 +215,7 @@ int EAM_Implementation::Refresh(KIM::ModelRefresh * const modelRefresh)
     }
   }
 
-  ier = SetReinitMutableValues(modelRefresh);
+  ier = SetRefreshMutableValues(modelRefresh);
   if (ier) return ier;
 
   // nothing else to do for this case
@@ -305,10 +290,13 @@ int EAM_Implementation::ComputeArgumentsDestroy(
 {
   int ier;
 
+  // nothing to do for this case
+
   // everything is good
   ier = false;
   return ier;
 }
+
 
 //==============================================================================
 //
@@ -317,22 +305,33 @@ int EAM_Implementation::ComputeArgumentsDestroy(
 //==============================================================================
 
 //******************************************************************************
-void EAM_Implementation::AllocateFixedParameterMemory()
-{ // allocate memory for particle number, mass, lattice constant, and lattice
-  // type
-  // NOTE: The term "fixed" here does not refer to "fixed parameters" as were
-  //       defined in KIM API 1.x. KIM API 2.0 has abolished these, and all
-  //       parameters are now mutable (corresponding to "free parameters" in
-  //       KIM API 1.x terminology)
-  particleNumber_ = new int[numberModelSpecies_];
-  particleMass_ = new double[numberModelSpecies_];
-  latticeConstant_ = new double[numberModelSpecies_];
-  latticeType_ = new char*[numberModelSpecies_];
-  latticeType_[0] = new char[numberModelSpecies_ * MAXLINE];
-  for (int i = 1; i < numberModelSpecies_; ++i)
-  {
-    latticeType_[i] = latticeType_[i-1] + MAXLINE;
-  }
+void EAM_Implementation::AllocateParameterMemory()
+{
+  // allocate memory for data
+  AllocateAndInitialize2DArray(embeddingData_, numberModelSpecies_,
+                               numberRhoPoints_);
+  AllocateAndInitialize3DArray(densityData_, numberModelSpecies_,
+                               numberModelSpecies_, numberRPoints_);
+  AllocateAndInitialize3DArray(rPhiData_, numberModelSpecies_,
+                               numberModelSpecies_, numberRPoints_);
+  // allocate memory for non-repeat data
+  AllocateAndInitialize2DArray(
+      publishDensityData_,
+      numberModelSpecies_
+      *((eamFileType_ == FinnisSinclair) ? numberModelSpecies_ : 1),
+      numberRPoints_);
+  AllocateAndInitialize2DArray(publish_rPhiData_, numberUniqueSpeciesPairs_,
+                               numberRPoints_);
+
+  // allocate memory for coefficients
+  AllocateAndInitialize2DArray(embeddingCoeff_, numberModelSpecies_,
+                               numberRhoPoints_ * NUMBER_SPLINE_COEFF);
+  AllocateAndInitialize3DArray(densityCoeff_, numberModelSpecies_,
+                               numberModelSpecies_,
+                               numberRPoints_ * NUMBER_SPLINE_COEFF);
+  AllocateAndInitialize3DArray(rPhiCoeff_, numberModelSpecies_,
+                               numberModelSpecies_,
+                               numberRPoints_ * NUMBER_SPLINE_COEFF);
 }
 
 //******************************************************************************
@@ -421,7 +420,8 @@ EAMFileType EAM_Implementation::DetermineParameterFileTypes(
     // distinguish between setfl and Finnis-Sinclair files
     if (eamFileType == Setfl)
     {
-      eamFileType = IsSetflOrFinnisSinclair(modelDriverCreate, parameterFilePointers[0]);
+      eamFileType = IsSetflOrFinnisSinclair(modelDriverCreate,
+                                            parameterFilePointers[0]);
     }
 
     return eamFileType;
@@ -665,6 +665,8 @@ int EAM_Implementation::ProcessParameterFileHeaders(
     {
       // set number of species to be the number of parameter files
       numberModelSpecies_ = numberParameterFiles;
+      numberUniqueSpeciesPairs_
+          = ((numberModelSpecies_+1)*numberModelSpecies_)/2;
 
       // initialize grid values
       deltaRho_ = 0.0;
@@ -830,7 +832,8 @@ int EAM_Implementation::ReadFuncflHeader(
   if (cer == 0)
   {
     ier = true;
-    LOG_ERROR("Error reading first line (the comment line) of Funcfl parameter file");
+    LOG_ERROR("Error reading first line (the comment line) of Funcfl "
+              "parameter file");
     return ier;
   }
   int const cmntlength = strlen(&comments_[fileIndex][0]);
@@ -885,19 +888,22 @@ int EAM_Implementation::SetParticleNamesForFuncflModels(
     if (ier)
     {
       LOG_ERROR("Error retrieving species names from atomic numbers read from"
-          "parameter files");
+                "parameter files");
       delete [] particleNames;
       return ier;
     }
     particleNames[i] = tmp_species.String().c_str();
   }
 
-  // write particleNames_ string
+  // write particleNames_ string and register species names in the
+  // KIM API object and give them indices that we'll use internally
   sprintf(particleNames_, "%d ", numberModelSpecies_);
   for (int i = 0; i < numberModelSpecies_; ++i)
   {
     strcat(particleNames_, particleNames[i]);
     strcat(particleNames_, " ");
+
+    modelDriverCreate->SetSpeciesCode(std::string(particleNames[i]), i);
   }
   int const nmlength = strlen(particleNames_);
   particleNames_[nmlength - 1] = 0;
@@ -906,36 +912,6 @@ int EAM_Implementation::SetParticleNamesForFuncflModels(
   // everything is good
   ier = false;
   return ier;
-}
-
-//******************************************************************************
-void EAM_Implementation::AllocateFreeParameterMemory()
-{
-  // allocate memory for data
-  AllocateAndInitialize2DArray(embeddingData_, numberModelSpecies_,
-                               numberRhoPoints_);
-  AllocateAndInitialize3DArray(densityData_, numberModelSpecies_,
-                               numberModelSpecies_, numberRPoints_);
-  AllocateAndInitialize3DArray(rPhiData_, numberModelSpecies_,
-                               numberModelSpecies_, numberRPoints_);
-  // allocate memory for non-repeat data
-  AllocateAndInitialize2DArray(
-      publishDensityData_,
-      numberModelSpecies_
-      *((eamFileType_ == FinnisSinclair) ? numberModelSpecies_ : 1),
-      numberRPoints_);
-  AllocateAndInitialize2DArray(publish_rPhiData_, numberUniqueSpeciesPairs_,
-                               numberRPoints_);
-
-  // allocate memory for coefficients
-  AllocateAndInitialize2DArray(embeddingCoeff_, numberModelSpecies_,
-                               numberRhoPoints_ * NUMBER_SPLINE_COEFF);
-  AllocateAndInitialize3DArray(densityCoeff_, numberModelSpecies_,
-                               numberModelSpecies_,
-                               numberRPoints_ * NUMBER_SPLINE_COEFF);
-  AllocateAndInitialize3DArray(rPhiCoeff_, numberModelSpecies_,
-                               numberModelSpecies_,
-                               numberRPoints_ * NUMBER_SPLINE_COEFF);
 }
 
 //******************************************************************************
@@ -1043,7 +1019,8 @@ int EAM_Implementation::ReadSetflData(
     }
 
     // read "embed_dat"
-    ier = GrabData(modelDriverCreate, fptr, numberRhoPoints_, embeddingData_[i]);
+    ier = GrabData(modelDriverCreate,
+                   fptr, numberRhoPoints_, embeddingData_[i]);
     if (ier)
     {
       LOG_ERROR("Error reading embeddingData lines of setfl file");
@@ -1121,7 +1098,8 @@ int EAM_Implementation::ReadFinnisSinclairData(
     }
 
     // read "embed_dat"
-    ier = GrabData(modelDriverCreate, fptr, numberRhoPoints_, embeddingData_[i]);
+    ier = GrabData(modelDriverCreate,
+                   fptr, numberRhoPoints_, embeddingData_[i]);
     if (ier)
     {
       LOG_ERROR("Error reading embeddingData lines of setfl file");
@@ -1131,7 +1109,8 @@ int EAM_Implementation::ReadFinnisSinclairData(
     // read "densityData"
     for (int j = 0; j < numberModelSpecies_; ++j)
     {
-      ier = GrabData(modelDriverCreate, fptr, numberRPoints_, densityData_[i][j]);
+      ier = GrabData(modelDriverCreate,
+                     fptr, numberRPoints_, densityData_[i][j]);
       if (ier)
       {
         LOG_ERROR("Error reading densityData lines of setfl file");
@@ -1345,8 +1324,8 @@ void EAM_Implementation::ReinterpolateAndMix(
 
 //******************************************************************************
 void EAM_Implementation::CloseParameterFiles(
-    FILE* const parameterFilePointers[MAX_PARAMETER_FILES],
-    int const numberParameterFiles)
+    int const numberParameterFiles,
+    FILE* const parameterFilePointers[MAX_PARAMETER_FILES])
 {
   for (int i = 0; i < numberParameterFiles; ++i)
     fclose(parameterFilePointers[i]);
@@ -1391,10 +1370,9 @@ int EAM_Implementation::ConvertUnits(
       requestedTemperatureUnit, requestedTimeUnit,
       1.0, 0.0, 0.0, 0.0, 0.0,
       &convertLength);
-
   if (ier)
   {
-    LOG_ERROR("Unable to convert length units");
+    LOG_ERROR("Unable to convert length unit");
     return ier;
   }
 
@@ -1415,7 +1393,7 @@ int EAM_Implementation::ConvertUnits(
       &convertEnergy);
   if (ier)
   {
-    LOG_ERROR("Unable to convert energy units");
+    LOG_ERROR("Unable to convert energy unit");
     return ier;
   }
 
@@ -1469,7 +1447,7 @@ int EAM_Implementation::ConvertUnits(
       requestedTimeUnit);
   if (ier)
   {
-    LOG_ERROR("Unable to set units to requested set");
+    LOG_ERROR("Unable to set units to requested values");
     return ier;
   }
 
@@ -1519,6 +1497,7 @@ int EAM_Implementation::RegisterKIMComputeArgumentsSettings(
 
   return error;
 }
+
 //******************************************************************************
 #include "KIM_ModelDriverCreateLogMacros.hpp"
 int EAM_Implementation::RegisterKIMParameters(
@@ -1527,83 +1506,22 @@ int EAM_Implementation::RegisterKIMParameters(
 {
   int ier = false;
 
-  /*int const numberCommentLines = (eamFileType == Funcfl) ?
-      numberModelSpecies_ : NUMBER_SETFL_COMMENT_LINES;
-  ier = modelDriverCreate->SetParameterPointer(numberCommentLines,
-      &comments_, "comments");
+  ier = modelDriverCreate->SetParameterPointer(1, &cutoffParameter_, "cutoff");
   if (ier)
   {
-    LOG_ERROR("Could set register parameter 'comments'");
-    return ier;
-  }*/
-  /*ier = modelDriverCreate->SetParameterPointer(1,
-      &particleNames_, "particleNames");
-  if (ier)
-  {
-    LOG_ERROR("Could set register parameter 'particleNames'");
-    return ier;
-  }*/
-  ier = modelDriverCreate->SetParameterPointer(numberModelSpecies_,
-      particleNumber_, "particleNumber");
-  if (ier)
-  {
-    LOG_ERROR("Could set register parameter 'particleNumber'");
+    LOG_ERROR("Could not set register parameter 'cutoff'");
     return ier;
   }
-  ier = modelDriverCreate->SetParameterPointer(numberModelSpecies_,
-      particleMass_, "particleMass");
+  ier = modelDriverCreate->SetParameterPointer(1, &deltaRho_, "deltaRho");
   if (ier)
   {
-    LOG_ERROR("Could set register parameter 'particleMass'");
+    LOG_ERROR("Could not set register parameter 'deltaRho'");
     return ier;
   }
-  ier = modelDriverCreate->SetParameterPointer(numberModelSpecies_,
-      latticeConstant_, "latticeConstant");
+  ier = modelDriverCreate->SetParameterPointer(1, &deltaR_, "deltaR");
   if (ier)
   {
-    LOG_ERROR("Could set register parameter 'latticeConstant'");
-    return ier;
-  }
-  /*ier = modelDriverCreate->SetParameterPointer(numberModelSpecies_,
-      &latticeType_, "latticeType");
-  if (ier)
-  {
-    LOG_ERROR("Could set register parameter 'latticeType'");
-    return ier;
-  }*/
-  ier = modelDriverCreate->SetParameterPointer(1,
-      &numberRhoPoints_, "numberRhoPoints");
-  if (ier)
-  {
-    LOG_ERROR("Could set register parameter 'numberRhoPoints'");
-    return ier;
-  }
-  ier = modelDriverCreate->SetParameterPointer(1,
-      &numberRPoints_, "numberRPoints");
-  if (ier)
-  {
-    LOG_ERROR("Could set register parameter 'numberRPoints'");
-    return ier;
-  }
-  ier = modelDriverCreate->SetParameterPointer(1,
-      &cutoffParameter_, "cutoff");
-  if (ier)
-  {
-    LOG_ERROR("Could set register parameter 'cutoff'");
-    return ier;
-  }
-  ier = modelDriverCreate->SetParameterPointer(1,
-      &deltaRho_, "deltaRho");
-  if (ier)
-  {
-    LOG_ERROR("Could set register parameter 'deltaRho'");
-    return ier;
-  }
-  ier = modelDriverCreate->SetParameterPointer(1,
-      &deltaR_, "deltaR");
-  if (ier)
-  {
-    LOG_ERROR("Could set register parameter 'deltaR'");
+    LOG_ERROR("Could not set register parameter 'deltaR'");
     return ier;
   }
 
@@ -1619,10 +1537,6 @@ int EAM_Implementation::RegisterKIMParameters(
     }
   }
 
-//  int publishDensityLength = (eamFileType_ == FinnisSinclair) ?
-//      numberModelSpecies_*numberModelSpecies_ :
-//      numberModelSpecies_;
-
   for (int i = 0; i < numberModelSpecies_ ; i++)
   {
     for(int j = 0; j < numberModelSpecies_; j++)
@@ -1637,30 +1551,34 @@ int EAM_Implementation::RegisterKIMParameters(
     }
   }
 
-  /*ier = modelDriverCreate->SetParameterPointer(
-      numberModelSpecies_ * numberRhoPoints_,
-      &embeddingData_, "embeddingData");
-  if (ier)
-  {
-    LOG_ERROR("Could set register parameter 'embeddingData'");
-    return ier;
-  }
   ier = modelDriverCreate->SetParameterPointer(
-      publishDensityLength * numberRPoints_,
-      &publishDensityData_, "densityData");
+      numberModelSpecies_ * numberRhoPoints_,
+      embeddingData_[0], "embeddingData");
   if (ier)
   {
-    LOG_ERROR("Could set register parameter 'densityData'");
+    LOG_ERROR("Could not set register parameter 'embeddingData'");
     return ier;
   }
+
   ier = modelDriverCreate->SetParameterPointer(
       numberUniqueSpeciesPairs_ * numberRPoints_,
-      &publishDensityData_, "rPhiData");
+      publish_rPhiData_[0], "rPhiData");
   if (ier)
   {
-    LOG_ERROR("Could set register parameter 'rPhiData'");
+    LOG_ERROR("Could not set register parameter 'rPhiData'");
     return ier;
-  }*/
+  }
+
+  int const publishDensityLength = (eamFileType_ == FinnisSinclair) ?
+      numberModelSpecies_*numberModelSpecies_ : numberModelSpecies_;
+  ier = modelDriverCreate->SetParameterPointer(
+      publishDensityLength * numberRPoints_,
+      publishDensityData_[0], "densityData");
+  if (ier)
+  {
+    LOG_ERROR("Could not set register parameter 'densityData'");
+    return ier;
+  }
 
   // everything is good
   ier = false;
@@ -1693,8 +1611,9 @@ int EAM_Implementation::RegisterKIMFunctions(
 
 //******************************************************************************
 template<class ModelObj>
-int EAM_Implementation::SetReinitMutableValues(ModelObj * modelObj)
-{ // use (possibly) new values of free parameters to compute other quantities
+int EAM_Implementation::SetRefreshMutableValues(
+    ModelObj * const modelObj)
+{ // use (possibly) new values of parameters to compute other quantities
   // NOTE: This function is templated because it's called with both a
   //       modelDriverCreate object during initialization and with a
   //       modelRefresh object when the Model's parameters have been altered
@@ -1767,8 +1686,6 @@ int EAM_Implementation::SetComputeMutableValues(
   isComputeProcess_dEdr = compProcess_dEdr;
   isComputeProcess_d2Edr2 = compProcess_d2Edr2;
 
-  // double const* cutoff;            // currently unused
-  // int const* numberOfSpeciesCodes;  // currently unused
   int const* numberOfParticles;
   ier =
       modelComputeArguments->GetArgumentPointer(
@@ -1837,7 +1754,7 @@ int EAM_Implementation::CheckParticleSpeciesCodes(
         (particleSpeciesCodes[i] >= numberModelSpecies_))
     {
       ier = true;
-      LOG_ERROR("unsupported particle species detected");
+      LOG_ERROR("unsupported particle species codes detected");
       return ier;
     }
   }

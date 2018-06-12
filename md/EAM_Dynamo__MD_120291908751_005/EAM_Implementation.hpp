@@ -31,9 +31,7 @@
 #ifndef EAM_IMPLEMENTATION_HPP_
 #define EAM_IMPLEMENTATION_HPP_
 
-#include <map>
 #include <cmath>
-
 #include "KIM_LogVerbosity.hpp"
 #include "EAM.hpp"
 
@@ -43,10 +41,12 @@
 #define TWO 2.0
 #define HALF 0.5
 
+#define MAX_NUMBER_OF_SPECIES 150
 #define MAX_PARAMETER_FILES 20
 #define NUMBER_SETFL_COMMENT_LINES 3
 
 #include "EAM_Spline.hpp"
+
 
 //==============================================================================
 //
@@ -56,7 +56,7 @@
 
 // type declaration for get neighbor functions
 typedef int (GetNeighborFunction)(void const * const, int const,
-                                  int * const, int const ** const);                                  
+                                  int * const, int const ** const);
 // type declaration for vector of constant dimension
 typedef double VectorOfSizeDIM[DIMENSION];
 // type declaration for funcfl data
@@ -114,6 +114,7 @@ class EAM_Implementation
       KIM::ModelComputeArgumentsDestroy * const modelComputeArgumentsDestroy)
       const;
 
+
  private:
   // Constant values that never change
   //   Set in constructor (via SetConstantValues)
@@ -129,37 +130,35 @@ class EAM_Implementation
   //   Set in constructor (via functions listed below)
   //
   //
-  // KIM API: Model Fixed Parameters
-  //   Memory allocated in   AllocateFixedParameterMemory()
-  //   Memory deallocated in ~EAM_Implementation()
+  // Private Model Parameters
   //   Data set in ReadParameterFile routines
   char* comments_ptr_[MAX_PARAMETER_FILES];
   char comments_[MAX_PARAMETER_FILES][MAXLINE];
   char particleNames_[MAXLINE];
-  int* particleNumber_;
-  double* particleMass_;
-  double* latticeConstant_;
-  char** latticeType_;
+  int particleNumber_[MAX_NUMBER_OF_SPECIES];
+  double particleMass_[MAX_NUMBER_OF_SPECIES];
+  double latticeConstant_[MAX_NUMBER_OF_SPECIES];
+  char latticeType_[MAX_NUMBER_OF_SPECIES][MAXLINE];
   int numberRhoPoints_;
   int numberRPoints_;
   //
-  // KIM API: Model Free Parameters whose (pointer) values never change
-  //   Memory allocated in   AllocateFreeParameterMemory() (from constructor)
-  //   Memory deallocated in ~EAM_Implementation()
+  // KIM API: Model Parameters whose (pointer) values never change
+  //   Memory allocated in AllocateParameterMemory() (from constructor)
+  //   Memory deallocated in destructor
   //   Data set in ReadParameterFile routines OR by KIM Simulator
   double** embeddingData_;
   double*** densityData_;
   double*** rPhiData_;
 
-  // Free Parameter pointers to be published without repeat data
+  // Parameter pointers to be published without repeated data
   double** publishDensityData_;
   double** publish_rPhiData_;
 
-  // Mutable values that only change when reinit() executes
-  //   Set in Reinit (via SetReinitMutableValues)
+  // Mutable values that only change when Refresh() executes
+  //   Set in Refresh (via SetRefreshMutableValues)
   //
   //
-  // KIM API: Model Free Parameters (can be changed directly by KIM Simulator)
+  // KIM API: Model Parameters (can be changed directly by KIM Simulator)
   double influenceDistance_;
   double cutoffParameter_;
   double deltaR_;
@@ -169,10 +168,11 @@ class EAM_Implementation
   double cutoffSq_;
   double oneByDr_;
   double oneByDrho_;
-  //   Memory allocated once by AllocateFreeParameterMemory()
+  //   Memory allocated once by AllocateParameterMemory()
   double** embeddingCoeff_;
   double*** densityCoeff_;
   double*** rPhiCoeff_;
+
 
   // Mutable values that can change with each call to Refresh() and Compute()
   //   Memory may be reallocated on each call
@@ -189,7 +189,7 @@ class EAM_Implementation
   //
   //
   // Related to constructor
-  void AllocateFixedParameterMemory();
+  void AllocateParameterMemory();
   static int OpenParameterFiles(
       KIM::ModelDriverCreate * const modelDriverCreate,
       int const numberParameterFiles,
@@ -218,7 +218,6 @@ class EAM_Implementation
       double& deltaR, double& cutoffParameter);
   int SetParticleNamesForFuncflModels(
       KIM::ModelDriverCreate * const modelDriverCreate);
-  void AllocateFreeParameterMemory();
   int ProcessParameterFileData(
       KIM::ModelDriverCreate * const modelDriverCreate,
       EAMFileType const eamFileType,
@@ -240,8 +239,8 @@ class EAM_Implementation
       FILE* const fptr, int const n, double* const list);
   void ReinterpolateAndMix(SetOfFuncflData const& funcflData);
   static void CloseParameterFiles(
-      FILE* const parameterFilePointers[MAX_PARAMETER_FILES],
-      int const numberParameterFiles);
+      int const numberParameterFiles,
+      FILE* const parameterFilePointers[MAX_PARAMETER_FILES]);
   int ConvertUnits(
       KIM::ModelDriverCreate * const modelDriverCreate,
       KIM::LengthUnit const requestedLengthUnit,
@@ -252,7 +251,8 @@ class EAM_Implementation
   int RegisterKIMModelSettings(
       KIM::ModelDriverCreate * const modelDriverCreate) const;
   int RegisterKIMComputeArgumentsSettings(
-      KIM::ModelComputeArgumentsCreate * const modelComputeArgumentsCreate) const;
+      KIM::ModelComputeArgumentsCreate * const modelComputeArgumentsCreate)
+      const;
   int RegisterKIMParameters(
       KIM::ModelDriverCreate * const modelDriverCreate,
       EAMFileType const eamFileType);
@@ -261,12 +261,11 @@ class EAM_Implementation
   //
   // Related to Refresh()
   template<class ModelObj>
-  int SetReinitMutableValues(ModelObj * const modelObj);
+  int SetRefreshMutableValues(ModelObj * const modelObj);
   void SplineInterpolateAllData();
   static void SplineInterpolate(double const* const dat,
                                 double const delta, int const n,
                                 double* const coe);
-
   //
   // Related to Compute()
   int SetComputeMutableValues(
@@ -401,22 +400,24 @@ int EAM_Implementation::Compute(
           double densityBetaValue;
           double const* const densityBetaCoeff
               = densityCoeff_[particleSpeciesCodes[j]][particleSpeciesCodes[i]];
-          INTERPOLATE_F(densityBetaCoeff, rijOffset, rijIndex, densityBetaValue);
+          INTERPOLATE_F(densityBetaCoeff, rijOffset, rijIndex,
+                        densityBetaValue);
           densityValue_[i] += densityBetaValue;
         }
       }  // end of loop over neighbors
 
-      densityValue_[i] = std::max(densityValue_[i], 0.0);  // ensure non-negative
+      // ensure non-negative
+      densityValue_[i] = std::max(densityValue_[i], 0.0);
       // Check for density too large
       double const rhoDomainLimit = (numberRhoPoints_ - 1.0)*deltaRho_;
       if (densityValue_[i] > rhoDomainLimit)
       {
         ier = true;
         LOG_ERROR("Particle has density value outside of embedding function"
-            " interpolation domain");
+                  " interpolation domain");
         return ier;
       }
-    } // end if statement as to whether particle is contributing
+    }  // end if statement as to whether particle is contributing
   }  // end of loop over contributing particles
 
   // calculate embedding function and its derivative
@@ -463,7 +464,7 @@ int EAM_Implementation::Compute(
         INTERPOLATE_D2F(embeddingAlphaCoeff, densityOffset, densityIndex,
                         embeddingSecondDerivativeValue_[i]);
       }
-    } // end if statement as to whether particle is contributing
+    }  // end if statement as to whether particle is contributing
   }
 
   // calculate contribution from electron density to the force part
@@ -512,7 +513,7 @@ int EAM_Implementation::Compute(
           double const oneByRij = ONE / rij;
           double const pairPotentialValue = rijPhiValue * oneByRij;
 
-          // Contribute pair term to Energy as half or full
+          // Contribute pair term to Energy
           if (isComputeEnergy == true)
           {
             *energy += HALF * pairPotentialValue;
@@ -524,7 +525,7 @@ int EAM_Implementation::Compute(
             particleEnergy[i] += HALF * pairPotentialValue;
           }
 
-          // Compute dEdrByR terms as half or full
+          // Compute dEdrByR terms
           double dEdrByRij = 0.0;
           if ((isComputeForces == true) || (isComputeProcess_dEdr == true))
           {
@@ -535,8 +536,8 @@ int EAM_Implementation::Compute(
 
             // interpolate derivative of rho_beta(r_ij)
             double densityBetaDerivativeValue;
-            double const* const densityBetaCoeff
-                = densityCoeff_[particleSpeciesCodes[i]][particleSpeciesCodes[j]];
+            double const* const densityBetaCoeff =
+                densityCoeff_[particleSpeciesCodes[j]][particleSpeciesCodes[i]];
             INTERPOLATE_DF(densityBetaCoeff, rijOffset, rijIndex,
                            densityBetaDerivativeValue);
 
@@ -580,7 +581,7 @@ int EAM_Implementation::Compute(
           }
         }  // if particles i and j interact
       }  // end of first neighbor loop
-    } // end of if statement for whether particle is contributing
+    }  // end of if statement for whether particle is contributing
   }  // end of loop over contributing particles
 
   // Separate loop nest for process_d2Edr2
@@ -640,7 +641,8 @@ int EAM_Implementation::Compute(
             double rijPhiValue;
             double const* const rijPhiAlphaBetaCoeff
                 = rPhiCoeff_[particleSpeciesCodes[i]][particleSpeciesCodes[j]];
-            INTERPOLATE_F(rijPhiAlphaBetaCoeff, rijOffset, rijIndex, rijPhiValue);
+            INTERPOLATE_F(rijPhiAlphaBetaCoeff,
+                          rijOffset, rijIndex, rijPhiValue);
 
             // find phi(r_ij)
             double const oneByRij = ONE / rij[0];
@@ -657,8 +659,8 @@ int EAM_Implementation::Compute(
 
             // interpolate derivative of rho_beta(r_ij)
             double densityBetaDerivativeValue;
-            double const* const densityBetaCoeff
-                = densityCoeff_[particleSpeciesCodes[i]][particleSpeciesCodes[j]];
+            double const* const densityBetaCoeff =
+                densityCoeff_[particleSpeciesCodes[j]][particleSpeciesCodes[i]];
             INTERPOLATE_DF(densityBetaCoeff, rijOffset, rijIndex,
                            densityBetaDerivativeValue);
 
@@ -688,13 +690,13 @@ int EAM_Implementation::Compute(
                 rij[1] = sqrt(rik2);
 
                 // compute rikOffset and rikIndex
-                GET_DELTAX_AND_INDEX(rij[1], oneByDr_, numberRPoints_, rikOffset,
-                                     rikIndex);
+                GET_DELTAX_AND_INDEX(
+                    rij[1], oneByDr_, numberRPoints_, rikOffset, rikIndex);
 
                 // interpolate derivative of rho_gamma(r_ik)
                 double densityGammaDerivativeValue;
-                double const* const densityGammaCoeff
-                    = densityCoeff_[particleSpeciesCodes[i]][particleSpeciesCodes[k]];
+                double const* const densityGammaCoeff = densityCoeff_[
+                    particleSpeciesCodes[k]][particleSpeciesCodes[i]];
                 INTERPOLATE_DF(densityGammaCoeff, rikOffset, rikIndex,
                                densityGammaDerivativeValue);
 
@@ -714,8 +716,8 @@ int EAM_Implementation::Compute(
 
                   // interpolate second derivative of rho_beta(r_ij)
                   double densityBetaSecondDerivativeValue;
-                  double const* const densityBetaCoeff
-                      = densityCoeff_[particleSpeciesCodes[i]][particleSpeciesCodes[j]];
+                  double const* const densityBetaCoeff = densityCoeff_[
+                      particleSpeciesCodes[j]][particleSpeciesCodes[i]];
                   INTERPOLATE_D2F(densityBetaCoeff, rijOffset, rijIndex,
                                   densityBetaSecondDerivativeValue);
 
@@ -745,8 +747,8 @@ int EAM_Implementation::Compute(
                                                r_ij[0], r_ij[1], r_ij[2] };
                   double const* const pr_ikr_ij = &r_ikr_ij[0];
 
-                  ier = modelComputeArguments
-                        ->ProcessD2EDr2Term(d2Edr2, prikrij, pr_ikr_ij, piis, pjjs);
+                  ier = modelComputeArguments->ProcessD2EDr2Term(
+                      d2Edr2, prikrij, pr_ikr_ij, piis, pjjs);
                   if (ier)
                   {
                     LOG_ERROR("process_d2Edr2");
@@ -760,7 +762,7 @@ int EAM_Implementation::Compute(
                 int const* const pjjs = &jjs[0];
                 double const* const prij = &rij[0];
                 ier = modelComputeArguments
-                        ->ProcessD2EDr2Term(d2Edr2, prij, r_ij, piis, pjjs);
+                    ->ProcessD2EDr2Term(d2Edr2, prij, r_ij, piis, pjjs);
                 if (ier)
                 {
                   LOG_ERROR("process_d2Edr2");
@@ -770,7 +772,7 @@ int EAM_Implementation::Compute(
             }  // end of second neighbor loop
           }  // if particles i and j interact
         }  // end of first neighbor loop
-      } // end of if statement for whether particle is contributing
+      }  // end of if statement for whether particle is contributing
     }  // end of loop over contributing particles
   }  // if (isComputeProcess_d2Edr2 == true)
 

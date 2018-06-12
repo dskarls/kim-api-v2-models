@@ -73,14 +73,13 @@ int model_driver_create(
   }
 
   // register pointer to EAM object in KIM object
-  modelDriverCreate->SetModelBufferPointer(
-      static_cast<void*>(modelObject));
+  modelDriverCreate->SetModelBufferPointer(static_cast<void*>(modelObject));
 
   // everything is good
   ier = false;
   return ier;
 }
-}
+}  // extern "C"
 
 //==============================================================================
 //
@@ -107,6 +106,7 @@ EAM::EAM(
       requestedTimeUnit,
       ier);
 }
+
 //******************************************************************************
 EAM::~EAM()
 {
@@ -144,7 +144,6 @@ int EAM::Refresh(
 
 //******************************************************************************
 // static member function
-
 int EAM::Compute(
     KIM::ModelCompute const * const modelCompute,
     KIM::ModelComputeArguments const * const modelComputeArguments)

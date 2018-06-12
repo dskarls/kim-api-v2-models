@@ -1,0 +1,35 @@
+{
+  "title" "EAM Model Driver with Hermite cubic spline interpolation"
+  "extended-id" "EAM_Dynamo__MD_120291908751_005"
+  "author" "Ryan S. Elliott"
+  "description" "EAM Model Driver which reads 'Dynamo setfl', 'Dynamo funcfl', and 'Finnis Sinclair setfl' table files for the Embedded-Atom Method (EAM) and Finnis Sinclair potentials (the type of table file provided is detected automatically).  Written in C++, this driver reproduces the behavior of the eam, eam/alloy, and eam/fs pair styles in LAMMPS.  That is, all interpolation is performed using cubic Hermite splines, just as is done in the aforementioned pair styles found in LAMMPS.  The only difference is that, while these pair styles will perform linear extrapolation in the event that the density is outside of the interpolative regime tabulated in the parameter file for the relevant species, the implementation provided here will simply return an error message and exit rather than performing any extrapolation.
+
+This Model Driver complies with the KIM API interface standard, using any NBC and iterator or locator mode, publishes its parameters, and supports optional computation of `energy', `forces', `particleEnergy', `process_dEdr', and `process_d2Edr2'.  Its initialization routine takes a KIM API object pointer, a pointer to a two-dimensional character array (each row of which contains the full path to a parameter file) of the form a[b][c], a pointer to the value of c, and a pointer to the value of b.  When multiple funcfl files are used to define a multispecies Model, the driver expects b > 1.  In all other cases, it expects b = 1, and the format of the provided table file is determined based on its contents."
+  "source-citations" [{"title" "Embedded-atom-method functions for the fcc metals Cu, Ag, Au, Ni, Pd, Pt, and their alloys"
+                       "author" "Foiles, S. M. and Baskes, M. I. and Daw, M. S."
+                       "volume" "33"
+                       "issue" "12"
+                       "pages" "7983--7991"
+                       "year" "1986"
+                       "journal" "Phys. Rev. B"
+                       "doi" "10.1103/PhysRevB.33.7983"
+                       "publisher" "American Physical Society"
+                       "recordtype" "article"
+                       "recordkey" "MD_120291908751_005a"}
+                      {"title" "Fast Parallel Algorithms for Short-Range Molecular Dynamics"
+                       "author" "S. Plimpton"
+                       "volume" "117"
+                       "number" "1"
+                       "pages" "1--19"
+                       "year" "1995"
+                       "journal" "Journal of Computational Physics"
+                       "doi" "https://doi.org/10.1006/jcph.1995.1039"
+                       "recordtype" "article"
+                       "recordkey" "MD_120291908751_005b"}]
+  "contributor-id" "b645a915-d1fa-4155-a3da-65469f990011"
+  "maintainer-id" "b645a915-d1fa-4155-a3da-65469f990011"
+  "publication-year" "2018"
+  "kim-api-version" "1.6"
+  "executables" ["CreateDispatch.sh"]
+  "domain" "openkim.org"
+}
