@@ -1,0 +1,66 @@
+#
+# CDDL HEADER START
+#
+# The contents of this file are subject to the terms of the Common Development
+# and Distribution License Version 1.0 (the "License").
+#
+# You can obtain a copy of the license at
+# http://www.opensource.org/licenses/CDDL-1.0.  See the License for the
+# specific language governing permissions and limitations under the License.
+#
+# When distributing Covered Code, include this CDDL HEADER in each file and
+# include the License file in a prominent location with the name LICENSE.CDDL.
+# If applicable, add the following below this CDDL HEADER, with the fields
+# enclosed by brackets "[]" replaced with your own identifying information:
+#
+# Portions Copyright (c) [yyyy] [name of copyright owner]. All rights reserved.
+#
+# CDDL HEADER END
+#
+
+#
+# Copyright (c) 2015--2018, Regents of the University of Minnesota.
+# All rights reserved.
+#
+# Contributors:
+#    Ryan S. Elliott
+#    Andrew Akerson
+#
+
+
+This directory (LennardJones612__MD_414112407348_003) contains a Lennard-Jones
+Driver which reads a parameter file containing the parameters for up to 139
+species.  It supports shifted and non-shifted energy behavior.  The driver is
+written in C++.  This Model Driver expects one parameter file as decribed
+below.
+
+The model driver implements the functional form:
+
+       phi_{ij}(r) = 4 * epsilon_{ij} *
+                     [ (sigma_{ij}/r)^12 - (sigma_{ij}/r)^6 ] + shift_{ij},
+
+where i, j = 0, 1, 2, ..., N-1, and N is the number of supported species.
+
+
+The format of the parameter file is as follows:
+
+* Blank lines and lines beginning with the `#' character are ignored.
+
+* Line 0 : N, shift
+   - N         : integer number of distinct particle species
+   - shift     : integer value: 0-for no shift; 1-for shifts.
+                 All shift values are computed at run time
+* Lines 1,2,...: species_i, species_j, cutoff, epsilon, sigma
+   - species_i : A valid KIM API particle species string
+   - species_j : A valid KIM API particle species string
+   - cutoff    : double cutoff distance value (in Angstroms) for phi_{ij}(r)
+   - epsilon   : double energy value (in eV) for  epsilon_{ij}
+   - sigma     : double sigma distance value (in Angstroms) for sigma_{ij}
+
+
+The parameter file must contain all "like-like" parameter sets (i.e., lines
+where species_i and species_j are identical) for each species which occurs in
+the file.  The model driver uses the Lorentz-Berthelot rules to generate any
+"cross-interaction" parameter sets which are not provided.  The model driver
+sets the `influcenceDistance' argument to max_{ij}(cutoff_{ij}).  The model
+driver uses this same influenceDistance as its NeighborListCutoff value.
