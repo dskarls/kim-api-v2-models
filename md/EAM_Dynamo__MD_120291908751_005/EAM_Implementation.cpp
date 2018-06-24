@@ -240,6 +240,8 @@ int EAM_Implementation::Compute(
   bool isComputeEnergy = false;
   bool isComputeForces = false;
   bool isComputeParticleEnergy = false;
+  bool isComputeVirial = false;
+  bool isComputeParticleVirial = false;
   //
   // KIM API Model Input
   int const* particleSpeciesCodes = 0;
@@ -250,12 +252,16 @@ int EAM_Implementation::Compute(
   double* energy = 0;
   double* particleEnergy = 0;
   VectorOfSizeDIM* forces = 0;
+  VectorOfSizeSix* virial = 0;
+  VectorOfSizeSix* particleVirial = 0;
   ier = SetComputeMutableValues(modelComputeArguments,
                                 isComputeProcess_dEdr,
                                 isComputeProcess_d2Edr2, isComputeEnergy,
                                 isComputeForces, isComputeParticleEnergy,
+                                isComputeVirial, isComputeParticleVirial,
                                 particleSpeciesCodes, particleContributing,
-                                coordinates, energy, particleEnergy, forces);
+                                coordinates, energy, particleEnergy, forces,
+                                virial, particleVirial);
   if (ier) return ier;
 
   // Skip this check for efficiency
@@ -1483,7 +1489,14 @@ int EAM_Implementation::RegisterKIMComputeArgumentsSettings(
           KIM::SUPPORT_STATUS::optional)
       || modelComputeArgumentsCreate->SetArgumentSupportStatus(
           KIM::COMPUTE_ARGUMENT_NAME::partialParticleEnergy,
+          KIM::SUPPORT_STATUS::optional)
+      || modelComputeArgumentsCreate->SetArgumentSupportStatus(
+          KIM::COMPUTE_ARGUMENT_NAME::partialVirial,
+          KIM::SUPPORT_STATUS::optional)
+      || modelComputeArgumentsCreate->SetArgumentSupportStatus(
+          KIM::COMPUTE_ARGUMENT_NAME::partialParticleVirial,
           KIM::SUPPORT_STATUS::optional);
+
 
   // register callbacks
   LOG_INFORMATION("Register callback supportStatus");
@@ -1663,12 +1676,16 @@ int EAM_Implementation::SetComputeMutableValues(
     bool& isComputeEnergy,
     bool& isComputeForces,
     bool& isComputeParticleEnergy,
+    bool& isComputeVirial,
+    bool& isComputeParticleVirial,
     int const*& particleSpeciesCodes,
     int const*& particleContributing,
     VectorOfSizeDIM const*& coordinates,
     double*& energy,
     double*& particleEnergy,
-    VectorOfSizeDIM*& forces)
+    VectorOfSizeDIM*& forces,
+    VectorOfSizeSix*& virial,
+    VectorOfSizeSix*& particleVirial)
 {
   int ier = true;
 
@@ -1708,7 +1725,13 @@ int EAM_Implementation::SetComputeMutableValues(
           &particleEnergy)
       || modelComputeArguments->GetArgumentPointer(
           KIM::COMPUTE_ARGUMENT_NAME::partialForces,
-          (double const ** const) &forces);
+          (double const ** const) &forces)
+      || modelComputeArguments->GetArgumentPointer(
+          KIM::COMPUTE_ARGUMENT_NAME::partialVirial,
+          (double const ** const) &virial)
+      || modelComputeArguments->GetArgumentPointer(
+          KIM::COMPUTE_ARGUMENT_NAME::partialParticleVirial,
+          (double const ** const) &particleVirial);
   if (ier)
   {
     LOG_ERROR("GetArgumentPointer");
@@ -1718,6 +1741,8 @@ int EAM_Implementation::SetComputeMutableValues(
   isComputeEnergy = (energy != 0);
   isComputeParticleEnergy = (particleEnergy != 0);
   isComputeForces = (forces != 0);
+  isComputeVirial = (virial != 0);
+  isComputeParticleVirial = (particleVirial != 0);
 
   // allocate memory if needed
   if (cachedNumberOfParticles_ < *numberOfParticles)
@@ -1770,37 +1795,95 @@ int EAM_Implementation::GetComputeIndex(
     const bool& isComputeProcess_d2Edr2,
     const bool& isComputeEnergy,
     const bool& isComputeForces,
-    const bool& isComputeParticleEnergy) const
+    const bool& isComputeParticleEnergy,
+    const bool& isComputeVirial,
+    const bool& isComputeParticleVirial) const
 {
   //const int processdE = 2;
   const int processd2E = 2;
   const int energy = 2;
   const int force = 2;
   const int particleEnergy = 2;
+  const int virial = 2;
+  const int particleVirial = 2;
 
 
   int index = 0;
 
   // processdE
   index += (int(isComputeProcess_dEdr))
-      * processd2E * energy * force * particleEnergy;
+      * processd2E * energy * force * particleEnergy * virial
+      * particleVirial;
 
   // processd2E
   index += (int(isComputeProcess_d2Edr2))
-      * energy * force * particleEnergy;
+      * energy * force * particleEnergy * virial * particleVirial;
 
   // energy
   index += (int(isComputeEnergy))
-      * force * particleEnergy;
+      * force * particleEnergy * virial * particleVirial;
 
   // force
   index += (int(isComputeForces))
-      * particleEnergy;
+      * particleEnergy * virial * particleVirial;
 
   // particleEnergy
-  index += (int(isComputeParticleEnergy));
+  index += (int(isComputeParticleEnergy))
+      * virial * particleVirial;
+
+  // virial
+  index += (int(isComputeVirial))
+      * particleVirial;
+
+  // particleVirial
+  index += (int(isComputeParticleVirial));
 
   return index;
+}
+
+//******************************************************************************
+void EAM_Implementation::ProcessVirialTerm(
+    const double& dEidr,
+    const double& rij,
+    const double* const r_ij,
+    const int& i,
+    const int& j,
+    VectorOfSizeSix virial) const
+{
+  double const v = dEidr/rij;
+
+  virial[0] += v * r_ij[0] * r_ij[0];
+  virial[1] += v * r_ij[1] * r_ij[1];
+  virial[2] += v * r_ij[2] * r_ij[2];
+  virial[3] += v * r_ij[1] * r_ij[2];
+  virial[4] += v * r_ij[0] * r_ij[2];
+  virial[5] += v * r_ij[0] * r_ij[1];
+}
+
+//******************************************************************************
+void EAM_Implementation::ProcessParticleVirialTerm(
+    const double& dEidr,
+    const double& rij,
+    const double* const r_ij,
+    const int& i,
+    const int& j,
+    VectorOfSizeSix* const particleVirial) const
+{
+  double const v = dEidr/rij;
+  VectorOfSizeSix vir;
+
+  vir[0] = 0.5 * v * r_ij[0] * r_ij[0];
+  vir[1] = 0.5 * v * r_ij[1] * r_ij[1];
+  vir[2] = 0.5 * v * r_ij[2] * r_ij[2];
+  vir[3] = 0.5 * v * r_ij[1] * r_ij[2];
+  vir[4] = 0.5 * v * r_ij[0] * r_ij[2];
+  vir[5] = 0.5 * v * r_ij[0] * r_ij[1];
+
+  for (int k = 0; k < 6; ++k)
+  {
+    particleVirial[i][k] += vir[k];
+    particleVirial[j][k] += vir[k];
+  }
 }
 
 //==============================================================================
