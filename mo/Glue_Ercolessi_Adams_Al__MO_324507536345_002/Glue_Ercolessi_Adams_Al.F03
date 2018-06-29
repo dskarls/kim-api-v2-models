@@ -743,25 +743,27 @@ enddo  ! infinite do loop (terminated by exit statements above)
 !  U and its derivative U' (derU)
 !
 do i = 1,N
-   if (comp_force.eq.1.or.comp_virial.eq.1) then
-      call calc_U_dU(rho(i),U,dU,ielast)       ! compute embedding energy
+   if(particleContributing(i).eq.1) then
+     if (comp_force.eq.1.or.comp_virial.eq.1) then
+       call calc_U_dU(rho(i),U,dU,ielast)      ! compute embedding energy
                                                !   and its derivative
-      derU(i) = dU                             ! store dU for later use
-   else
-      call calc_U(rho(i),U,ielast)             ! compute just embedding energy
-   endif
+       derU(i) = dU                            ! store dU for later use
+     else
+       call calc_U(rho(i),U,ielast)            ! compute just embedding energy
+     endif
 
-   ! accumulate the embedding energy contribution
-   !
-   ! Assuming U(rho=0) = 0.0_cd
-   !
-   if (comp_particleEnergy.eq.1) then                     ! accumulate embedding energy contribution
-      particleEnergy(i) = U
-   endif
-   if (comp_energy.eq.1) then
-      energy = energy + U
-   endif
+     ! accumulate the embedding energy contribution
+     !
+     ! Assuming U(rho=0) = 0.0_cd
+     !
+     if (comp_particleEnergy.eq.1) then        ! accumulate embedding energy contribution
+       particleEnergy(i) = U
+     endif
+     if (comp_energy.eq.1) then
+       energy = energy + U
+     endif
 
+   endif ! Check on whether particle is contributing
 enddo
 
 !  Loop over particles in the neighbor list a second time, to compute
