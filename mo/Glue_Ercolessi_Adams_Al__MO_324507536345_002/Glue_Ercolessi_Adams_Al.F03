@@ -56,10 +56,10 @@ implicit none
 save
 private
 public Compute_Energy_Forces, &
-       model_refresh_func, &
-       model_destroy_func, &
-       model_compute_arguments_create, &
-       model_compute_arguments_destroy, &
+       refresh, &
+       destroy, &
+       compute_arguments_create, &
+       compute_arguments_destroy, &
        model_cutoff, &
        speccode, &
        buffer_type
@@ -811,8 +811,8 @@ do i = 1,N
             else
                call calc_phi(r,phi,irlast)           ! compute just pair potential
             endif
-            Ei     = 0.5_cd*phi
-            Ej     = 0.0_cd
+            Ei = 0.5_cd*phi
+            Ej = 0.0_cd
 
             ! contribution to energy
             !
@@ -865,7 +865,7 @@ end subroutine Compute_Energy_Forces
 !
 !-------------------------------------------------------------------------------
 #include "kim_model_destroy_log_macros.fd"
-subroutine model_destroy_func(model_destroy_handle, ierr) bind(c)
+subroutine destroy(model_destroy_handle, ierr) bind(c)
   use, intrinsic :: iso_c_binding
   implicit none
 
@@ -883,7 +883,7 @@ subroutine model_destroy_func(model_destroy_handle, ierr) bind(c)
   LOG_INFORMATION()
   deallocate(buf)
   ierr = 0  ! everything is good
-end subroutine model_destroy_func
+end subroutine destroy
 
 !-------------------------------------------------------------------------------
 !
@@ -891,7 +891,7 @@ end subroutine model_destroy_func
 !
 !-------------------------------------------------------------------------------
 #include "kim_model_refresh_log_macros.fd"
-subroutine model_refresh_func(model_refresh_handle, ierr) bind(c)
+subroutine refresh(model_refresh_handle, ierr) bind(c)
   use, intrinsic :: iso_c_binding
   implicit none
 
@@ -914,7 +914,7 @@ subroutine model_refresh_func(model_refresh_handle, ierr) bind(c)
     model_refresh_handle, 1, buf%cutoff)
 
   ierr = 0  ! everything is good
-end subroutine model_refresh_func
+end subroutine refresh
 
 !-------------------------------------------------------------------------------
 !
@@ -922,7 +922,7 @@ end subroutine model_refresh_func
 !
 !-------------------------------------------------------------------------------
 #include "kim_model_compute_arguments_create_log_macros.fd"
-subroutine model_compute_arguments_create(model_compute_handle, &
+subroutine compute_arguments_create(model_compute_handle, &
   model_compute_arguments_create_handle, ierr) bind(c)
   use, intrinsic :: iso_c_binding
   use kim_model_compute_arguments_create_module, &
@@ -972,7 +972,7 @@ subroutine model_compute_arguments_create(model_compute_handle, &
   endif
 
   return
-end subroutine model_compute_arguments_create
+end subroutine compute_arguments_create
 
 !-------------------------------------------------------------------------------
 !
@@ -980,7 +980,7 @@ end subroutine model_compute_arguments_create
 !
 !-------------------------------------------------------------------------------
 #include "kim_model_compute_arguments_destroy_log_macros.fd"
-subroutine model_compute_arguments_destroy(model_compute_handle, &
+subroutine compute_arguments_destroy(model_compute_handle, &
   model_compute_arguments_destroy_handle, ierr) bind(c)
   use, intrinsic :: iso_c_binding
   use kim_model_compute_arguments_destroy_module, &
@@ -1001,7 +1001,7 @@ subroutine model_compute_arguments_destroy(model_compute_handle, &
   ! nothing to do
 
   return
-end subroutine model_compute_arguments_destroy
+end subroutine compute_arguments_destroy
 
 end module Glue_Ercolessi_Adams_Al
 
@@ -1011,7 +1011,7 @@ end module Glue_Ercolessi_Adams_Al
 !
 !-------------------------------------------------------------------------------
 #include "kim_model_create_log_macros.fd"
-subroutine model_create_routine(model_create_handle, requested_length_unit, &
+subroutine create(model_create_handle, requested_length_unit, &
   requested_energy_unit, requested_charge_unit, requested_temperature_unit, &
   requested_time_unit, ierr) bind(c)
 use, intrinsic :: iso_c_binding
@@ -1065,18 +1065,18 @@ call kim_model_create_set_compute_pointer(model_create_handle, &
 ierr = ierr + ierr2
 call kim_model_create_set_compute_arguments_create_pointer( &
   model_create_handle, kim_language_name_fortran, &
-  c_funloc(model_compute_arguments_create), ierr2)
+  c_funloc(compute_arguments_create), ierr2)
 ierr = ierr + ierr2
 call kim_model_create_set_compute_arguments_destroy_pointer( &
   model_create_handle, kim_language_name_fortran, &
-  c_funloc(model_compute_arguments_destroy), ierr2)
+  c_funloc(compute_arguments_destroy), ierr2)
 ierr = ierr + ierr2
 call kim_model_create_set_destroy_pointer(model_create_handle, &
-  kim_language_name_fortran, c_funloc(model_destroy_func), ierr2)
+  kim_language_name_fortran, c_funloc(destroy), ierr2)
 ierr = ierr + ierr2
 call kim_model_create_set_refresh_pointer( &
   model_create_handle, kim_language_name_fortran, &
-  c_funloc(model_refresh_func), ierr2)
+  c_funloc(refresh), ierr2)
 ierr = ierr + ierr2
 
 ! allocate buffer
@@ -1103,5 +1103,5 @@ if (ierr /= 0) then
   kim_log_message = "Unable to successfully initialize model"
   LOG_ERROR()
 endif
-end subroutine model_create_routine
+end subroutine create
 

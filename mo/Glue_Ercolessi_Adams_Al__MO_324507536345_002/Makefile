@@ -35,7 +35,7 @@ include $(shell $(KIM_API_BUILD_CONFIG) --master-config)
 
 # set model specific details
 MODEL_NAME := Glue_Ercolessi_Adams_Al__MO_324507536345_002
-MODEL_CREATE_FUNCTION_NAME := model_create_routine
+MODEL_CREATE_FUNCTION_NAME := create
 MODEL_CREATE_FUNCTION_LANG := fortran
 
 LOCALOBJ = Glue_Ercolessi_Adams_Al.o
