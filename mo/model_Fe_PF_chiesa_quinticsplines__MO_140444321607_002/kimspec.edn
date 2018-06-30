@@ -1,0 +1,22 @@
+{"author" "Mark R. Gilbert"
+ "contributor-id" "c2a3340e-1ed1-47b0-86d1-0fb98fa0375d"
+ "description" "A parameterization for bcc Fe for the EAM quintic splines model driver: model_driver_PF_quintic_splines__MD_543355979582_002.\nFitted to a database of material parameters, including ab initio-derived point defect formation energies, third-order elastic constants, and ab initio-derived string potential data, the final two controlling, respectively, the thermal expansion properties and the core structure of the 1/2<111> screw dislocation. Produces a non-degenerate configuration for the relaxed 1/2<111> screw dislocation."
+ "disclaimer" ""
+ "domain" "openkim.org"
+ "extended-id" "model_Fe_PF_chiesa_quinticsplines__MO_140444321607_002"
+ "kim-api-version" "2.0"
+ "maintainer-id" "c2a3340e-1ed1-47b0-86d1-0fb98fa0375d"
+ "model-driver" "model_driver_PF_quintic_splines__MD_543355979582_002"
+ "publication-year" "2018"
+ "source-citations" [{"author" "S Chiesa and P M Derlet and S L Dudarev and H Van Swygenhoven"
+                      "doi" "10.1088/0953-8984/23/20/206001"
+                      "journal" "Journal of Physics: Condensed Matter"
+                      "number" "20"
+                      "pages" "206001"
+                      "recordkey" "MO_140444321607_002a"
+                      "recordtype" "article"
+                      "title" "Optimization of the magnetic potential for $\\alpha$-{F}e"
+                      "volume" "23"
+                      "year" "2011"}]
+ "species" ["Fe"]
+ "title" "Model parameterization for quintic splines EAM model driver: model_driver_PF_quintic_splines__MD_543355979582_002"}

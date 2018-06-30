@@ -1,0 +1,75 @@
+#
+# CDDL HEADER START
+#
+# The contents of this file are subject to the terms of the Common Development
+# and Distribution License Version 1.0 (the "License").
+#
+# You can obtain a copy of the license at
+# http://www.opensource.org/licenses/CDDL-1.0.  See the License for the
+# specific language governing permissions and limitations under the License.
+#
+# When distributing Covered Code, include this CDDL HEADER in each file and
+# include the License file in a prominent location with the name LICENSE.CDDL.
+# If applicable, add the following below this CDDL HEADER, with the fields
+# enclosed by brackets "[]" replaced with your own identifying information:
+#
+#
+# CDDL HEADER END
+#
+
+#
+# Copyright (c) 2012, Mark R. Gilbert, CCFE Fusion Association.  All rights reserved.
+#
+# Contributors:
+#    Mark R. Gilbert
+#
+
+#
+#
+#
+
+
+This directory (model_driver_PF_qunitic_splines) contains an EAM-like
+Model driver written in Fortran 90.
+See Reference: Chiesa et al., J. Phys.: Condens. Matter 23 (2011) 206001
+For details of functional forms
+
+
+It complies with the KIM API interface standard, using any NBC and iterator or
+locator mode, publishes its parameters, and supports optional computation of
+`energy', `forces', `particleEnergy', `process_dEdr', and `process_dE2dr2'.
+Its initializaton routine takes a KIM API object pointer and a pointer to a
+string that contains the cutoff and Lennard-Jones parameters which define a KIM
+Model based on this KIM Model Driver.
+
+To create a KIM Model from this Model Driver, a parameter file is required.
+This file must have the follwing format:
+   Line 1: chemical symbol of the relevant species, e.g. Fe
+   Line 2: cutoff value in angstroms
+   Line 3: number of pair potential knot point, number of rho density knot points, logical flag to determine
+   whether the lambda pre-factor for knot functions is constant or varying with knot point
+   Line 4: dummy integer, sqrt(rho) pre-factor for embedding function, dummy logicaal
+   Line 5: dummy integer, pre-factor for magnetic part of embedding function (zero for non-magnetic cases), dummy logical
+   Line 6+: line per density knot point: dummy integer, i'th knot coefficient, dummy logical, i'th knot point, dummy logical
+   Line per pair potential knot point - same format as density knot points
+   If single lambda, then global lambda for density knot points followed by global lambda for pair-part knot points
+   ELSE: line per density knot point: idummy, lambda i phi, ldummy
+   then line per pair knot point: same format.
+   last line - text descriptor for potential.
+
+
+The following files are in this directory:
+
+LICENSE.CDDL
+     The Common Development and Distribution License (CDDL) Version 1.0 file
+
+Makefile
+    makefile to compile and build executables with GNU or Intel compilers
+
+README
+    This file
+
+model_driver_PF_quintic_splines.F90
+    Fortran 90 file that contains the implementation of the
+    potential Model Driver
+
