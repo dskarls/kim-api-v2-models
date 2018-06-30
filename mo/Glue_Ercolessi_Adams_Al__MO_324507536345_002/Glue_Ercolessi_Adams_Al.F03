@@ -344,26 +344,27 @@ contains
 !
 !-------------------------------------------------------------------------------
 subroutine calc_phi(r,phi,irlast)
-implicit none
+  implicit none
 
-!-- Transferred variables
-real(c_double), intent(in)    :: r
-real(c_double), intent(out)   :: phi
-integer(c_int), intent(inout) :: irlast
+  !-- Transferred variables
+  real(c_double), intent(in)    :: r
+  real(c_double), intent(out)   :: phi
+  integer(c_int), intent(inout) :: irlast
 
-!-- Local variables
-integer(c_int) i
-real(c_double) dx
+  !-- Local variables
+  integer(c_int) i
+  real(c_double) dx
 
-if (r .gt. model_cutoff) then
-   ! Argument exceeds cutoff radius
-   phi = 0.0_cd
-else
-   i = seval_i(npt,r,x,irlast)
-   dx = r - x(i)
-   phi = yv2(i) + dx*(Bv2(i) + dx*(Cv2(i) + dx*Dv2(i)))
-endif
+  if (r .gt. model_cutoff) then
+     ! Argument exceeds cutoff radius
+     phi = 0.0_cd
+  else
+     i = seval_i(npt,r,x,irlast)
+     dx = r - x(i)
+     phi = yv2(i) + dx*(Bv2(i) + dx*(Cv2(i) + dx*Dv2(i)))
+  endif
 
+  return
 end subroutine calc_phi
 
 !-------------------------------------------------------------------------------
@@ -372,28 +373,29 @@ end subroutine calc_phi
 !
 !-------------------------------------------------------------------------------
 subroutine calc_phi_dphi(r,phi,dphi,irlast)
-implicit none
+  implicit none
 
-!-- Transferred variables
-real(c_double), intent(in)    :: r
-real(c_double), intent(out)   :: phi,dphi
-integer(c_int), intent(inout) :: irlast
+  !-- Transferred variables
+  real(c_double), intent(in)    :: r
+  real(c_double), intent(out)   :: phi,dphi
+  integer(c_int), intent(inout) :: irlast
 
-!-- Local variables
-integer(c_int) i
-real(c_double) dx
+  !-- Local variables
+  integer(c_int) i
+  real(c_double) dx
 
-if (r .gt. model_cutoff) then
-   ! Argument exceeds cutoff radius
-   phi    = 0.0_cd
-   dphi   = 0.0_cd
-else
-   i = seval_i(npt,r,x,irlast)
-   dx = r - x(i)
-   phi  = yv2(i) + dx*(Bv2(i) + dx*(Cv2(i) + dx*Dv2(i)))
-   dphi = Bv2(i) + dx*(2.0_cd*Cv2(i) + 3.0_cd*dx*Dv2(i))
-endif
+  if (r .gt. model_cutoff) then
+     ! Argument exceeds cutoff radius
+     phi    = 0.0_cd
+     dphi   = 0.0_cd
+  else
+     i = seval_i(npt,r,x,irlast)
+     dx = r - x(i)
+     phi  = yv2(i) + dx*(Bv2(i) + dx*(Cv2(i) + dx*Dv2(i)))
+     dphi = Bv2(i) + dx*(2.0_cd*Cv2(i) + 3.0_cd*dx*Dv2(i))
+  endif
 
+  return
 end subroutine calc_phi_dphi
 
 !-------------------------------------------------------------------------------
@@ -402,26 +404,27 @@ end subroutine calc_phi_dphi
 !
 !-------------------------------------------------------------------------------
 subroutine calc_g(r,g,irlast)
-implicit none
+  implicit none
 
-!-- Transferred variables
-real(c_double), intent(in)    :: r
-real(c_double), intent(out)   :: g
-integer(c_int), intent(inout) :: irlast
+  !-- Transferred variables
+  real(c_double), intent(in)    :: r
+  real(c_double), intent(out)   :: g
+  integer(c_int), intent(inout) :: irlast
 
-!-- Local variables
-integer(c_int) i
-real(c_double) dx
+  !-- Local variables
+  integer(c_int) i
+  real(c_double) dx
 
-if (r .gt. model_cutoff) then
-   ! Argument exceeds cutoff radius
-   g = 0.0_cd
-else
-   i = seval_i(npt,r,x,irlast)
-   dx = r - x(i)
-   g = yrh(i) + dx*(Brh(i) + dx*(Crh(i) + dx*Drh(i)))
-endif
+  if (r .gt. model_cutoff) then
+     ! Argument exceeds cutoff radius
+     g = 0.0_cd
+  else
+     i = seval_i(npt,r,x,irlast)
+     dx = r - x(i)
+     g = yrh(i) + dx*(Brh(i) + dx*(Crh(i) + dx*Drh(i)))
+  endif
 
+  return
 end subroutine calc_g
 
 !-------------------------------------------------------------------------------
@@ -430,26 +433,27 @@ end subroutine calc_g
 !
 !-------------------------------------------------------------------------------
 subroutine calc_dg(r,dg,irlast)
-implicit none
+  implicit none
 
-!-- Transferred variables
-real(c_double), intent(in)    :: r
-real(c_double), intent(out)   :: dg
-integer(c_int), intent(inout) :: irlast
+  !-- Transferred variables
+  real(c_double), intent(in)    :: r
+  real(c_double), intent(out)   :: dg
+  integer(c_int), intent(inout) :: irlast
 
-!-- Local variables
-integer(c_int) i
-real(c_double) dx
+  !-- Local variables
+  integer(c_int) i
+  real(c_double) dx
 
-if (r .gt. model_cutoff) then
-   ! Argument exceeds cutoff radius
-   dg = 0.0_cd
-else
-   i = seval_i(npt,r,x,irlast)
-   dx = r - x(i)
-   dg = Brh(i) + dx*(2.0_cd*Crh(i) + 3.0_cd*dx*Drh(i))
-endif
+  if (r .gt. model_cutoff) then
+     ! Argument exceeds cutoff radius
+     dg = 0.0_cd
+  else
+     i = seval_i(npt,r,x,irlast)
+     dx = r - x(i)
+     dg = Brh(i) + dx*(2.0_cd*Crh(i) + 3.0_cd*dx*Drh(i))
+  endif
 
+  return
 end subroutine calc_dg
 
 !-------------------------------------------------------------------------------
@@ -458,26 +462,27 @@ end subroutine calc_dg
 !
 !-------------------------------------------------------------------------------
 subroutine calc_U(rho,U,ielast)
-implicit none
+  implicit none
 
-!-- Transferred variables
-real(c_double), intent(in)    :: rho
-real(c_double), intent(out)   :: U
-integer(c_int), intent(inout) :: ielast
+  !-- Transferred variables
+  real(c_double), intent(in)    :: rho
+  real(c_double), intent(out)   :: U
+  integer(c_int), intent(inout) :: ielast
 
-!-- Local variables
-integer(c_int) i
-real(c_double) dx
+  !-- Local variables
+  integer(c_int) i
+  real(c_double) dx
 
-if (rho .le. rhomin) then
-   ! Argument less than the minimum stored value
-   U = 0.0_cd
-else
-   i = seval_i(nuu,rho,xuu,ielast)
-   dx = rho - xuu(i)
-   U = yuu(i) + dx*(Buu(i) + dx*(Cuu(i) + dx*Duu(i)))
-endif
+  if (rho .le. rhomin) then
+     ! Argument less than the minimum stored value
+     U = 0.0_cd
+  else
+     i = seval_i(nuu,rho,xuu,ielast)
+     dx = rho - xuu(i)
+     U = yuu(i) + dx*(Buu(i) + dx*(Cuu(i) + dx*Duu(i)))
+  endif
 
+  return
 end subroutine calc_U
 
 !-------------------------------------------------------------------------------
@@ -486,28 +491,29 @@ end subroutine calc_U
 !
 !-------------------------------------------------------------------------------
 subroutine calc_U_dU(rho,U,dU,ielast)
-implicit none
+  implicit none
 
-!-- Transferred variables
-real(c_double), intent(in)    :: rho
-real(c_double), intent(out)   :: U,dU
-integer(c_int), intent(inout) :: ielast
+  !-- Transferred variables
+  real(c_double), intent(in)    :: rho
+  real(c_double), intent(out)   :: U,dU
+  integer(c_int), intent(inout) :: ielast
 
-!-- Local variables
-integer(c_int) i
-real(c_double) dx
+  !-- Local variables
+  integer(c_int) i
+  real(c_double) dx
 
-if (rho .le. rhomin) then
-   ! Argument less than the minimum stored value
-   U  = 0.0_cd
-   dU = 0.0_cd
-else
-   i = seval_i(nuu,rho,xuu,ielast)
-   dx = rho - xuu(i)
-   U  = yuu(i) + dx*(Buu(i) + dx*(Cuu(i) + dx*Duu(i)))
-   dU = Buu(i) + dx*(2.0_cd*Cuu(i) + 3.0_cd*dx*Duu(i))
-endif
+  if (rho .le. rhomin) then
+     ! Argument less than the minimum stored value
+     U  = 0.0_cd
+     dU = 0.0_cd
+  else
+     i = seval_i(nuu,rho,xuu,ielast)
+     dx = rho - xuu(i)
+     U  = yuu(i) + dx*(Buu(i) + dx*(Cuu(i) + dx*Duu(i)))
+     dU = Buu(i) + dx*(2.0_cd*Cuu(i) + 3.0_cd*dx*Duu(i))
+  endif
 
+  return
 end subroutine calc_U_dU
 
 !-------------------------------------------------------------------------------
@@ -534,33 +540,34 @@ end subroutine calc_U_dU
 !
 !-------------------------------------------------------------------------------
 integer(c_int) function seval_i(n, u, x, i)
-implicit none
+  implicit none
 
-!--Transferred variables
-integer(c_int), intent(in)    ::  n
-real(c_double), intent(in)    ::  u, x(n)
-integer(c_int), intent(inout) ::  i
+  !--Transferred variables
+  integer(c_int), intent(in)    ::  n
+  real(c_double), intent(in)    ::  u, x(n)
+  integer(c_int), intent(inout) ::  i
 
-!--Local variables
-integer(c_int) j, k
+  !--Local variables
+  integer(c_int) j, k
 
-if ( i .ge. n ) i = 1
-if ( u .lt. x(i) ) go to 10
-if ( u .le. x(i+1) ) go to 30
+  if ( i .ge. n ) i = 1
+  if ( u .lt. x(i) ) go to 10
+  if ( u .le. x(i+1) ) go to 30
 
-!  binary search
-!
-10 i = 1
-   j = n+1
-20 k = (i+j)/2
-   if ( u .lt. x(k) ) j = k
-   if ( u .ge. x(k) ) i = k
-   if ( j .gt. i+1 ) go to 20
+  !  binary search
+  !
+  10 i = 1
+     j = n+1
+  20 k = (i+j)/2
+     if ( u .lt. x(k) ) j = k
+     if ( u .ge. x(k) ) i = k
+     if ( j .gt. i+1 ) go to 20
 
-!  got i, return
-!
-30 seval_i = i
-   return
+  !  got i, return
+  !
+  30 seval_i = i
+
+  return
 
 end function seval_i
 
@@ -572,291 +579,292 @@ end function seval_i
 #include "kim_model_compute_log_macros.fd"
 subroutine Compute_Energy_Forces(model_compute_handle, &
   model_compute_arguments_handle, ierr) bind(c)
-implicit none
+  implicit none
 
-!-- Transferred variables
-type(kim_model_compute_handle_type), intent(in) :: model_compute_handle
-type(kim_model_compute_arguments_handle_type), intent(in) :: &
-  model_compute_arguments_handle
-integer(c_int), intent(out) :: ierr
+  !-- Transferred variables
+  type(kim_model_compute_handle_type), intent(in) :: model_compute_handle
+  type(kim_model_compute_arguments_handle_type), intent(in) :: &
+    model_compute_arguments_handle
+  integer(c_int), intent(out) :: ierr
 
-!-- Local variables
-real(c_double) :: Rij(DIM)
-real(c_double) :: r,Rsqij,phi,dphi,g,dg,dU,U,dphieff = 0.0_cd
-real(c_double) :: dphii,dUi,Ei,dphij,dUj,Ej
-integer(c_int) :: i,j,jj,numnei,comp_force,comp_particleEnergy,comp_virial,comp_energy
-integer(c_int) :: ierr2
-real(c_double), allocatable :: rho(:),derU(:)
-integer(c_int) :: irlast, ielast
+  !-- Local variables
+  real(c_double) :: Rij(DIM)
+  real(c_double) :: r,Rsqij,phi,dphi,g,dg,dU,U,dphieff = 0.0_cd
+  real(c_double) :: dphii,dUi,Ei,dphij,dUj,Ej
+  integer(c_int) :: i,j,jj,numnei,comp_force,comp_particleEnergy,comp_virial,comp_energy
+  integer(c_int) :: ierr2
+  real(c_double), allocatable :: rho(:),derU(:)
+  integer(c_int) :: irlast, ielast
 
-!-- KIM variables
-integer(c_int), pointer :: N
-real(c_double), pointer :: energy
-real(c_double), pointer :: coor(:,:)
-real(c_double), pointer :: force(:,:)
-real(c_double), pointer :: particleEnergy(:)
-integer(c_int), pointer :: nei1part(:)
-integer(c_int), pointer :: particleSpeciesCodes(:)
-integer(c_int), pointer :: particleContributing(:)
-real(c_double), pointer :: virial(:)
+  !-- KIM variables
+  integer(c_int), pointer :: N
+  real(c_double), pointer :: energy
+  real(c_double), pointer :: coor(:,:)
+  real(c_double), pointer :: force(:,:)
+  real(c_double), pointer :: particleEnergy(:)
+  integer(c_int), pointer :: nei1part(:)
+  integer(c_int), pointer :: particleSpeciesCodes(:)
+  integer(c_int), pointer :: particleContributing(:)
+  real(c_double), pointer :: virial(:)
 
-kim_log_file = __FILE__
+  kim_log_file = __FILE__
 
-! Initialize interpolation interval indices
-irlast = 1
-ielast = 1
+  ! Initialize interpolation interval indices
+  irlast = 1
+  ielast = 1
 
-! Unpack data from KIM object
-!
-ierr = 0
-call kim_model_compute_arguments_get_argument_pointer( &
-  model_compute_arguments_handle, &
-  kim_compute_argument_name_number_of_particles, N, ierr2)
-ierr = ierr + ierr2
-call kim_model_compute_arguments_get_argument_pointer( &
-  model_compute_arguments_handle, &
-  kim_compute_argument_name_particle_species_codes, n, particleSpeciesCodes, &
-  ierr2)
-ierr = ierr + ierr2
-call kim_model_compute_arguments_get_argument_pointer( &
-  model_compute_arguments_handle, &
-  kim_compute_argument_name_particle_contributing, n, particleContributing, &
-  ierr2)
-ierr = ierr + ierr2
-call kim_model_compute_arguments_get_argument_pointer( &
-  model_compute_arguments_handle, &
-  kim_compute_argument_name_coordinates, dim, n, coor, ierr2)
-ierr = ierr + ierr2
-call kim_model_compute_arguments_get_argument_pointer( &
-  model_compute_arguments_handle, &
-  kim_compute_argument_name_partial_energy, energy, ierr2)
-ierr = ierr + ierr2
-call kim_model_compute_arguments_get_argument_pointer( &
-  model_compute_arguments_handle, &
-  kim_compute_argument_name_partial_forces, dim, n, force, ierr2)
-ierr = ierr + ierr2
-call kim_model_compute_arguments_get_argument_pointer( &
-  model_compute_arguments_handle, &
-  kim_compute_argument_name_partial_particle_energy, n, particleEnergy, ierr2)
-ierr = ierr + ierr2
-call kim_model_compute_arguments_get_argument_pointer( &
-  model_compute_arguments_handle, &
-  kim_compute_argument_name_partial_virial, 6, virial, ierr2)
-ierr = ierr + ierr2
-if (ierr /= 0) then
-  kim_log_message = "Failed to retrieve data from KIM API compute-arguments object"
-  LOG_ERROR()
-  return
-endif
-
-! Check to see if we have been asked to compute the forces, energyperpart,
-! energy and virial
-!
-if (associated(energy)) then
-  comp_energy = 1
-else
-  comp_energy = 0
-end if
-if (associated(force)) then
-  comp_force = 1
-else
-  comp_force = 0
-end if
-if (associated(particleEnergy)) then
-  comp_particleEnergy = 1
-else
-  comp_particleEnergy = 0
-end if
-if (associated(virial)) then
-  comp_virial = 1
-else
-  comp_virial = 0
-end if
-
-! Check to be sure that the species are correct
-!
-ierr = 1 ! assume an error
-do i = 1,N
-  if (particleSpeciesCodes(i).ne.speccode) then
-    kim_log_message = "Unexpected species code detected"
+  ! Unpack data from KIM object
+  !
+  ierr = 0
+  call kim_model_compute_arguments_get_argument_pointer( &
+    model_compute_arguments_handle, &
+    kim_compute_argument_name_number_of_particles, N, ierr2)
+  ierr = ierr + ierr2
+  call kim_model_compute_arguments_get_argument_pointer( &
+    model_compute_arguments_handle, &
+    kim_compute_argument_name_particle_species_codes, n, particleSpeciesCodes, &
+    ierr2)
+  ierr = ierr + ierr2
+  call kim_model_compute_arguments_get_argument_pointer( &
+    model_compute_arguments_handle, &
+    kim_compute_argument_name_particle_contributing, n, particleContributing, &
+    ierr2)
+  ierr = ierr + ierr2
+  call kim_model_compute_arguments_get_argument_pointer( &
+    model_compute_arguments_handle, &
+    kim_compute_argument_name_coordinates, dim, n, coor, ierr2)
+  ierr = ierr + ierr2
+  call kim_model_compute_arguments_get_argument_pointer( &
+    model_compute_arguments_handle, &
+    kim_compute_argument_name_partial_energy, energy, ierr2)
+  ierr = ierr + ierr2
+  call kim_model_compute_arguments_get_argument_pointer( &
+    model_compute_arguments_handle, &
+    kim_compute_argument_name_partial_forces, dim, n, force, ierr2)
+  ierr = ierr + ierr2
+  call kim_model_compute_arguments_get_argument_pointer( &
+    model_compute_arguments_handle, &
+    kim_compute_argument_name_partial_particle_energy, n, particleEnergy, ierr2)
+  ierr = ierr + ierr2
+  call kim_model_compute_arguments_get_argument_pointer( &
+    model_compute_arguments_handle, &
+    kim_compute_argument_name_partial_virial, 6, virial, ierr2)
+  ierr = ierr + ierr2
+  if (ierr /= 0) then
+    kim_log_message = "Failed to retrieve data from KIM API compute-arguments object"
     LOG_ERROR()
     return
   endif
-enddo
-ierr = 0 ! everything is ok
 
-! Initialize potential energies, forces, virial term, and electron density
-!
-! Note: that the variable `particleEnergy' does not need to be initialized
-!       because it's initial value is set during the embedding energy
-!       calculation.
-if (comp_energy.eq.1) energy = 0.0_cd
-if (comp_force.eq.1) force  = 0.0_cd
-if (comp_virial.eq.1) virial = 0.0_cd
+  ! Check to see if we have been asked to compute the forces, energyperpart,
+  ! energy and virial
+  !
+  if (associated(energy)) then
+    comp_energy = 1
+  else
+    comp_energy = 0
+  end if
+  if (associated(force)) then
+    comp_force = 1
+  else
+    comp_force = 0
+  end if
+  if (associated(particleEnergy)) then
+    comp_particleEnergy = 1
+  else
+    comp_particleEnergy = 0
+  end if
+  if (associated(virial)) then
+    comp_virial = 1
+  else
+    comp_virial = 0
+  end if
 
-allocate( rho(N) )  ! pair functional electron density
-rho = 0.0_cd
+  ! Check to be sure that the species are correct
+  !
+  ierr = 1 ! assume an error
+  do i = 1,N
+    if (particleSpeciesCodes(i).ne.speccode) then
+      kim_log_message = "Unexpected species code detected"
+      LOG_ERROR()
+      return
+    endif
+  enddo
+  ierr = 0 ! everything is ok
 
-! EAM embedded energy deriv
-if (comp_force.eq.1.or.comp_virial.eq.1) allocate( derU(N) )
+  ! Initialize potential energies, forces, virial term, and electron density
+  !
+  ! Note: that the variable `particleEnergy' does not need to be initialized
+  !       because it's initial value is set during the embedding energy
+  !       calculation.
+  if (comp_energy.eq.1) energy = 0.0_cd
+  if (comp_force.eq.1) force  = 0.0_cd
+  if (comp_virial.eq.1) virial = 0.0_cd
 
-!  Loop over particles in the neighbor list a first time,
-!  to compute electron density (=coordination)
-!
-do i = 1,N
-   if(particleContributing(i).eq.1) then
-      ! Get neighbor list of current atom
-      call kim_model_compute_arguments_get_neighbor_list( &
-         model_compute_arguments_handle, 1, i, numnei, nei1part, ierr)
-      if (ierr /= 0) then
-         ! some sort of problem, exit
-         kim_log_message = "GetNeighborList failed"
-         LOG_ERROR()
-         ierr = 1
-         return
-      endif
+  allocate( rho(N) )  ! pair functional electron density
+  rho = 0.0_cd
 
-      ! Loop over the neighbors of atom i
-      !
-      do jj = 1, numnei
+  ! EAM embedded energy deriv
+  if (comp_force.eq.1.or.comp_virial.eq.1) allocate( derU(N) )
 
-         j = nei1part(jj)                            ! get neighbor ID
+  !  Loop over particles in the neighbor list a first time,
+  !  to compute electron density (=coordination)
+  !
+  do i = 1,N
+     if(particleContributing(i).eq.1) then
+        ! Get neighbor list of current atom
+        call kim_model_compute_arguments_get_neighbor_list( &
+           model_compute_arguments_handle, 1, i, numnei, nei1part, ierr)
+        if (ierr /= 0) then
+           ! some sort of problem, exit
+           kim_log_message = "GetNeighborList failed"
+           LOG_ERROR()
+           ierr = 1
+           return
+        endif
 
-         ! compute relative position vector
-         !
-         Rij(:) = coor(:,j) - coor(:,i)              ! distance vector between i j
+        ! Loop over the neighbors of atom i
+        !
+        do jj = 1, numnei
 
-         ! compute contribution to electron density
-         !
-         Rsqij = dot_product(Rij,Rij)                ! compute square distance
-         if ( Rsqij .lt. model_cutsq ) then          ! particles are interacting?
-            r = sqrt(Rsqij)                          ! compute distance
-            call calc_g(r,g,irlast)                  ! compute electron density
-            rho(i) = rho(i) + g                      ! accumulate electron density
-         endif
+           j = nei1part(jj)                            ! get neighbor ID
 
-      enddo  ! loop on jj
-   endif ! Check on whether particle is contributing
-enddo  ! infinite do loop (terminated by exit statements above)
+           ! compute relative position vector
+           !
+           Rij(:) = coor(:,j) - coor(:,i)              ! distance vector between i j
 
-!  Now that we know the electron densities, calculate embedding part of energy
-!  U and its derivative U' (derU)
-!
-do i = 1,N
-   if(particleContributing(i).eq.1) then
-     if (comp_force.eq.1.or.comp_virial.eq.1) then
-       call calc_U_dU(rho(i),U,dU,ielast)      ! compute embedding energy
-                                               !   and its derivative
-       derU(i) = dU                            ! store dU for later use
-     else
-       call calc_U(rho(i),U,ielast)            ! compute just embedding energy
-     endif
+           ! compute contribution to electron density
+           !
+           Rsqij = dot_product(Rij,Rij)                ! compute square distance
+           if ( Rsqij .lt. model_cutsq ) then          ! particles are interacting?
+              r = sqrt(Rsqij)                          ! compute distance
+              call calc_g(r,g,irlast)                  ! compute electron density
+              rho(i) = rho(i) + g                      ! accumulate electron density
+           endif
 
-     ! accumulate the embedding energy contribution
-     !
-     ! Assuming U(rho=0) = 0.0_cd
-     !
-     if (comp_particleEnergy.eq.1) then        ! accumulate embedding energy contribution
-       particleEnergy(i) = U
-     endif
-     if (comp_energy.eq.1) then
-       energy = energy + U
-     endif
+        enddo  ! loop on jj
+     endif ! Check on whether particle is contributing
+  enddo  ! infinite do loop (terminated by exit statements above)
 
-   endif ! Check on whether particle is contributing
-enddo
+  !  Now that we know the electron densities, calculate embedding part of energy
+  !  U and its derivative U' (derU)
+  !
+  do i = 1,N
+     if(particleContributing(i).eq.1) then
+       if (comp_force.eq.1.or.comp_virial.eq.1) then
+         call calc_U_dU(rho(i),U,dU,ielast)      ! compute embedding energy
+                                                 !   and its derivative
+         derU(i) = dU                            ! store dU for later use
+       else
+         call calc_U(rho(i),U,ielast)            ! compute just embedding energy
+       endif
 
-!  Loop over particles in the neighbor list a second time, to compute
-!  the forces and complete energy calculation
-!
+       ! accumulate the embedding energy contribution
+       !
+       ! Assuming U(rho=0) = 0.0_cd
+       !
+       if (comp_particleEnergy.eq.1) then        ! accumulate embedding energy contribution
+         particleEnergy(i) = U
+       endif
+       if (comp_energy.eq.1) then
+         energy = energy + U
+       endif
 
-do i = 1,N
-   if(particleContributing(i).eq.1) then
-      ! Get neighbor list of current atom
-      call kim_model_compute_arguments_get_neighbor_list( &
-         model_compute_arguments_handle, 1, i, numnei, nei1part, ierr)
-      if (ierr /= 0) then
-         ! some sort of problem, exit
-         kim_log_message = "GetNeighborList failed"
-         LOG_ERROR()
-         ierr = 1
-         return
-      endif
+     endif ! Check on whether particle is contributing
+  enddo
 
-      ! Loop over the neighbors of atom i
-      !
-      do jj = 1, numnei
+  !  Loop over particles in the neighbor list a second time, to compute
+  !  the forces and complete energy calculation
+  !
 
-         j = nei1part(jj)                            ! get neighbor ID
+  do i = 1,N
+     if(particleContributing(i).eq.1) then
+        ! Get neighbor list of current atom
+        call kim_model_compute_arguments_get_neighbor_list( &
+           model_compute_arguments_handle, 1, i, numnei, nei1part, ierr)
+        if (ierr /= 0) then
+           ! some sort of problem, exit
+           kim_log_message = "GetNeighborList failed"
+           LOG_ERROR()
+           ierr = 1
+           return
+        endif
 
-         ! compute relative position vector
-         !
-         Rij(:) = coor(:,j) - coor(:,i)              ! distance vector between i j
+        ! Loop over the neighbors of atom i
+        !
+        do jj = 1, numnei
 
-         ! compute energy and forces
-         !
-         Rsqij = dot_product(Rij,Rij)                ! compute square distance
-         if ( Rsqij .lt. model_cutsq ) then          ! particles are interacting?
+           j = nei1part(jj)                            ! get neighbor ID
 
-            r = sqrt(Rsqij)                          ! compute distance
-            if (comp_force.eq.1.or.comp_virial.eq.1) then
-               call calc_phi_dphi(r,phi,dphi,irlast) ! compute pair potential
-                                                     !   and it derivative
-               call calc_dg(r,dg,irlast)             ! compute elect dens first deriv
-               dphii  = 0.5_cd*dphi
-               dphij  = 0.0_cd
-               dUi    = derU(i)*dg
-               dUj    = 0.0_cd
-               dphieff = dphii + dphij + dUi + dUj
-            else
-               call calc_phi(r,phi,irlast)           ! compute just pair potential
-            endif
-            Ei = 0.5_cd*phi
-            Ej = 0.0_cd
+           ! compute relative position vector
+           !
+           Rij(:) = coor(:,j) - coor(:,i)              ! distance vector between i j
 
-            ! contribution to energy
-            !
-            if (comp_particleEnergy.eq.1) then
-               particleEnergy(i) = particleEnergy(i) + Ei          ! accumulate energy Ei
-               particleEnergy(j) = particleEnergy(j) + Ej          ! accumulate energy Ej
-            endif
-            if (comp_energy.eq.1) then
-               energy = energy + Ei                  ! accumulate energy
-               energy = energy + Ej                  ! accumulate energy
-            endif
+           ! compute energy and forces
+           !
+           Rsqij = dot_product(Rij,Rij)                ! compute square distance
+           if ( Rsqij .lt. model_cutsq ) then          ! particles are interacting?
 
-            ! contribution to virial tensor
-            !
-            if (comp_virial.eq.1) then
-               virial(1) = virial(1) + Rij(1)*Rij(1)*dphieff/r
-               virial(2) = virial(2) + Rij(2)*Rij(2)*dphieff/r
-               virial(3) = virial(3) + Rij(3)*Rij(3)*dphieff/r
-               virial(4) = virial(4) + Rij(2)*Rij(3)*dphieff/r
-               virial(5) = virial(5) + Rij(1)*Rij(3)*dphieff/r
-               virial(6) = virial(6) + Rij(1)*Rij(2)*dphieff/r
-            endif
+              r = sqrt(Rsqij)                          ! compute distance
+              if (comp_force.eq.1.or.comp_virial.eq.1) then
+                 call calc_phi_dphi(r,phi,dphi,irlast) ! compute pair potential
+                                                       !   and it derivative
+                 call calc_dg(r,dg,irlast)             ! compute elect dens first deriv
+                 dphii  = 0.5_cd*dphi
+                 dphij  = 0.0_cd
+                 dUi    = derU(i)*dg
+                 dUj    = 0.0_cd
+                 dphieff = dphii + dphij + dUi + dUj
+              else
+                 call calc_phi(r,phi,irlast)           ! compute just pair potential
+              endif
+              Ei = 0.5_cd*phi
+              Ej = 0.0_cd
 
-            ! contribution to forces
-            !
-            if (comp_force.eq.1) then                  ! Ei contribution
-               force(:,i) = force(:,i) + dphieff*Rij/r ! accumulate force on atom i
-               force(:,j) = force(:,j) - dphieff*Rij/r ! accumulate force on atom j
-            endif
+              ! contribution to energy
+              !
+              if (comp_particleEnergy.eq.1) then
+                 particleEnergy(i) = particleEnergy(i) + Ei          ! accumulate energy Ei
+                 particleEnergy(j) = particleEnergy(j) + Ej          ! accumulate energy Ej
+              endif
+              if (comp_energy.eq.1) then
+                 energy = energy + Ei                  ! accumulate energy
+                 energy = energy + Ej                  ! accumulate energy
+              endif
 
-         endif
+              ! contribution to virial tensor
+              !
+              if (comp_virial.eq.1) then
+                 virial(1) = virial(1) + Rij(1)*Rij(1)*dphieff/r
+                 virial(2) = virial(2) + Rij(2)*Rij(2)*dphieff/r
+                 virial(3) = virial(3) + Rij(3)*Rij(3)*dphieff/r
+                 virial(4) = virial(4) + Rij(2)*Rij(3)*dphieff/r
+                 virial(5) = virial(5) + Rij(1)*Rij(3)*dphieff/r
+                 virial(6) = virial(6) + Rij(1)*Rij(2)*dphieff/r
+              endif
 
-      enddo  ! loop on jj
-   endif ! Check on whether particle is contributing
-enddo  ! infinite do loop (terminated by exit statements above)
+              ! contribution to forces
+              !
+              if (comp_force.eq.1) then                  ! Ei contribution
+                 force(:,i) = force(:,i) + dphieff*Rij/r ! accumulate force on atom i
+                 force(:,j) = force(:,j) - dphieff*Rij/r ! accumulate force on atom j
+              endif
 
-! Free temporary storage
-!
-deallocate( rho )
-if (comp_force.eq.1.or.comp_virial.eq.1) deallocate( derU )
+           endif
 
-! Everything is great
-ierr = 0
+        enddo  ! loop on jj
+     endif ! Check on whether particle is contributing
+  enddo  ! infinite do loop (terminated by exit statements above)
 
+  ! Free temporary storage
+  !
+  deallocate( rho )
+  if (comp_force.eq.1.or.comp_virial.eq.1) deallocate( derU )
+
+  ! Everything is great
+  ierr = 0
+
+ return
 end subroutine Compute_Energy_Forces
 
 !-------------------------------------------------------------------------------
@@ -883,6 +891,8 @@ subroutine destroy(model_destroy_handle, ierr) bind(c)
   LOG_INFORMATION()
   deallocate(buf)
   ierr = 0  ! everything is good
+
+  return
 end subroutine destroy
 
 !-------------------------------------------------------------------------------
@@ -914,6 +924,8 @@ subroutine refresh(model_refresh_handle, ierr) bind(c)
     model_refresh_handle, 1, buf%cutoff)
 
   ierr = 0  ! everything is good
+
+  return
 end subroutine refresh
 
 !-------------------------------------------------------------------------------
@@ -1014,94 +1026,95 @@ end module Glue_Ercolessi_Adams_Al
 subroutine create(model_create_handle, requested_length_unit, &
   requested_energy_unit, requested_charge_unit, requested_temperature_unit, &
   requested_time_unit, ierr) bind(c)
-use, intrinsic :: iso_c_binding
-use Glue_Ercolessi_Adams_Al
-use kim_model_headers_module
-implicit none
+  use, intrinsic :: iso_c_binding
+  use Glue_Ercolessi_Adams_Al
+  use kim_model_headers_module
+  implicit none
 
-!-- Transferred variables
-type(kim_model_create_handle_type), intent(inout) :: model_create_handle
-type(kim_length_unit_type), intent(in) :: requested_length_unit
-type(kim_energy_unit_type), intent(in) :: requested_energy_unit
-type(kim_charge_unit_type), intent(in) :: requested_charge_unit
-type(kim_temperature_unit_type), intent(in) :: requested_temperature_unit
-type(kim_time_unit_type), intent(in) :: requested_time_unit
-integer(c_int), intent(out) :: ierr
+  !-- Transferred variables
+  type(kim_model_create_handle_type), intent(inout) :: model_create_handle
+  type(kim_length_unit_type), intent(in) :: requested_length_unit
+  type(kim_energy_unit_type), intent(in) :: requested_energy_unit
+  type(kim_charge_unit_type), intent(in) :: requested_charge_unit
+  type(kim_temperature_unit_type), intent(in) :: requested_temperature_unit
+  type(kim_time_unit_type), intent(in) :: requested_time_unit
+  integer(c_int), intent(out) :: ierr
 
-!-- Local variables
-integer(c_int), parameter :: one=1
+  !-- Local variables
+  integer(c_int), parameter :: one=1
 
-!-- KIM variables
-integer(c_int) :: ierr2
-type(buffer_type), pointer :: buf
+  !-- KIM variables
+  integer(c_int) :: ierr2
+  type(buffer_type), pointer :: buf
 
-kim_log_file = __FILE__
+  kim_log_file = __FILE__
 
-ierr = 0
-ierr2 = 0
+  ierr = 0
+  ierr2 = 0
 
-call kim_model_create_set_units(model_create_handle, &
-  kim_length_unit_a, &
-  kim_energy_unit_ev, &
-  kim_charge_unit_unused, &
-  kim_temperature_unit_unused, &
-  kim_time_unit_unused, &
-  ierr2)
-ierr = ierr + ierr2
+  call kim_model_create_set_units(model_create_handle, &
+    kim_length_unit_a, &
+    kim_energy_unit_ev, &
+    kim_charge_unit_unused, &
+    kim_temperature_unit_unused, &
+    kim_time_unit_unused, &
+    ierr2)
+  ierr = ierr + ierr2
 
-! register species
-call kim_model_create_set_species_code(model_create_handle, &
-  kim_species_name_al, speccode, ierr2)
-ierr = ierr + ierr2
+  ! register species
+  call kim_model_create_set_species_code(model_create_handle, &
+    kim_species_name_al, speccode, ierr2)
+  ierr = ierr + ierr2
 
-! register numbering
-call kim_model_create_set_model_numbering(model_create_handle, &
-  kim_numbering_one_based, ierr2);
-ierr = ierr + ierr2
+  ! register numbering
+  call kim_model_create_set_model_numbering(model_create_handle, &
+    kim_numbering_one_based, ierr2);
+  ierr = ierr + ierr2
 
-! register function pointers
-call kim_model_create_set_compute_pointer(model_create_handle, &
-  kim_language_name_fortran, c_funloc(Compute_Energy_Forces), ierr2)
-ierr = ierr + ierr2
-call kim_model_create_set_compute_arguments_create_pointer( &
-  model_create_handle, kim_language_name_fortran, &
-  c_funloc(compute_arguments_create), ierr2)
-ierr = ierr + ierr2
-call kim_model_create_set_compute_arguments_destroy_pointer( &
-  model_create_handle, kim_language_name_fortran, &
-  c_funloc(compute_arguments_destroy), ierr2)
-ierr = ierr + ierr2
-call kim_model_create_set_destroy_pointer(model_create_handle, &
-  kim_language_name_fortran, c_funloc(destroy), ierr2)
-ierr = ierr + ierr2
-call kim_model_create_set_refresh_pointer( &
-  model_create_handle, kim_language_name_fortran, &
-  c_funloc(refresh), ierr2)
-ierr = ierr + ierr2
+  ! register function pointers
+  call kim_model_create_set_compute_pointer(model_create_handle, &
+    kim_language_name_fortran, c_funloc(Compute_Energy_Forces), ierr2)
+  ierr = ierr + ierr2
+  call kim_model_create_set_compute_arguments_create_pointer( &
+    model_create_handle, kim_language_name_fortran, &
+    c_funloc(compute_arguments_create), ierr2)
+  ierr = ierr + ierr2
+  call kim_model_create_set_compute_arguments_destroy_pointer( &
+    model_create_handle, kim_language_name_fortran, &
+    c_funloc(compute_arguments_destroy), ierr2)
+  ierr = ierr + ierr2
+  call kim_model_create_set_destroy_pointer(model_create_handle, &
+    kim_language_name_fortran, c_funloc(destroy), ierr2)
+  ierr = ierr + ierr2
+  call kim_model_create_set_refresh_pointer( &
+    model_create_handle, kim_language_name_fortran, &
+    c_funloc(refresh), ierr2)
+  ierr = ierr + ierr2
 
-! allocate buffer
-allocate(buf)
+  ! allocate buffer
+  allocate(buf)
 
-! store model buffer in KIM object
-call kim_model_create_set_model_buffer_pointer(model_create_handle, &
-  c_loc(buf))
+  ! store model buffer in KIM object
+  call kim_model_create_set_model_buffer_pointer(model_create_handle, &
+    c_loc(buf))
 
-! set buffer values
-buf%influence_distance = model_cutoff
-buf%cutoff(1) = model_cutoff
+  ! set buffer values
+  buf%influence_distance = model_cutoff
+  buf%cutoff(1) = model_cutoff
 
-! register influence distance
-call kim_model_create_set_influence_distance_pointer( &
-  model_create_handle, buf%influence_distance)
+  ! register influence distance
+  call kim_model_create_set_influence_distance_pointer( &
+    model_create_handle, buf%influence_distance)
 
-! register cutoff
-call kim_model_create_set_neighbor_list_cutoffs_pointer(model_create_handle, &
-  1, buf%cutoff)
+  ! register cutoff
+  call kim_model_create_set_neighbor_list_cutoffs_pointer(model_create_handle, &
+    1, buf%cutoff)
 
-if (ierr /= 0) then
-  ierr = 1
-  kim_log_message = "Unable to successfully initialize model"
-  LOG_ERROR()
-endif
+  if (ierr /= 0) then
+    ierr = 1
+    kim_log_message = "Unable to successfully initialize model"
+    LOG_ERROR()
+  endif
+
+  return
 end subroutine create
-
