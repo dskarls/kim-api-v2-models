@@ -48,7 +48,7 @@ LOCALOBJ = model_driver_PF_cubic_splines.o
 LOCALCLEAN =
 
 # APPEND to compiler option flag lists
-FFLAGS   += -g
+#FFLAGS   +=
 #CFLAGS   +=
 #CXXFLAGS +=
 #LDFLAGS  +=
