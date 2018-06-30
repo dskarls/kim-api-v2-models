@@ -909,7 +909,7 @@ subroutine model_refresh_func(model_refresh_handle, ierr) bind(c)
   kim_log_message = "Resetting influence distance and cutoffs"
   LOG_INFORMATION()
   call kim_model_refresh_set_influence_distance_pointer( &
-    model_refresh_handle, buf%cutoff(1))
+    model_refresh_handle, buf%influence_distance)
   call kim_model_refresh_set_neighbor_list_cutoffs_pointer( &
     model_refresh_handle, 1, buf%cutoff)
 
@@ -1088,7 +1088,7 @@ call kim_model_create_set_model_buffer_pointer(model_create_handle, &
 
 ! set buffer values
 buf%influence_distance = model_cutoff
-buf%cutoff = model_cutoff
+buf%cutoff(1) = model_cutoff
 
 ! register influence distance
 call kim_model_create_set_influence_distance_pointer( &
