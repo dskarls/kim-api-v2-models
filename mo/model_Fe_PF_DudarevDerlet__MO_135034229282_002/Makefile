@@ -1,0 +1,53 @@
+#
+# CDDL HEADER START
+#
+# The contents of this file are subject to the terms of the Common Development
+# and Distribution License Version 1.0 (the "License").
+#
+# You can obtain a copy of the license at
+# http://www.opensource.org/licenses/CDDL-1.0.  See the License for the
+# specific language governing permissions and limitations under the License.
+#
+# When distributing Covered Code, include this CDDL HEADER in each file and
+# include the License file in a prominent location with the name LICENSE.CDDL.
+# If applicable, add the following below this CDDL HEADER, with the fields
+# enclosed by brackets "[]" replaced with your own identifying information:
+#
+#
+# CDDL HEADER END
+#
+
+#
+# Copyright (c) 2012, Mark R. Gilbert, CCFE Fusion Association.  All rights reserved.
+#
+# Contributors:
+#    Mark R. Gilbert
+#
+
+#
+#
+#
+
+# load all basic KIM make configuration
+KIM_API_BUILD_CONFIG = kim-api-v2-build-config
+ifeq ($(shell $(KIM_API_BUILD_CONFIG) --version 2> /dev/null),)
+  $(error $(KIM_API_BUILD_CONFIG) utility is not available.  Something is wrong with your KIM API package setup)
+endif
+include $(shell $(KIM_API_BUILD_CONFIG) --master-config)
+
+
+# set model driver specific details
+MODEL_DRIVER_NAME := model_driver_PF_cubic_splines__MD_620624592962_002
+MODEL_NAME := model_Fe_PF_DudarevDerlet__MO_135034229282_002
+PARAM_FILE_1_NAME := model_Fe_PF_DudarevDerlet.params
+
+# APPEND to compiler option flag lists
+#FFLAGS   +=
+#CFLAGS   +=
+#CXXFLAGS +=
+#LDFLAGS  +=
+#LDLIBS   +=
+
+# load remaining KIM make configuration
+include $(KIM_DIR)/$(builddir)/Makefile.ParameterizedModel
+

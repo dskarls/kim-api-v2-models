@@ -1,0 +1,91 @@
+ Fe
+ 4.1d0
+ 26.00
+ 1.8d0  2.0d0  .true.   6  0d0
+            6            8
+            1    4.100199340884814       F
+            2    1.565647547483517       F
+            1   0.9332056681088162       T    3.000000000000000
+            2   -1.162558782567700       T    2.866666666666670
+            3  -0.3502026949249225       T    2.733333333333330
+            4   0.4287820835430028       T    2.600000000000000
+            5    4.907925057809273       T    2.400000000000000
+            6   -5.307049068415304       T    2.300000000000000
+            1  -0.1960674387419232       F    4.100000000000000
+            2   0.3687525935422963       F    3.800000000000000
+            3   -1.505333614924853       F    3.500000000000000
+            4    4.948907078156191       T    3.200000000000000
+            5   -4.894613262753399       T    2.900000000000000
+            6    3.468897724782442       T    2.600000000000000
+            7   -1.792218099820337       T    2.400000000000000
+            8    80.22069592246987       T    2.300000000000000
+ 72218.36828658299d0
+ -180889.3061833579d0
+ 180517.1510401687d0
+ -89648.63197630807d0
+ 22141.23873630531d0
+ -2174.252677819831d0
+ a magnetic interatomic potential for alpha iron
+
+
+
+
+Minimiser function value                   24.6262
+Bcc equilibrium density                     0.4821
+Bcc equilibrium energy                     -4.3160      -4.3160
+Bcc equilibrium pressure                    0.0000
+Bcc equilibrium bulk modulus              173.1000     173.1000
+Bcc equilibrium rs modulus                121.9000     121.9000
+Bcc equilibrium ts modulus                 52.5000      52.5000
+Bcc equilibrium Cauchy pressure             8.1000       8.1000
+Bcc unrelaxed vacancy energy                2.0700       2.0666
+
+NM Bcc equilibrium energy                   0.4762       0.1930
+NM Bcc equilibrium pressure                -0.0143
+NM Bcc equilibrium bulk modulus           276.0000     249.2351
+NM Bcc equilibrium rs modulus             141.0000     172.1087
+NM Bcc equilibrium ts modulus            -110.0000     -21.0393
+NM Bcc equilibrium Cauchy pressure        104.1667      45.5763
+
+Fcc equilibrium energy                      0.1361       0.1355
+Fcc equilibrium pressure                    0.0994
+Fcc equilibrium bulk modulus              182.0000     197.8497
+Fcc equilibrium rs modulus                 23.0000     151.6097
+Fcc equilibrium ts modulus                -77.0000      56.2388
+Fcc equilibrium Cauchy pressure           105.1667       4.3738
+
+NM Fcc equilibrium energy                   0.1565       0.2216
+NM Fcc equilibrium pressure                 0.0529
+NM Fcc equilibrium bulk modulus           317.0000     305.4491
+NM Fcc equilibrium rs modulus             287.0000     179.8996
+NM Fcc equilibrium ts modulus             125.0000      49.3223
+NM Fcc equilibrium Cauchy pressure        -26.6667      46.3340
+
+Bcc/Fcc transition energy difference       -0.0822
+Fcc transition rho_c-rho difference         0.1391
+
+Bcc fm c100 energy                          4.6400       4.5923
+Bcc fm c111 energy                          4.2400       4.2446
+Bcc fm d110 energy                          3.6400       3.6543
+
+Bcc fm c100-c111 energy                     0.4000       0.3477
+Bcc fm c111-d110 energy                     0.6000       0.5903
+
+Bcc nm c100 energy                          2.2894       2.0556
+Bcc nm c111 energy                          0.9124       1.6253
+Bcc nm d110 energy                          1.0142       1.2175
+
+Bcc nm c100-c111 energy                     1.3770       0.4304
+Bcc nm c111-d110 energy                    -0.1018       0.4078
+
+Bcc fm c100 ~moment                         0.0934
+Bcc fm c111 ~moment                         0.1409
+Bcc fm d110 ~moment                         0.1138
+
+Bcc fm c100 force objective                 0.0000
+Bcc fm c111 force objective                 0.0000
+Bcc fm d110 force objective                 0.0000
+
+Bcc fm c100 local ce0 objective             0.0232
+Bcc fm c111 local ce0 objective             0.0721
+Bcc fm d110 local ce0 objective             0.1188
