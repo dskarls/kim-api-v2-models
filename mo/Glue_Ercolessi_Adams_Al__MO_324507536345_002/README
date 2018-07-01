@@ -28,15 +28,11 @@
 #    Valeriu Smirichinski
 #
 
-#
-#
-
-
 This directory (Glue_Ercolessi_Adams_Al) contains an EAM Model created by
 Ercolessi and Adams (for aluminum) written in F90 and based on the pair
 functional template in DOCs/TEMPLATEs/.
 
-Reference: F. Ercolessi and J. B. Adams, "Interatomic Potentials from 
+Reference: F. Ercolessi and J. B. Adams, "Interatomic Potentials from
 First-Principles Calculations: the Force-Matching Method",
 Europhys. Lett., 26:583-588 (1994).
 
@@ -55,6 +51,3 @@ Glue_Ercolessi_Adams_Al.F90
      Fortran module file that contains the implementation of the Ercolessi and
      Adams EAM Model
 
-Glue_Ercolessi_Adams_Al.kim
-     KIM descriptor file, contains all variables and methods that are exposed
-     through the KIM API interface

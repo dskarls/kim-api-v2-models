@@ -29,6 +29,3 @@ README
 Pair_Johnson_Fe.F90
     Implementation of the Modified Johnson pair potential for Fe.
 
-Pair_Johnson_Fe__MO_857282754307_001.kim
-    The KIM descriptor file for the potential.
-
