@@ -1,0 +1,34 @@
+# This Source Code Form is subject to the terms of the Mozilla Public License,
+# v. 2.0. If a copy of the MPL was not distributed with this file, You can
+# obtain one at http://mozilla.org/MPL/2.0/.
+
+This directory (iron_pair_potental) contains the modified Johnson pair potential
+for Fe. The parameters for this model are taken from the following reference:
+
+J. R. Morris, R. S. Aga, V. Levashov and T. Egami,
+"Many-body effects in bcc metals: An embedded atom model extension
+of the modified Johnson pair potential for iron"
+Phys. Rev. B 77, 174201 (2008).
+
+Updates:
+_002 : Corrected errors in calc_phi_dphi subroutine to compute dphi.
+_003 : Update for compliance with KIM API v2.0
+
+The following files are in this directory:
+
+LICENSE.CDDL
+     The Common Development and Distribution License (CDDL) Version 1.0 file
+
+Makefile
+    makefile to compile and build the Model based on the specified KIM Model
+    Driver
+
+README
+    This file
+
+Pair_Johnson_Fe.F90
+    Implementation of the Modified Johnson pair potential for Fe.
+
+Pair_Johnson_Fe__MO_857282754307_001.kim
+    The KIM descriptor file for the potential.
+

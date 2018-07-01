@@ -1,0 +1,25 @@
+{
+  "title" "Implementation of the Modified Johnson pair potential for Fe"
+  "description" "Modified Johnson pair potential for Fe"
+  "disclaimer" ""
+  "domain" "openkim.org"
+  "kim-api-version" "2.0"
+  "extended-id" "Pair_Johnson_Fe__MO_857282754307_003"
+  "source-citations" [{"title" "Many-body effects in bcc metals: {A}n embedded atom model extension of the modified {J}ohnson pair potential for iron"
+											 "author" "Morris, James R. and Aga, Rachel S. and Levashov, Valentin and Egami, Takeshi},
+                       "journal" "Physical Review B"
+                       "volume" "77"
+                       "issue" "17"
+                       "pages" "174201"
+                       "numpages" "9"
+                       "year" "2008"
+                       "month" "May"
+                       "publisher" "American Physical Society"
+                       "doi" "10.1103/PhysRevB.77.174201"
+                       "recordtype" "article"
+                       "recordkey" "MO_857282754307_003a"}]
+ "species" ["Fe"]
+ "author" "Sung-Yup Kim"
+ "contributor-id" "ac9a600a-f97e-4e71-83cd-d25d7e2bab9c"
+ "maintainer-id" "ac9a600a-f97e-4e71-83cd-d25d7e2bab9c"
+ "publication-year" "2018"}
