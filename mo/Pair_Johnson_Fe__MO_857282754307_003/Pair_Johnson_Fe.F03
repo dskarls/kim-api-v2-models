@@ -38,10 +38,6 @@
 !**  Release: This file is part of the kim-api.git repository.
 !**
 !****************************************************************************
-
-#define THIS_FILE_NAME __FILE__
-#define TRUEFALSE(TRUTH) merge(1,0,(TRUTH))
-
 module iron_pair_potential
 
 use, intrinsic :: iso_c_binding

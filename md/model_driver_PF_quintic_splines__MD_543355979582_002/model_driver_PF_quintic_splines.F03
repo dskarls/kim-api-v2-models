@@ -37,11 +37,6 @@
 !**
 !**
 !****************************************************************************
-
-
-#define THIS_FILE_NAME __FILE__
-#define TRUEFALSE(TRUTH) merge(1,0,(TRUTH))
-
 module model_driver_pf_quintic_splines
 
 use, intrinsic :: iso_c_binding

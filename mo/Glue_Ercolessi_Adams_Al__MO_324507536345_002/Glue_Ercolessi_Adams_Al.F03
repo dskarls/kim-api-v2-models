@@ -42,11 +42,6 @@
 !**
 !**
 !****************************************************************************
-
-
-#define THIS_FILE_NAME __FILE__
-#define TRUEFALSE(TRUTH) merge(1,0,(TRUTH))
-
 module Glue_Ercolessi_Adams_Al
 
 use, intrinsic :: iso_c_binding
