@@ -1,0 +1,22 @@
+{"author" "Nicholas R Lewkow"
+ "contributor-id" "71d034f9-750e-4d27-ae69-32bfdb8bed58"
+ "description" "Ab initio interaction potential for H+He, both in their ground electronic state."
+ "disclaimer" ""
+ "domain" "openkim.org"
+ "extended-id" "model_He_P_AbIn__MO_126942667206_002"
+ "kim-api-version" "2.0"
+ "maintainer-id" "71d034f9-750e-4d27-ae69-32bfdb8bed58"
+ "publication-year" "2018"
+ "source-citations" [{"author" "Robert Hellmann and Eckard Bich and Eckhard Vogel"
+                      "doi" "10.1080/00268970701730096"
+                      "journal" "Molecular Physics"
+                      "number" "23-24"
+                      "pages" "3013--3023"
+                      "publisher" "Taylor \\& Francis"
+                      "recordkey" "MO_126942667206_002a"
+                      "recordtype" "article"
+                      "title" "Ab initio potential energy curve for the helium atom pair and thermophysical properties of dilute helium gas. {I}. {H}elium--helium interatomic potential"
+                      "volume" "105"
+                      "year" "2007"}]
+ "species" ["He"]
+ "title" "Ab Initio Ground State He+He Interaction Potential"}

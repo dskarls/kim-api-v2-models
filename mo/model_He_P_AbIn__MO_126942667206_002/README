@@ -1,0 +1,27 @@
+This directory (model_He_P_AbIn) contains an ab initio ground state He+He pair potential.
+The potential comprises of two parts:
+
+1) Ab Initio well and dispersion potential for separation distances > ~2a0 which was given
+by
+
+Bich E., Hellmann R., and Vogel E. 2007. Ab initio potential energy curve for the helium atom
+pair and thermophysical properties of the dilute helium gas. Mol. Phys. 105.
+
+2) For separation distances < ~2a0 a screened coloumb potential was fit to the ab initio potential.
+This screened potential is such that the potentials and its derivatives are smooth.
+
+The following files are in this directory:
+
+LICENSE.CDDL
+     The Common Development and Distribution License (CDDL) Version 1.0 file
+
+Makefile
+    makefile to compile and build the Model based on the specified KIM Model
+    Driver
+
+README
+    This file
+
+model_He_P_AbIn.F90
+		model for the pair potential
+
