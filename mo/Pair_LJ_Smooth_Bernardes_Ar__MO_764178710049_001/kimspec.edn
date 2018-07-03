@@ -1,0 +1,23 @@
+{"author" "Nikhil Chandra Admal"
+ "contributor-id" "1ca2116a-8ef0-4f27-baa5-c6bd14160e05"
+ "description" "A smoothed Lennard-Jones pair potential for Argon with parameter from Bernardes."
+ "domain" "openkim.org"
+ "extended-id" "Pair_LJ_Smooth_Bernardes_Ar__MO_764178710049_000"
+ "kim-api-version" "2.0"
+ "maintainer-id" "1ca2116a-8ef0-4f27-baa5-c6bd14160e05"
+ "model-driver" "Pair_LJ_Smooth__MD_716364606252_000"
+ "publication-year" "2018"
+ "source-citations" [{"author" "Bernardes, Newton"
+                      "doi" "10.1103/PhysRev.112.1534"
+                      "issue" "5"
+                      "journal" "Physical Review"
+                      "month" "Dec"
+                      "pages" "1534--1539"
+                      "publisher" "American Physical Society"
+                      "recordkey" "MO_764178710049_000a"
+                      "recordtype" "article"
+                      "title" "Theory of Solid Ne, A, Kr, and Xe at 0${}^\\circ$K"
+                      "volume" "112"
+                      "year" "1958"}]
+ "species" ["Ar"]
+ "title" "A smoothed Lennard-Jones pair potential for Argon"}

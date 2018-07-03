@@ -1,0 +1,9 @@
+{"description" "A smoothed Lennard-Jones pair potential to model nobel gases.  A quadratic function is added to the standard Lennard-Jones potential such that the resulting potential function and its derivative are zero at the cutoff radius. The driver is written in Fortran 2003."
+ "domain" "openkim.org"
+ "extended-id" "Pair_LJ_Smooth__MD_716364606252_001"
+ "kim-api-version" "2.0"
+ "title" "A smoothed Lennard-Jones pair potential using a quadratic function"
+ "author" "Nikhil Chandra Admal"
+ "contributor-id" "1ca2116a-8ef0-4f27-baa5-c6bd14160e05"
+ "maintainer-id" "1ca2116a-8ef0-4f27-baa5-c6bd14160e05"
+ "publication-year" "2018"}
