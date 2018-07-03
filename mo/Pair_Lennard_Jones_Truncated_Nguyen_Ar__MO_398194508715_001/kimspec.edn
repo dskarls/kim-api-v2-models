@@ -1,0 +1,21 @@
+{"author" "Ellad Tadmor"
+ "contributor-id" "360c0aed-48ce-45f6-ba13-337f12a531e8"
+ "description" "This is a parameterization for the Pair_Lennard_Jones_Truncated model driver for argon (Ar).  The Lennard-Jones (LJ) parameters epsilon and sigma are due to Nguyen et al. (2005).  The cutoff radius is set to 4.5*sigma=15.3 Angstrom.  See the parameter file (.params) for more details."
+ "domain" "openkim.org"
+ "extended-id" "Pair_Lennard_Jones_Truncated_Nguyen_Ar__MO_398194508715_001"
+ "kim-api-version" "2.0"
+ "maintainer-id" "360c0aed-48ce-45f6-ba13-337f12a531e8"
+ "model-driver" "Pair_Lennard_Jones_Truncated__MD_132729421025_001"
+ "publication-year" "2018"
+ "source-citations" [{"author" "Nguyen, Thanh X. and Bhatia, Suresh K. and Nicholson, David"
+                      "doi" "10.1021/la047545h"
+                      "journal" "Langmuir"
+                      "number" "7"
+                      "pages" "3187--3197"
+                      "recordkey" "MO_398194508715_001a"
+                      "recordtype" "article"
+                      "title" "Prediction of High-Pressure Adsorption Equilibrium of Supercritical Gases Using Density Functional Theory"
+                      "volume" "21"
+                      "year" "2005"}]
+ "species" ["Ar"]
+ "title" "Truncated Lennard-Jones model for Ar with parameters from Nguyen"}

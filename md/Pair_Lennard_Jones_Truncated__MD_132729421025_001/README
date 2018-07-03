@@ -1,0 +1,71 @@
+#
+# CDDL HEADER START
+#
+# The contents of this file are subject to the terms of the Common Development
+# and Distribution License Version 1.0 (the "License").
+#
+# You can obtain a copy of the license at
+# http://www.opensource.org/licenses/CDDL-1.0.  See the License for the
+# specific language governing permissions and limitations under the License.
+#
+# When distributing Covered Code, include this CDDL HEADER in each file and
+# include the License file in a prominent location with the name LICENSE.CDDL.
+# If applicable, add the following below this CDDL HEADER, with the fields
+# enclosed by brackets "[]" replaced with your own identifying information:
+#
+# Portions Copyright (c) [yyyy] [name of copyright owner]. All rights reserved.
+#
+# CDDL HEADER END
+#
+
+#
+# Copyright (c) 2013, Regents of the University of Minnesota.
+# All rights reserved.
+#
+# Contributors:
+#    Ellad B. Tadmor
+#    Ryan S. Elliott
+#
+
+This directory (Pair_Lennard_Jones_Truncated) contains a truncated Lennard-Jones
+pair potential model driver written in Fortran 90.
+
+   phi(r) = 4 * epsilon * ( (sigma/r)^12 - (sigma/r)^6 ), if r <= rcut
+
+          = 0,                                            otherwise
+
+where 'rcut' is the cutoff radius.
+
+It complies with the KIM API interface standard, allows alteration of its
+parameters, and supports optional computation of `energy', `forces',
+`particleEnergy', `process_dEdr', and `process_dE2dr2'.  Its initialization
+routine takes a KIM API object pointer, a pointer to a two-dimensional
+character array (each row of which contains the full path to a parameter file)
+of the form a[b][c], a pointer to the value of c, and a pointer to the value of
+b.  This Model Driver expects that only b=1 and that the associated parameter
+file contains the cutoff and Lennard-Jones parameters which define a KIM Model
+based on this KIM Model Driver.
+
+To create a KIM Model from this Model Driver, a parameter file is required.
+This file must have the following format:
+
+   Line 1: chemical symbol of the atomic species, e.g. Ar
+   Line 2: `cutoff' value in angstroms
+   Line 3: Lennard-Jones `epsilon' value in eV
+   Line 4: Lennard-Jones `sigma' value in Angstroms
+
+The following files are in this directory (before any compilation is performed):
+
+LICENSE.CDDL
+     The Common Development and Distribution License (CDDL) Version 1.0 file
+
+Makefile
+    makefile to compile and build executables with GNU or Intel compilers
+
+README
+    This file
+
+Pair_Lennard_Jones_Truncated.F90
+    Fortran 90 file that contains the implementation of the Lennard-Jones
+    potential Model Driver
+
