@@ -768,9 +768,9 @@ subroutine create(model_driver_create_handle, requested_length_unit, &
 
   buf%influence_distance = in_cutoff
   buf%cutoff(1) = in_cutoff
-  buf%cutsq = in_cutoff*in_cutoff
-  buf%eps = in_eps
-  buf%sigma = in_sigma
+  buf%cutsq(1) = in_cutoff*in_cutoff
+  buf%eps(1) = in_eps
+  buf%sigma(1) = in_sigma
 
   ! Compute energy at cutoff and store it in the buffer, as well
   call calc_phi(in_eps, &
