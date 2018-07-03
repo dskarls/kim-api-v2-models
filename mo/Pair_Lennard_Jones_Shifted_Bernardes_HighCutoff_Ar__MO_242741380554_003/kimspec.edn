@@ -1,0 +1,22 @@
+{"author" "Ellad Tadmor"
+ "contributor-id" "360c0aed-48ce-45f6-ba13-337f12a531e8"
+ "description" "This is a parameterization for the Pair_Lennard_Jones_Shifted model driver for argon (Ar).  The Lennard-Jones (LJ) parameters epsilon and sigma are due to Bernardes (1958).  The cutoff radius is set so that phi(rcut)=tol*|phi(rmin)|, where  phi(r) is the LJ potential, 'rcut' is the cutoff radius, 'rmin' is the radius at which phi(r) is a minimum, and 'tol' is a small number.  Here 'tol' is taken to be 1.e-4 for a \"high-precision\".  See the parameter file (.params) for more details."
+ "domain" "openkim.org"
+ "extended-id" "Pair_Lennard_Jones_Shifted_Bernardes_HighCutoff_Ar__MO_242741380554_003"
+ "kim-api-version" "2.0"
+ "maintainer-id" "360c0aed-48ce-45f6-ba13-337f12a531e8"
+ "model-driver" "Pair_Lennard_Jones_Shifted__MD_498634107543_003"
+ "publication-year" "2018"
+ "source-citations" [{"author" "Newton Bernardes"
+                      "doi" "10.1103/PhysRev.112.1534"
+                      "issue" "5"
+                      "journal" "Physical Review"
+                      "pages" "1534--1539"
+                      "publisher" "American Physical Society"
+                      "recordkey" "MO_242741380554_003a"
+                      "recordtype" "article"
+                      "title" "Theory of Solid {N}e, {A}, {K}r, and {X}e at 0{K}"
+                      "volume" "112"
+                      "year" "1958"}]
+ "species" ["Ar"]
+ "title" "Shifted Lennard-Jones model for Ar with parameters from Bernardes (high precision cutoff)"}
