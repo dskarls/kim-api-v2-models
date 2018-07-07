@@ -233,7 +233,6 @@ static int compute(KIM_ModelCompute const * const modelCompute,
   KIM_ModelCompute_GetModelBufferPointer(modelCompute, (void **) &buffer);
 
   /* Unpack parameters from buffer */
-  cutoff = buffer->cutoff;
   a = buffer -> cutoff;
   A = buffer->A;
   B = buffer->B;
@@ -694,7 +693,6 @@ int model_driver_create(KIM_ModelDriverCreate *const modelDriverCreate,
     LOG_ERROR("Unable to open parameter file for EDIP parameters");
     return ier;
   }
-
   ier = fscanf(fid, "%s \n%lf \n%lf \n%lf \n%lf %lf \n%lf \n%lf \n%lf \n%lf \n%lf \n%lf %lf \n%lf \
                      \n%lf \n%lf %lf \n%lf \n%lf",
                speciesNameString,
@@ -799,7 +797,7 @@ int model_driver_create(KIM_ModelDriverCreate *const modelDriverCreate,
 
   /* Register species */
   LOG_INFORMATION("Setting species code");
-  speciesName = KIM_SpeciesNameFromString(speciesNameString);
+  speciesName = KIM_SpeciesName_FromString(speciesNameString);
   ier = ier || KIM_ModelDriverCreate_SetSpeciesCode(modelDriverCreate,
                                                     speciesName, SPECCODE);
   if(ier == TRUE){
@@ -852,24 +850,24 @@ int model_driver_create(KIM_ModelDriverCreate *const modelDriverCreate,
 
   /* Register Model parameters */
   LOG_INFORMATION("Registering Model parameters");
-  KIM_ModelDriverCreate_SetParameterPointer(modelDriverCreate, 1, &(buffer->cutoff), "a");
-  KIM_ModelDriverCreate_SetParameterPointer(modelDriverCreate, 1, &(buffer->A), "A");
-  KIM_ModelDriverCreate_SetParameterPointer(modelDriverCreate, 1, &(buffer->B), "B");
-  KIM_ModelDriverCreate_SetParameterPointer(modelDriverCreate, 1, &(buffer->rh), "rh");
-  KIM_ModelDriverCreate_SetParameterPointer(modelDriverCreate, 1, &(buffer->sig), "sig");
-  KIM_ModelDriverCreate_SetParameterPointer(modelDriverCreate, 1, &(buffer->lam), "lam");
-  KIM_ModelDriverCreate_SetParameterPointer(modelDriverCreate, 1, &(buffer->gam), "gam");
-  KIM_ModelDriverCreate_SetParameterPointer(modelDriverCreate, 1, &(buffer->b), "b");
-  KIM_ModelDriverCreate_SetParameterPointer(modelDriverCreate, 1, &(buffer->c), "c");
-  KIM_ModelDriverCreate_SetParameterPointer(modelDriverCreate, 1, &(buffer->mu), "mu");
-  KIM_ModelDriverCreate_SetParameterPointer(modelDriverCreate, 1, &(buffer->Qo), "Qo");
-  KIM_ModelDriverCreate_SetParameterPointer(modelDriverCreate, 1, &(buffer->eta), "eta");
-  KIM_ModelDriverCreate_SetParameterPointer(modelDriverCreate, 1, &(buffer->bet), "bet");
-  KIM_ModelDriverCreate_SetParameterPointer(modelDriverCreate, 1, &(buffer->alp), "alp");
-  KIM_ModelDriverCreate_SetParameterPointer(modelDriverCreate, 1, &(buffer->u1), "u1");
-  KIM_ModelDriverCreate_SetParameterPointer(modelDriverCreate, 1, &(buffer->u2), "u2");
-  KIM_ModelDriverCreate_SetParameterPointer(modelDriverCreate, 1, &(buffer->u3), "u3");
-  KIM_ModelDriverCreate_SetParameterPointer(modelDriverCreate, 1, &(buffer->u4), "u4");
+  KIM_ModelDriverCreate_SetParameterPointerDouble(modelDriverCreate, 1, &(buffer->cutoff), "a");
+  KIM_ModelDriverCreate_SetParameterPointerDouble(modelDriverCreate, 1, &(buffer->A), "A");
+  KIM_ModelDriverCreate_SetParameterPointerDouble(modelDriverCreate, 1, &(buffer->B), "B");
+  KIM_ModelDriverCreate_SetParameterPointerDouble(modelDriverCreate, 1, &(buffer->rh), "rh");
+  KIM_ModelDriverCreate_SetParameterPointerDouble(modelDriverCreate, 1, &(buffer->sig), "sig");
+  KIM_ModelDriverCreate_SetParameterPointerDouble(modelDriverCreate, 1, &(buffer->lam), "lam");
+  KIM_ModelDriverCreate_SetParameterPointerDouble(modelDriverCreate, 1, &(buffer->gam), "gam");
+  KIM_ModelDriverCreate_SetParameterPointerDouble(modelDriverCreate, 1, &(buffer->b), "b");
+  KIM_ModelDriverCreate_SetParameterPointerDouble(modelDriverCreate, 1, &(buffer->c), "c");
+  KIM_ModelDriverCreate_SetParameterPointerDouble(modelDriverCreate, 1, &(buffer->mu), "mu");
+  KIM_ModelDriverCreate_SetParameterPointerDouble(modelDriverCreate, 1, &(buffer->Qo), "Qo");
+  KIM_ModelDriverCreate_SetParameterPointerDouble(modelDriverCreate, 1, &(buffer->eta), "eta");
+  KIM_ModelDriverCreate_SetParameterPointerDouble(modelDriverCreate, 1, &(buffer->bet), "bet");
+  KIM_ModelDriverCreate_SetParameterPointerDouble(modelDriverCreate, 1, &(buffer->alp), "alp");
+  KIM_ModelDriverCreate_SetParameterPointerDouble(modelDriverCreate, 1, &(buffer->u1), "u1");
+  KIM_ModelDriverCreate_SetParameterPointerDouble(modelDriverCreate, 1, &(buffer->u2), "u2");
+  KIM_ModelDriverCreate_SetParameterPointerDouble(modelDriverCreate, 1, &(buffer->u3), "u3");
+  KIM_ModelDriverCreate_SetParameterPointerDouble(modelDriverCreate, 1, &(buffer->u4), "u4");
 
   if (ier == TRUE){
     free(buffer);
