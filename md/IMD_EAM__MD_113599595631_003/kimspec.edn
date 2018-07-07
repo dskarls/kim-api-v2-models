@@ -1,0 +1,11 @@
+{"description" "This model driver implements the EAM routine from the IMD code. Input files are the regular IMD potential files, tabulated over r^2. More information is available at http://imd.itap.physik.uni-stuttgart.de/userguide/eam2.html"
+ "disclaimer" ""
+ "domain" "openkim.org"
+ "kim-api-version" "2.0"
+ "extended-id" "IMD_EAM__MD_113599595631_003"
+ "source-citations" ""
+ "title" "EAM implementation from the IMD code"
+ "author" "Daniel Schopf"
+ "contributor-id" "a795e742-41a5-47a1-9586-dc507c1f5f3f"
+ "maintainer-id" "a795e742-41a5-47a1-9586-dc507c1f5f3f"
+ "publication-year" "2018"}

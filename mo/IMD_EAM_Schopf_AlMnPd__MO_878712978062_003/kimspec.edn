@@ -1,0 +1,24 @@
+{
+  "title" "AlMnPd potential for the IMD_EAM model driver."
+  "extended-id" "IMD_EAM_Schopf_AlMnPd__MO_878712978062_003"
+  "model-driver" "IMD_EAM__MD_113599595631_003"
+  "species" ["Al" "Mn" "Pd"]
+  "author" "Daniel Schopf"
+  "description" "EAM potential for the Ξ phases of Al-Mn-Pd developed by Schopf et al. (2012) using the force-matching method. Different combinations of analytic functions were tested for the pair and transfer part. The best results are obtained if one allows for oscillations on two different length scales. These potentials stabilize structural models of the Ξ phases and describe their energy with high accuracy. Simulations at temperatures up to 1200 K show very good agreement with ab initio results with respect to stability and dynamics of the system.\n\nThis model is also stored in OpenKIM for the LAMMPS EAM driver; see https://openkim.org/cite/MO_137572817842_000"
+  "disclaimer" ""
+  "source-citations" [{"title" "Embedded atom method potentials for Al-Pd-Mn phases"
+                       "author" "Schopf, Daniel and Brommer, Peter and Frigan, Benjamin and Trebin, Hans-Rainer"
+                       "journal" "Physical Review B"
+                       "volume" "85"
+                       "issue" "5"
+                       "pages" "054201"
+                       "year" "2012"
+                       "doi" "10.1103/PhysRevB.85.054201"
+                       "recordtype" "article"
+                       "recordkey" "MO_878712978062_003a"}]
+  "contributor-id" "a795e742-41a5-47a1-9586-dc507c1f5f3f"
+  "maintainer-id" "a795e742-41a5-47a1-9586-dc507c1f5f3f"
+  "publication-year" "2018"
+  "kim-api-version" "2.0"
+  "domain" "openkim.org"
+}
