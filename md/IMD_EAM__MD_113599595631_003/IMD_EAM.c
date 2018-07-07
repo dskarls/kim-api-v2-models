@@ -834,6 +834,25 @@ int destroy(KIM_ModelDestroy * const modelDestroy)
     (void**) &buffer);
 
   /* destroy all variables we allocated */
+  free(buffer->pair_pot.begin);
+  free(buffer->pair_pot.end);
+  free(buffer->pair_pot.step);
+  free(buffer->pair_pot.invstep);
+  free(buffer->pair_pot.len);
+  free(buffer->pair_pot.table);
+  free(buffer->transfer_pot.begin);
+  free(buffer->transfer_pot.end);
+  free(buffer->transfer_pot.step);
+  free(buffer->transfer_pot.invstep);
+  free(buffer->transfer_pot.len);
+  free(buffer->transfer_pot.table);
+  free(buffer->embed_pot.begin);
+  free(buffer->embed_pot.end);
+  free(buffer->embed_pot.step);
+  free(buffer->embed_pot.invstep);
+  free(buffer->embed_pot.len);
+  free(buffer->embed_pot.table);
+
   free(buffer->dF_val);
   free(buffer->rho_val);
 
