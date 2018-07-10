@@ -1,0 +1,11 @@
+{"description" "This Model Driver implements the temperature-dependent Morse pair potential of Guthikonda and Elliott 2009.  The potential is shifted in energy so that it takes a value of zero eV at the cutoff separation.  This version (001) fixes a bug in the computation of temperture dependent parameters."
+ "disclaimer" "none"
+ "domain" "openkim.org"
+ "extended-id" "MorseEIP_GuthikondaElliott_2009__MD_429561112321_001"
+ "kim-api-version" "2.0"
+ "source-citations" "V.S. Guthikonda and R.S. Elliott, \"An effective interaction potential model for the shape memory alloy AuCd\", Continuum Mechanics and Thermodynamics (2009) 21:269--295.\n\nV.S. Guthikonda and R.S. Elliott, \"Erratum to: An effective interaction potential model for the shape memory alloy AuCd\", Continuum Mechanics and Thermodynamics (2011) 23:177--183."
+ "title" "This is a Model Driver for the temperature-dependent Morse pair potential shifted to zero energy at cutoff separation"
+ "author" "Ryan S. Elliott"
+ "contributor-id" "b645a915-d1fa-4155-a3da-65469f990011"
+ "maintainer-id" "b645a915-d1fa-4155-a3da-65469f990011"
+ "publication-year" "2018"}

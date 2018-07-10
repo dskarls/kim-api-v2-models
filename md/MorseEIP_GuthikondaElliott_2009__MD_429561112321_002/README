@@ -1,0 +1,108 @@
+#
+# CDDL HEADER START
+#
+# The contents of this file are subject to the terms of the Common Development
+# and Distribution License Version 1.0 (the "License").
+#
+# You can obtain a copy of the license at
+# http://www.opensource.org/licenses/CDDL-1.0.  See the License for the
+# specific language governing permissions and limitations under the License.
+#
+# When distributing Covered Code, include this CDDL HEADER in each file and
+# include the License file in a prominent location with the name LICENSE.CDDL.
+# If applicable, add the following below this CDDL HEADER, with the fields
+# enclosed by brackets "[]" replaced with your own identifying information:
+#
+# Portions Copyright (c) [yyyy] [name of copyright owner]. All rights reserved.
+#
+# CDDL HEADER END
+#
+
+#
+# Copyright (c) 2013--2015, Regents of the University of Minnesota.
+# All rights reserved.
+#
+# Contributors:
+#    Ryan S. Elliott
+#    Andrew Akerson
+#    Ellad B. Tadmor
+#    Valeriu Smirichinski
+#
+
+
+This directory (MorseEIP_GuthikondaElliott_2009__MD_429561112321_001) contains
+a shifted Morse pair potential Model driver written in C.  This driver is based
+on the publications: V.S. Guthikonda and R.S. Elliott, Continuum Mechanics and
+Thermodynamics (2009) 21:269--295 and (2011) 23:177--183.
+
+phi(r; theta) = A(theta) * ( exp[-2*B(theta)*(r/rHat(theta) - 1)]
+                            - 2*exp[-B(theta*(r/rHat(theta) - 1)] )
+                + shift
+
+where:
+rHat(theta) = r1 + r2 * (exp(r3*(theta - 1.0)) - 1.0)
+B(theta) = B1 + B2 * (theta^B3 - 1.0)
+A(theta) = A1 + A2 * (theta^A3 - 1.0)
+
+And shift is computed so that phi(rcut) = 0.0
+
+It complies with the KIM API interface standard, using any NBC and iterator or
+locator mode, publishes its parameters, and supports optional computation of
+`energy', `forces', `particleEnergy', `process_dEdr', and `process_dE2dr2'.
+Its initialization routine takes a KIM API object pointer, a pointer to a
+two-dimensional character array (each row of which contains the full path to a
+parameter file) of the form a[b][c], a pointer to the value of c, and a pointer
+to the value of b.  This Model Driver expects that only b=1 and that the
+associated parameter file contains the cutoff and Morse parameters which define
+a KIM Model based on this KIM Model Driver.
+
+To create a KIM Model from this Model Driver, a parameter file is required.
+This file must have the following format:
+
+* Blank lines and lines beginning with the `#' character are ignored.
+
+* The parameters given on each line of the file are to be space separated.
+
+* Line 0 : N temp
+   - N    : integer number of distinct particle species (max 139)
+   - Temp : double temperature parameter (in Kelvin)
+
+* Lines 1,4,7..: species_i species_j cutoff A1 A2 A3
+   - species_i : A valid kim-api particle species string
+   - species_j : A valid kim-api particle species string
+   - cutoff    : double distance value (in Angstroms) for cutoffs{ij}
+   - A1        : double energy value (in eV) for A1s{ij}
+   - A2        : double energy value (in eV) for A2s{ij}
+   - A3        : double unitless value for A3s{ij}
+
+* Lines 2,5,8..: B1, B2, B3
+   - B1        : double unitless value for B1s{ij}
+   - B2        : double unitless value for B2s{ij}
+   - B3        : double unitless value for B3s{ij}
+
+* Lines 3,6,9..: r1, r2, r3
+   - r1        : double distance value (in Angstroms) for r1s{ij}
+   - r2        : double distance value (in Angstroms) for r2s{ij}
+   - r3        : double unitless value for r3s{ij}
+
+The parameter file must contain ALL parameter sets for each unique (unordered)
+combination of the interacting species.  It is also imperative that the
+pure-species interactions all be given before the interspecies interactions;
+this is used to establish the indexing of the species (both used internally and
+registered in the KIM API).  If any repeated interactions are specified, only
+the last set of provided parameters will be used.  The model driver sets the
+kim-api `cutoff' argument to max_{ij}(cutoff_{ij}).
+
+The following files are in this directory (before any compilation is performed):
+
+LICENSE.CDDL
+     The Common Development and Distribution License (CDDL) Version 1.0 file
+
+Makefile
+    makefile to compile and build executables with GNU or Intel compilers
+
+README
+    This file
+
+MorseEIP_GuthikondaElliott_2009.c
+    C file that contains the implementation of the Morse potential Model Driver
