@@ -31,6 +31,7 @@
 #ifndef EAM_IMPLEMENTATION_HPP_
 #define EAM_IMPLEMENTATION_HPP_
 
+#include <map>
 #include <cmath>
 #include "KIM_LogVerbosity.hpp"
 #include "EAM.hpp"
@@ -72,6 +73,13 @@ struct SetOfFuncflData
   double* densityData[MAX_PARAMETER_FILES];
   double* ZData[MAX_PARAMETER_FILES];
 };
+//type declaration for deferred neighbors
+typedef struct
+{
+  int index;
+} neighbor;
+//type declaration for iterating over deferred neighbor lists
+typedef std::multimap<int, neighbor>::iterator deferredNeighborIterator;
 
 // enumeration for EAMFileType
 enum EAMFileType {Setfl, Funcfl, FinnisSinclair, Error};
@@ -126,7 +134,6 @@ class EAM_Implementation
   int numberUniqueSpeciesPairs_;
   EAMFileType eamFileType_;
 
-
   // Constant values that are read from the input files and never change
   //   Set in constructor (via functions listed below)
   //
@@ -164,16 +171,16 @@ class EAM_Implementation
   double cutoffParameter_;
   double deltaR_;
   double deltaRho_;
-  //
+
   // EAM_Implementation: values (changed only by Refresh())
   double cutoffSq_;
   double oneByDr_;
   double oneByDrho_;
-  //   Memory allocated once by AllocateParameterMemory()
+
+  // Memory allocated once by AllocateParameterMemory()
   double** embeddingCoeff_;
   double*** densityCoeff_;
   double*** rPhiCoeff_;
-
 
   // Mutable values that can change with each call to Refresh() and Compute()
   //   Memory may be reallocated on each call
@@ -185,6 +192,10 @@ class EAM_Implementation
   double* embeddingDerivativeValue_;
   double* embeddingSecondDerivativeValue_;
 
+  // Hints passed to the simulator by the Model
+  int paddingNeighborHints_; // Whether to request that the simulator
+                             // omit neighbors of padding atoms
+  int halfListHints_; // Whether to request half-lists
 
   // Helper methods
   //
@@ -337,10 +348,10 @@ class EAM_Implementation
 
 //******************************************************************************
 #include "KIM_ModelComputeLogMacros.hpp"
-  template< bool isComputeProcess_dEdr, bool isComputeProcess_d2Edr2,
-            bool isComputeEnergy, bool isComputeForces,
-            bool isComputeParticleEnergy, bool isComputeVirial,
-            bool isComputeParticleVirial >
+template< bool isComputeProcess_dEdr, bool isComputeProcess_d2Edr2,
+          bool isComputeEnergy, bool isComputeForces,
+          bool isComputeParticleEnergy, bool isComputeVirial,
+          bool isComputeParticleVirial >
 int EAM_Implementation::Compute(
     KIM::ModelCompute const * const modelCompute,
     KIM::ModelComputeArguments const * const modelComputeArguments,
@@ -403,7 +414,7 @@ int EAM_Implementation::Compute(
   // Setup loop over contributing particles
   int i = 0;
   int numnei = 0;
-  int const * n1atom = 0;
+  int const * n1atom = NULL;
   for (i = 0; i < cachedNumberOfParticles_; ++i)
   {
     if (particleContributing[i])
@@ -414,36 +425,49 @@ int EAM_Implementation::Compute(
       for (int jj = 0; jj < numnei; ++jj)
       {
         int const j = n1atom[jj];
-        double* r_ij;
-        double r_ijValue[DIMENSION];
-        // Compute r_ij
-        r_ij = r_ijValue;
-        for (int k = 0; k < DIMENSION; ++k)
-          r_ij[k] = coordinates[j][k] - coordinates[i][k];
 
-        // compute distance squared
-        double rij2 = 0.0;
-        for (int k = 0; k < DIMENSION; ++k)
-          rij2 += r_ij[k] * r_ij[k];
+        if (i < j) // Effective half list
+        {
+          double* r_ij;
+          double r_ijValue[DIMENSION];
+          // Compute r_ij
+          r_ij = r_ijValue;
+          for (int k = 0; k < DIMENSION; ++k)
+            r_ij[k] = coordinates[j][k] - coordinates[i][k];
 
-        if (rij2 <= cutoffSq_)
-        { // compute contribution to electron density
-          double rijOffset;
-          int rijIndex;
-          double const rij = sqrt(rij2);
+          // compute distance squared
+          double rij2 = 0.0;
+          for (int k = 0; k < DIMENSION; ++k)
+            rij2 += r_ij[k] * r_ij[k];
 
-          // compute rijOffset and rijIndex
-          GET_DELTAX_AND_INDEX(rij, oneByDr_, numberRPoints_, rijOffset,
-                               rijIndex);
+          if (rij2 <= cutoffSq_)
+          { // compute contribution to electron density
+            double rijOffset;
+            int rijIndex;
+            double const rij = sqrt(rij2);
 
-          // interpolate value of rho_beta(r_ij)
-          double densityBetaValue;
-          double const* const densityBetaCoeff
-              = densityCoeff_[particleSpeciesCodes[j]][particleSpeciesCodes[i]];
-          INTERPOLATE_F(densityBetaCoeff, rijOffset, rijIndex,
-                        densityBetaValue);
-          densityValue_[i] += densityBetaValue;
-        }
+            // compute rijOffset and rijIndex
+            GET_DELTAX_AND_INDEX(rij, oneByDr_, numberRPoints_, rijOffset,
+                                 rijIndex);
+
+            // interpolate value of rho_beta(r_ij)
+            double densityBetaValue;
+            double const* const densityBetaCoeff
+                = densityCoeff_[particleSpeciesCodes[j]][particleSpeciesCodes[i]];
+            INTERPOLATE_F(densityBetaCoeff, rijOffset, rijIndex,
+                          densityBetaValue);
+            densityValue_[i] += densityBetaValue;
+            if (particleContributing[j])
+            {
+              double densityAlphaValue;
+              double const* const densityAlphaCoeff
+                = densityCoeff_[particleSpeciesCodes[i]][particleSpeciesCodes[j]];
+              INTERPOLATE_F(densityAlphaCoeff, rijOffset, rijIndex,
+                            densityAlphaValue);
+              densityValue_[j] += densityAlphaValue;
+            }
+          }
+        } // end effective half-list check (i < j)
       }  // end of loop over neighbors
 
       // ensure non-negative
@@ -472,22 +496,19 @@ int EAM_Implementation::Compute(
                            densityOffset, densityIndex);
       double const* const embeddingAlphaCoeff
           = embeddingCoeff_[particleSpeciesCodes[i]];
-      if (0 < numnei)
+      // interpolate F_i(rho_i)
+      double embeddingValue;
+      INTERPOLATE_F(embeddingAlphaCoeff, densityOffset, densityIndex,
+                    embeddingValue);
+      // Contribute embedding term to Energy
+      if (isComputeEnergy == true)
       {
-        // interpolate F_i(rho_i)
-        double embeddingValue;
-        INTERPOLATE_F(embeddingAlphaCoeff, densityOffset, densityIndex,
-                      embeddingValue);
-        // Contribute embedding term to Energy
-        if (isComputeEnergy == true)
-        {
-          *energy += embeddingValue;
-        }
-        // Contribute embedding term to ParticleEnergy
-        if (isComputeParticleEnergy == true)
-        {
-          particleEnergy[i] = embeddingValue;
-        }
+        *energy += embeddingValue;
+      }
+      // Contribute embedding term to ParticleEnergy
+      if (isComputeParticleEnergy == true)
+      {
+        particleEnergy[i] = embeddingValue;
       }
       // Compute embedding derivative
       if ((isComputeForces == true) || (isComputeProcess_dEdr == true) ||
@@ -521,123 +542,169 @@ int EAM_Implementation::Compute(
       for (int jj = 0; jj < numnei; ++jj)
       {
         int const j = n1atom[jj];
-        double* r_ij;
-        double r_ijValue[DIMENSION];
-        // Compute r_ij appropriately
-        r_ij = r_ijValue;
-        for (int k = 0; k < DIMENSION; ++k)
-          r_ij[k] = coordinates[j][k] - coordinates[i][k];
+        if (i < j) // Effective half list
+        {
+          double* r_ij;
+          double r_ijValue[DIMENSION];
+          // Compute r_ij appropriately
+          r_ij = r_ijValue;
+          for (int k = 0; k < DIMENSION; ++k)
+            r_ij[k] = coordinates[j][k] - coordinates[i][k];
 
-        // compute distance squared
-        double rij2 = 0.0;
-        for (int k = 0; k < DIMENSION; ++k)
-          rij2 += r_ij[k] * r_ij[k];
+          // compute distance squared
+          double rij2 = 0.0;
+          for (int k = 0; k < DIMENSION; ++k)
+            rij2 += r_ij[k] * r_ij[k];
 
-        if (rij2 <= cutoffSq_)
-        { // compute contribution to energy and force
-          double rijOffset;
-          int rijIndex;
-          double const rij = sqrt(rij2);
-
-          // compute rijOffset and rijIndex
-          GET_DELTAX_AND_INDEX(rij, oneByDr_, numberRPoints_, rijOffset,
-                               rijIndex);
-
-          // interpolate r_ij*phi(r_ij)
-          double rijPhiValue;
-          double const* const rijPhiAlphaBetaCoeff
-              = rPhiCoeff_[particleSpeciesCodes[i]][particleSpeciesCodes[j]];
-          INTERPOLATE_F(rijPhiAlphaBetaCoeff, rijOffset, rijIndex, rijPhiValue);
-
-          // find phi(r_ij)
-          double const oneByRij = ONE / rij;
-          double const pairPotentialValue = rijPhiValue * oneByRij;
-
-          // Contribute pair term to Energy
-          if (isComputeEnergy == true)
-          {
-            *energy += HALF * pairPotentialValue;
-          }
-
-          // Contribute pair term to Particle Energy
-          if (isComputeParticleEnergy == true)
-          {
-            particleEnergy[i] += HALF * pairPotentialValue;
-          }
-
-          // Compute dEdrByR terms
-          double dEdrByRij = 0.0;
-          if ((isComputeForces == true) || (isComputeProcess_dEdr == true))
-          {
-            // interpolate derivative of r_ij*phi(r_ij) function
-            double rijPhiDerivativeValue;
-            INTERPOLATE_DF(rijPhiAlphaBetaCoeff, rijOffset, rijIndex,
-                           rijPhiDerivativeValue);
-
-            // interpolate derivative of rho_beta(r_ij)
-            double densityBetaDerivativeValue;
-            double const* const densityBetaCoeff =
-                densityCoeff_[particleSpeciesCodes[j]][particleSpeciesCodes[i]];
-            INTERPOLATE_DF(densityBetaCoeff, rijOffset, rijIndex,
-                           densityBetaDerivativeValue);
-
-            // compute dEdr contribution
-            // embedding contribution to dEdr
-            double const embeddingContribution
-                = (embeddingDerivativeValue_[i] * densityBetaDerivativeValue);
-
-            // pair potential contribution
-            double const pairPotentialContribution
-                = HALF * (rijPhiDerivativeValue - pairPotentialValue)
-                * oneByRij;
-
-            // divide by r so we can multiply by r_ij below
-            dEdrByRij = (embeddingContribution + pairPotentialContribution)
-                * oneByRij;
-          }
-
-          // Contribute dEdrByR to forces
-          if (isComputeForces == true)
-          {
-            for (int k = 0; k < DIMENSION; ++k)
-            {
-              forces[i][k] += dEdrByRij * r_ij[k];
-              forces[j][k] -= dEdrByRij * r_ij[k];
-            }
-          }
-
-          // Call process_dEdr
-          if ((isComputeProcess_dEdr == true) ||
-              (isComputeVirial == true) ||
-              (isComputeParticleVirial == true))
-          {
+          if (rij2 <= cutoffSq_)
+          { // compute contribution to energy and force
+            double rijOffset;
+            int rijIndex;
             double const rij = sqrt(rij2);
-            double const dEidr = dEdrByRij*rij;
 
-            if (isComputeProcess_dEdr == true)
+            // compute rijOffset and rijIndex
+            GET_DELTAX_AND_INDEX(rij, oneByDr_, numberRPoints_, rijOffset,
+                                 rijIndex);
+
+            // interpolate r_ij*phi(r_ij)
+            double rijPhiValue;
+            double const* const rijPhiAlphaBetaCoeff
+                = rPhiCoeff_[particleSpeciesCodes[i]][particleSpeciesCodes[j]];
+            INTERPOLATE_F(rijPhiAlphaBetaCoeff, rijOffset, rijIndex, rijPhiValue);
+
+            // find phi(r_ij)
+            double const oneByRij = ONE / rij;
+            double const pairPotentialValue = rijPhiValue * oneByRij;
+
+            if (particleContributing[j])
             {
-              ier = modelComputeArguments
-                  ->ProcessDEDrTerm(dEidr, rij, r_ij, i, j);
-              if (ier)
+              // Contribute pair term to Energy
+              if (isComputeEnergy == true)
               {
-                LOG_ERROR("process_dEdr");
-                return ier;
+                *energy += pairPotentialValue;
+              }
+
+              // Contribute pair term to Particle Energy
+              if (isComputeParticleEnergy == true)
+              {
+                particleEnergy[i] += HALF * pairPotentialValue;
+                particleEnergy[j] += HALF * pairPotentialValue;
+              }
+            }
+            else
+            {
+              // Contribute pair term to Energy
+              if (isComputeEnergy == true)
+              {
+                *energy += HALF * pairPotentialValue;
+              }
+
+              // Contribute pair term to Particle Energy
+              if (isComputeParticleEnergy == true)
+              {
+                particleEnergy[i] += HALF * pairPotentialValue;
               }
             }
 
-            if (isComputeVirial == true)
+            // Compute dEdrByR terms
+            double dEdrByRij = 0.0;
+            if ((isComputeForces == true) || (isComputeProcess_dEdr == true))
             {
-              ProcessVirialTerm(dEidr, rij, r_ij, i, j, virial);
+              // interpolate derivative of r_ij*phi(r_ij) function
+              double rijPhiDerivativeValue;
+              INTERPOLATE_DF(rijPhiAlphaBetaCoeff, rijOffset, rijIndex,
+                             rijPhiDerivativeValue);
+
+              // interpolate derivative of rho_beta(r_ij)
+              double densityBetaDerivativeValue;
+              double const* const densityBetaCoeff =
+                  densityCoeff_[particleSpeciesCodes[j]][particleSpeciesCodes[i]];
+              INTERPOLATE_DF(densityBetaCoeff, rijOffset, rijIndex,
+                             densityBetaDerivativeValue);
+              if (particleContributing[j])
+              {
+                double densityAlphaDerivativeValue;
+                double const* const densityAlphaCoeff =
+                    densityCoeff_[particleSpeciesCodes[i]][particleSpeciesCodes[j]];
+                INTERPOLATE_DF(densityAlphaCoeff, rijOffset, rijIndex,
+                             densityAlphaDerivativeValue);
+
+                // compute dEdr contribution
+                // embedding contribution to dEdr
+                double const embeddingContribution
+                    = ((embeddingDerivativeValue_[i] * densityBetaDerivativeValue)
+                        +
+                       (embeddingDerivativeValue_[j] * densityAlphaDerivativeValue));
+
+                // pair potential contribution
+                double const pairPotentialContribution
+                    = (rijPhiDerivativeValue - pairPotentialValue) * oneByRij;
+
+                // divide by r so we can multiply by r_ij below
+                dEdrByRij = (embeddingContribution + pairPotentialContribution)
+                    * oneByRij;
+              }
+              else
+              {
+                // compute dEdr contribution
+                // embedding contribution to dEdr
+                double const embeddingContribution
+                    = (embeddingDerivativeValue_[i] * densityBetaDerivativeValue);
+
+                // pair potential contribution
+                double const pairPotentialContribution
+                    = HALF * (rijPhiDerivativeValue - pairPotentialValue)
+                    * oneByRij;
+
+                // divide by r so we can multiply by r_ij below
+                dEdrByRij = (embeddingContribution + pairPotentialContribution)
+                    * oneByRij;
+              }
             }
 
-            if (isComputeParticleVirial == true)
+            // Contribute dEdrByR to forces
+            if (isComputeForces == true)
             {
-              ProcessParticleVirialTerm(dEidr, rij, r_ij, i, j,
-                                        particleVirial);
+              for (int k = 0; k < DIMENSION; ++k)
+              {
+                forces[i][k] += dEdrByRij * r_ij[k];
+                forces[j][k] -= dEdrByRij * r_ij[k];
+              }
             }
-          }
-        }  // if particles i and j interact
-      }  // end of first neighbor loop
+
+            // Call process_dEdr
+            if ((isComputeProcess_dEdr == true) ||
+                (isComputeVirial == true) ||
+                (isComputeParticleVirial == true))
+            {
+              double const rij = sqrt(rij2);
+              double const dEidr = dEdrByRij*rij;
+
+              if (isComputeProcess_dEdr == true)
+              {
+                ier = modelComputeArguments
+                    ->ProcessDEDrTerm(dEidr, rij, r_ij, i, j);
+                if (ier)
+                {
+                  LOG_ERROR("process_dEdr");
+                  return ier;
+                }
+              }
+
+              if (isComputeVirial == true)
+              {
+                ProcessVirialTerm(dEidr, rij, r_ij, i, j, virial);
+              }
+
+              if (isComputeParticleVirial == true)
+              {
+                ProcessParticleVirialTerm(dEidr, rij, r_ij, i, j,
+                                          particleVirial);
+              }
+            }
+          }  // if particles i and j interact
+        } // end effective half-list check (i < j)
+      } // end of first neighbor loop
     }  // end of if statement for whether particle is contributing
   }  // end of loop over contributing particles
 
@@ -649,9 +716,65 @@ int EAM_Implementation::Compute(
     // not distinct. As such, we need only address all
     // derivatives d^2E/dr_{ij}dr_{ik}.
     //
-    // We simply iterate over particle i's neighbor list in a doubly-nested
+    // If we have a full list, we can simply iterate over
+    // particle i's neighbor list in a doubly-nested
     // triangular loop.
+    //
+    // If we have half lists, then the presence of j in
+    // i's neighbor list implies that i is also a neighbor
+    // of j, so that we should be processing all derivs
+    // d^2E/dr_{ij}dr_{ik} and d^2E/dr_{ji}dr_{jl}. The
+    // hurdle to overcome here is the need to access the
+    // neighbor list of particle j (and also particle k).
+    //
+    // We avoid this problem by taking a different
+    // approach. For each neighbor (j or k) of i, we save
+    // i in a "deferred neighbor list" for each of j and
+    // k. For each particle, we process neighbors both in
+    // its neighbor list and its deferred neighbor list.
+    // (In effect, we are reconstructing full lists for
+    // each particle.)
 
+    // Containers for deferred neighbor lists for process_d2Edr2
+    std::multimap<int, neighbor> deferredNeighborMap;
+
+    // Iterators over deferred neighbor lists
+    std::pair<deferredNeighborIterator, deferredNeighborIterator>
+        deferredNeighborRange;
+    deferredNeighborIterator deferredNeighborPtrJ;
+
+    // First, do a check to determine whether we've been given a half list or
+    // a full list
+    bool isHalf = false;
+    for (i = 0; i < cachedNumberOfParticles_; ++i)
+    {
+      modelComputeArguments->GetNeighborList(0, i, &numnei, &n1atom);
+
+      if (numnei > 0)
+      {
+        // Get the neighbor list of the first neighbor of atom i and check to
+        // see if atom i is in its list
+        modelComputeArguments->GetNeighborList(0, 0, &numnei, &n1atom);
+        if (numnei > 0)
+        {
+          isHalf = true;
+          for (int kk = 0; kk < numnei; ++kk)
+          {
+            if (n1atom[kk] == i)
+            {
+              isHalf = false;
+              break;
+            }
+          }
+        }
+        else
+        {
+          isHalf = false;
+        }
+        break; // Stop loop over i
+      }
+    }
+    printf("isHalf = %d\n", isHalf); // @@ DELETE THIS
     // Setup loop over contributing particles
     for (i = 0; i < cachedNumberOfParticles_; ++i)
     {
@@ -659,11 +782,56 @@ int EAM_Implementation::Compute(
       {
         modelComputeArguments->GetNeighborList(0, i, &numnei, &n1atom);
 
-        // Setup loop over neighbors of current particle
-        for (int jj = 0; jj < numnei; ++jj)
+        // Number of neighbors to visit. May be greater than
+        // numnei if previous particles inserted deferred
+        // neighbors to this particle, or if this particle
+        // is its own neighbor.
+        int extendedNumnei;
+        extendedNumnei = numnei;
+
+        // Begin by deferring i to each of its neighbors.
+        // It is tempting to try to include this in the
+        // subsequent loop that also does the calculations,
+        // but this cannot be done. The complete deferred
+        // list must be available the first time we go
+        // through the inner, second-neighbor, loop.
+        if (isHalf == true)
         {
-          // adjust index of particle neighbor
-          int const j = n1atom[jj];
+          for (int jj = 0; jj < numnei; ++jj)
+          {
+            neighbor reflectedNeighJ;
+
+            // Index of particle neighbor
+            int const j = n1atom[jj];
+
+            if (particleContributing[j])
+            {
+              reflectedNeighJ.index = i;
+
+              deferredNeighborMap.insert(std::make_pair(j, reflectedNeighJ));
+            }
+          }
+        }
+
+        // No further particles will contribute to i's neighbor list.
+        // Safe to finalize the neighbor count.
+        extendedNumnei += deferredNeighborMap.count(i);
+        deferredNeighborRange = deferredNeighborMap.equal_range(i);
+        deferredNeighborPtrJ  = deferredNeighborRange.first;
+
+        // Setup loop over neighbors of current particle
+        for (int jj = 0; jj < extendedNumnei; ++jj)
+        {
+          int j;
+
+          if (isHalf && jj >= numnei)
+          { // Look in deferred neighbor list
+            j = deferredNeighborPtrJ->second.index;
+          }
+          else
+          { // Not a deferred neighbor
+            j = n1atom[jj];
+          }
 
           // Declare enough space to hold two displacements,
           // one for each neighbor. Ensuring that the two
@@ -722,9 +890,19 @@ int EAM_Implementation::Compute(
                            densityBetaDerivativeValue);
 
             // Setup second loop over neighbors of current particle
-            for (int kk = jj; kk < numnei; ++kk)
+            deferredNeighborIterator
+                  deferredNeighborPtrK = deferredNeighborPtrJ;
+            for (int kk = jj; kk < extendedNumnei; ++kk)
             {
-              int const k = n1atom[kk];
+              int k;
+              if (isHalf && kk >= numnei)
+              { // Look in deferred neighbor list
+                k = deferredNeighborPtrK->second.index;
+              }
+              else
+              {
+                k = n1atom[kk];
+              }
 
               // adjust index of particle neighbor
               double* r_ik;
@@ -826,9 +1004,21 @@ int EAM_Implementation::Compute(
                   return ier;
                 }
               }  // if particles i and k interact
+
+              if (isHalf && kk >= numnei)
+              {
+                ++deferredNeighborPtrK;
+              }
             }  // end of second neighbor loop
           }  // if particles i and j interact
+
+          if (isHalf && jj >= numnei)
+          {
+            ++deferredNeighborPtrJ;
+          }
         }  // end of first neighbor loop
+
+        deferredNeighborMap.erase(i);
       }  // end of if statement for whether particle is contributing
     }  // end of loop over contributing particles
   }  // if (isComputeProcess_d2Edr2 == true)

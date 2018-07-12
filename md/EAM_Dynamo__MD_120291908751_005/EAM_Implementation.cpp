@@ -56,18 +56,21 @@ EAM_Implementation::EAM_Implementation(
     KIM::TemperatureUnit const requestedTemperatureUnit,
     KIM::TimeUnit const requestedTimeUnit,
     int * const ier)
-    : embeddingData_(0),
-      densityData_(0),
-      rPhiData_(0),
-      publishDensityData_(0),
-      publish_rPhiData_(0),
-      embeddingCoeff_(0),
-      densityCoeff_(0),
-      rPhiCoeff_(0),
+    : embeddingData_(NULL),
+      densityData_(NULL),
+      rPhiData_(NULL),
+      publishDensityData_(NULL),
+      publish_rPhiData_(NULL),
+      influenceDistance_(0.0),
+      embeddingCoeff_(NULL),
+      densityCoeff_(NULL),
+      rPhiCoeff_(NULL),
       cachedNumberOfParticles_(0),
-      densityValue_(0),
-      embeddingDerivativeValue_(0),
-      embeddingSecondDerivativeValue_(0)
+      densityValue_(NULL),
+      embeddingDerivativeValue_(NULL),
+      embeddingSecondDerivativeValue_(NULL),
+      paddingNeighborHints_(1),
+      halfListHints_(1)
 {
   // initialize comments to null strings and set pointers for comment fields
   for (int i = 0; i < MAX_PARAMETER_FILES; ++i)
@@ -244,16 +247,16 @@ int EAM_Implementation::Compute(
   bool isComputeParticleVirial = false;
   //
   // KIM API Model Input
-  int const* particleSpeciesCodes = 0;
-  int const* particleContributing = 0;
-  VectorOfSizeDIM const* coordinates = 0;
+  int const* particleSpeciesCodes = NULL;
+  int const* particleContributing = NULL;
+  VectorOfSizeDIM const* coordinates = NULL;
   //
   // KIM API Model Output
-  double* energy = 0;
-  double* particleEnergy = 0;
-  VectorOfSizeDIM* forces = 0;
-  VectorOfSizeSix* virial = 0;
-  VectorOfSizeSix* particleVirial = 0;
+  double* energy = NULL;
+  double* particleEnergy = NULL;
+  VectorOfSizeDIM* forces = NULL;
+  VectorOfSizeSix* virial = NULL;
+  VectorOfSizeSix* particleVirial = NULL;
   ier = SetComputeMutableValues(modelComputeArguments,
                                 isComputeProcess_dEdr,
                                 isComputeProcess_d2Edr2, isComputeEnergy,
@@ -736,7 +739,6 @@ int EAM_Implementation::ProcessParameterFileHeaders(
 }
 
 //******************************************************************************
-#include "KIM_ModelDriverCreateLogMacros.hpp"
 int EAM_Implementation::ReadSetflHeader(
     KIM::ModelDriverCreate * const modelDriverCreate, FILE* const fptr)
 {
@@ -1635,7 +1637,11 @@ int EAM_Implementation::SetRefreshMutableValues(
   // Update
   influenceDistance_ = cutoffParameter_;
   modelObj->SetInfluenceDistancePointer(&influenceDistance_);
-  modelObj->SetNeighborListCutoffsPointer(1, &influenceDistance_);
+  modelObj->SetNeighborListPointers(1,
+                                    &influenceDistance_,
+                                    &paddingNeighborHints_,
+                                    &halfListHints_);
+
 
   // update EAM_Implementation values
   cutoffSq_ = cutoffParameter_ * cutoffParameter_;
@@ -1738,11 +1744,11 @@ int EAM_Implementation::SetComputeMutableValues(
     return ier;
   }
 
-  isComputeEnergy = (energy != 0);
-  isComputeParticleEnergy = (particleEnergy != 0);
-  isComputeForces = (forces != 0);
-  isComputeVirial = (virial != 0);
-  isComputeParticleVirial = (particleVirial != 0);
+  isComputeEnergy = (energy != NULL);
+  isComputeParticleEnergy = (particleEnergy != NULL);
+  isComputeForces = (forces != NULL);
+  isComputeVirial = (virial != NULL);
+  isComputeParticleVirial = (particleVirial != NULL);
 
   // allocate memory if needed
   if (cachedNumberOfParticles_ < *numberOfParticles)
@@ -1916,11 +1922,11 @@ void AllocateAndInitialize2DArray(double**& arrayPtr, int const extentZero,
 //******************************************************************************
 void Deallocate2DArray(double**& arrayPtr)
 { // deallocate memory
-  if (arrayPtr != 0) delete [] arrayPtr[0];
+  if (arrayPtr != NULL) delete [] arrayPtr[0];
   delete [] arrayPtr;
 
   // nullify pointer
-  arrayPtr = 0;
+  arrayPtr = NULL;
 }
 
 //******************************************************************************
@@ -1960,7 +1966,7 @@ void AllocateAndInitialize3DArray(double***& arrayPtr, int const extentZero,
 //******************************************************************************
 void Deallocate3DArray(double***& arrayPtr)
 { // deallocate memory
-  if (arrayPtr != 0)
+  if (arrayPtr != NULL)
   {
     delete [] arrayPtr[0][0];
     delete [] arrayPtr[0];
@@ -1968,5 +1974,5 @@ void Deallocate3DArray(double***& arrayPtr)
   delete [] arrayPtr;
 
   // nullify pointer
-  arrayPtr = 0;
+  arrayPtr = NULL;
 }
