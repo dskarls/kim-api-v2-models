@@ -329,6 +329,8 @@ type, bind(c) :: buffer_type
   real(c_double) :: cutoff(1)
   integer(c_int) :: irlast
   integer(c_int) :: ielast
+  integer(c_int) :: padding_neighbor_hints(1)
+  integer(c_int) :: half_list_hints(1)
 end type buffer_type
 
 contains
@@ -585,7 +587,7 @@ subroutine Compute_Energy_Forces(model_compute_handle, &
   !-- Local variables
   real(c_double) :: Rij(DIM)
   real(c_double) :: r,Rsqij,phi,dphi,g,dg,dU,U,dphieff = 0.0_cd
-  real(c_double) :: dphii,dUi,Ei,dphij,dUj,Ej
+  real(c_double) :: dphii,dUi,dphij,dUj
   integer(c_int) :: i,j,jj,numnei,comp_force,comp_particleEnergy,comp_virial,comp_energy
   integer(c_int) :: ierr2
   real(c_double), allocatable :: rho(:),derU(:)
@@ -706,66 +708,72 @@ subroutine Compute_Energy_Forces(model_compute_handle, &
   !  to compute electron density (=coordination)
   !
   do i = 1,N
-     if(particleContributing(i).eq.1) then
-       ! Get neighbor list of current atom
-       call kim_model_compute_arguments_get_neighbor_list( &
-          model_compute_arguments_handle, 1, i, numnei, nei1part, ierr)
-       if (ierr /= 0) then
-          ! some sort of problem, exit
-          kim_log_message = "GetNeighborList failed"
-          LOG_ERROR()
-          ierr = 1
-          return
-       endif
+    if(particleContributing(i).eq.1) then
+      ! Get neighbor list of current atom
+      call kim_model_compute_arguments_get_neighbor_list( &
+        model_compute_arguments_handle, 1, i, numnei, nei1part, ierr)
+      if (ierr /= 0) then
+        ! some sort of problem, exit
+        kim_log_message = "GetNeighborList failed"
+        LOG_ERROR()
+        ierr = 1
+        return
+      endif
 
-       ! Loop over the neighbors of atom i
-       !
-       do jj = 1, numnei
+      ! Loop over the neighbors of atom i
+      !
+      do jj = 1, numnei
 
-          j = nei1part(jj)                            ! get neighbor ID
-
+        j = nei1part(jj)                             ! get neighbor ID
+        if ( i.lt.j ) then                           ! effective half list
           ! compute relative position vector
           !
-          Rij(:) = coor(:,j) - coor(:,i)              ! distance vector between i j
+          Rij(:) = coor(:,j) - coor(:,i)             ! distance vector between i j
 
           ! compute contribution to electron density
           !
-          Rsqij = dot_product(Rij,Rij)                ! compute square distance
-          if ( Rsqij .lt. model_cutsq ) then          ! particles are interacting?
-             r = sqrt(Rsqij)                          ! compute distance
-             call calc_g(r,g,irlast)                  ! compute electron density
-             rho(i) = rho(i) + g                      ! accumulate electron density
+          Rsqij = dot_product(Rij,Rij)               ! compute square distance
+          if ( Rsqij .lt. model_cutsq ) then         ! particles are interacting?
+            r = sqrt(Rsqij)                          ! compute distance
+            call calc_g(r,g,irlast)                  ! compute electron density
+            rho(i) = rho(i) + g                      ! accumulate electron density
+            if (particleContributing(j).eq.1) then
+              rho(j) = rho(j) + g                    ! this Model only supports a
+                                                     ! single species, so we can
+                                                     ! just add the same density
+                                                     ! onto atom j
+            endif
           endif
-
-       enddo  ! loop on jj
-     endif ! Check on whether particle is contributing
+        endif ! if ( i.lt.j )
+      enddo  ! loop on jj
+    endif ! Check on whether particle is contributing
   enddo  ! infinite do loop (terminated by exit statements above)
 
   !  Now that we know the electron densities, calculate embedding part of energy
   !  U and its derivative U' (derU)
   !
   do i = 1,N
-     if(particleContributing(i).eq.1) then
-       if (comp_force.eq.1.or.comp_virial.eq.1) then
-         call calc_U_dU(rho(i),U,dU,ielast)      ! compute embedding energy
-                                                 !   and its derivative
-         derU(i) = dU                            ! store dU for later use
-       else
-         call calc_U(rho(i),U,ielast)            ! compute just embedding energy
-       endif
+    if(particleContributing(i).eq.1) then
+      if (comp_force.eq.1.or.comp_virial.eq.1) then
+        call calc_U_dU(rho(i),U,dU,ielast)           ! compute embedding energy
+                                                     !   and its derivative
+        derU(i) = dU                                 ! store dU for later use
+      else
+        call calc_U(rho(i),U,ielast)                 ! compute just embedding energy
+      endif
 
-       ! accumulate the embedding energy contribution
-       !
-       ! Assuming U(rho=0) = 0.0_cd
-       !
-       if (comp_particleEnergy.eq.1) then        ! accumulate embedding energy contribution
-         particleEnergy(i) = U
-       endif
-       if (comp_energy.eq.1) then
-         energy = energy + U
-       endif
+      ! accumulate the embedding energy contribution
+      !
+      ! Assuming U(rho=0) = 0.0_cd
+      !
+      if (comp_particleEnergy.eq.1) then             ! accumulate embedding energy contribution
+        particleEnergy(i) = U
+      endif
+      if (comp_energy.eq.1) then
+        energy = energy + U
+      endif
 
-     endif ! Check on whether particle is contributing
+    endif ! Check on whether particle is contributing
   enddo
 
   !  Loop over particles in the neighbor list a second time, to compute
@@ -773,82 +781,95 @@ subroutine Compute_Energy_Forces(model_compute_handle, &
   !
 
   do i = 1,N
-     if(particleContributing(i).eq.1) then
-       ! Get neighbor list of current atom
-       call kim_model_compute_arguments_get_neighbor_list( &
-          model_compute_arguments_handle, 1, i, numnei, nei1part, ierr)
-       if (ierr /= 0) then
-          ! some sort of problem, exit
-          kim_log_message = "GetNeighborList failed"
-          LOG_ERROR()
-          ierr = 1
-          return
-       endif
+    if(particleContributing(i).eq.1) then
+      ! Get neighbor list of current atom
+      call kim_model_compute_arguments_get_neighbor_list( &
+        model_compute_arguments_handle, 1, i, numnei, nei1part, ierr)
+      if (ierr /= 0) then
+        ! some sort of problem, exit
+        kim_log_message = "GetNeighborList failed"
+        LOG_ERROR()
+        ierr = 1
+        return
+      endif
 
-       ! Loop over the neighbors of atom i
-       !
-       do jj = 1, numnei
+      ! Loop over the neighbors of atom i
+      !
+      do jj = 1, numnei
 
-          j = nei1part(jj)                            ! get neighbor ID
+        j = nei1part(jj)                             ! get neighbor ID
 
+        if ( i.lt. j) then                           ! effective half list
           ! compute relative position vector
           !
-          Rij(:) = coor(:,j) - coor(:,i)              ! distance vector between i j
+          Rij(:) = coor(:,j) - coor(:,i)             ! distance vector between i j
 
           ! compute energy and forces
           !
-          Rsqij = dot_product(Rij,Rij)                ! compute square distance
-          if ( Rsqij .lt. model_cutsq ) then          ! particles are interacting?
+          Rsqij = dot_product(Rij,Rij)               ! compute square distance
+          if ( Rsqij .lt. model_cutsq ) then         ! particles are interacting?
 
-             r = sqrt(Rsqij)                          ! compute distance
-             if (comp_force.eq.1.or.comp_virial.eq.1) then
-                call calc_phi_dphi(r,phi,dphi,irlast) ! compute pair potential
-                                                      !   and it derivative
-                call calc_dg(r,dg,irlast)             ! compute elect dens first deriv
+            r = sqrt(Rsqij)                          ! compute distance
+            if (comp_force.eq.1.or.comp_virial.eq.1) then
+              call calc_phi_dphi(r,phi,dphi,irlast)  !  compute pair potential
+                                                     !   and it derivative
+              call calc_dg(r,dg,irlast)              ! compute elect dens first deriv
+
+              if (particleContributing(j).eq.1) then
+                dphii  = 0.5_cd*dphi
+                dphij  = 0.5_cd*dphi
+                dUi    = derU(i)*dg
+                dUj    = derU(j)*dg
+              else
                 dphii  = 0.5_cd*dphi
                 dphij  = 0.0_cd
                 dUi    = derU(i)*dg
                 dUj    = 0.0_cd
-                dphieff = dphii + dphij + dUi + dUj
-             else
-                call calc_phi(r,phi,irlast)           ! compute just pair potential
-             endif
-             Ei = 0.5_cd*phi
-             Ej = 0.0_cd
+              endif
+              dphieff = dphii + dphij + dUi + dUj
+            else
+               call calc_phi(r,phi,irlast)           ! compute just pair potential
+            endif
 
-             ! contribution to energy
-             !
-             if (comp_particleEnergy.eq.1) then
-                particleEnergy(i) = particleEnergy(i) + Ei          ! accumulate energy Ei
-                particleEnergy(j) = particleEnergy(j) + Ej          ! accumulate energy Ej
-             endif
-             if (comp_energy.eq.1) then
-                energy = energy + Ei                  ! accumulate energy
-                energy = energy + Ej                  ! accumulate energy
-             endif
+            ! contribution to energy
+            !
+            if (comp_particleEnergy.eq.1) then
+              particleEnergy(i) = particleEnergy(i) + 0.5_cd*phi    ! accumulate energy
+              if (particleContributing(j).eq.1) then
+                particleEnergy(j) = particleEnergy(j) + 0.5_cd*phi  ! accumulate energy
+              endif
+            endif
 
-             ! contribution to virial tensor
-             !
-             if (comp_virial.eq.1) then
-                virial(1) = virial(1) + Rij(1)*Rij(1)*dphieff/r
-                virial(2) = virial(2) + Rij(2)*Rij(2)*dphieff/r
-                virial(3) = virial(3) + Rij(3)*Rij(3)*dphieff/r
-                virial(4) = virial(4) + Rij(2)*Rij(3)*dphieff/r
-                virial(5) = virial(5) + Rij(1)*Rij(3)*dphieff/r
-                virial(6) = virial(6) + Rij(1)*Rij(2)*dphieff/r
-             endif
+            if (comp_energy.eq.1) then
+              if (particleContributing(j).eq.1) then
+                energy = energy + phi                ! accumulate energy
+              else
+                energy = energy + 0.5_cd*phi
+              endif
+            endif
 
-             ! contribution to forces
-             !
-             if (comp_force.eq.1) then                  ! Ei contribution
-                force(:,i) = force(:,i) + dphieff*Rij/r ! accumulate force on atom i
-                force(:,j) = force(:,j) - dphieff*Rij/r ! accumulate force on atom j
-             endif
+            ! contribution to virial tensor
+            !
+            if (comp_virial.eq.1) then
+               virial(1) = virial(1) + Rij(1)*Rij(1)*dphieff/r
+               virial(2) = virial(2) + Rij(2)*Rij(2)*dphieff/r
+               virial(3) = virial(3) + Rij(3)*Rij(3)*dphieff/r
+               virial(4) = virial(4) + Rij(2)*Rij(3)*dphieff/r
+               virial(5) = virial(5) + Rij(1)*Rij(3)*dphieff/r
+               virial(6) = virial(6) + Rij(1)*Rij(2)*dphieff/r
+            endif
+
+            ! contribution to forces
+            !
+            if (comp_force.eq.1) then
+               force(:,i) = force(:,i) + dphieff*Rij/r ! accumulate force on atom i
+               force(:,j) = force(:,j) - dphieff*Rij/r ! accumulate force on atom j
+            endif
 
           endif
-
-       enddo  ! loop on jj
-     endif ! Check on whether particle is contributing
+        endif ! if ( i.lt.j )
+      enddo  ! loop on jj
+    endif ! Check on whether particle is contributing
   enddo  ! infinite do loop (terminated by exit statements above)
 
   ! Free temporary storage
@@ -915,8 +936,9 @@ subroutine refresh(model_refresh_handle, ierr) bind(c)
   LOG_INFORMATION()
   call kim_model_refresh_set_influence_distance_pointer( &
     model_refresh_handle, buf%influence_distance)
-  call kim_model_refresh_set_neighbor_list_cutoffs_pointer( &
-    model_refresh_handle, 1, buf%cutoff)
+  call kim_model_refresh_set_neighbor_list_pointers( &
+    model_refresh_handle, 1, buf%cutoff, &
+    buf%padding_neighbor_hints, buf%half_list_hints)
 
   ierr = 0  ! everything is good
 
@@ -1096,14 +1118,16 @@ subroutine create(model_create_handle, requested_length_unit, &
   ! set buffer values
   buf%influence_distance = model_cutoff
   buf%cutoff(1) = model_cutoff
+  buf%padding_neighbor_hints(1) = 1
+  buf%half_list_hints(1) = 1
 
   ! register influence distance
   call kim_model_create_set_influence_distance_pointer( &
     model_create_handle, buf%influence_distance)
 
   ! register cutoff
-  call kim_model_create_set_neighbor_list_cutoffs_pointer(model_create_handle, &
-    1, buf%cutoff)
+  call kim_model_create_set_neighbor_list_pointers(model_create_handle, &
+    1, buf%cutoff, buf%padding_neighbor_hints, buf%half_list_hints)
 
   if (ierr /= 0) then
     ierr = 1
