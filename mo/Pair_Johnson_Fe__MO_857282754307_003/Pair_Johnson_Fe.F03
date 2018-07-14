@@ -98,6 +98,8 @@ type, bind(c) :: buffer_type
   real(c_double) :: influence_distance
   real(c_double) :: cutoff(1)
   real(c_double) :: cutsq(1)
+  integer(c_int) :: padding_neighbor_hints(1)
+  integer(c_int) :: half_list_hints(1)
 end type buffer_type
 
 contains
@@ -320,53 +322,67 @@ subroutine Compute_Energy_Forces(model_compute_handle, &
       !
       do jj = 1, numnei
 
-        j = nei1part(jj)                         ! get neighbor ID
+        j = nei1part(jj)                           ! get neighbor ID
 
-        ! compute relative position vector
-        !
-        Rij(:) = coor(:,j) - coor(:,i)           ! distance vector between i j
-
-        ! compute energy and forces
-        !
-        Rsqij = dot_product(Rij,Rij)             ! compute square distance
-        if ( Rsqij .lt. model_cutsq ) then       ! particles are interacting?
-          r = sqrt(Rsqij)                        ! compute distance
-          if (comp_force.eq.1.or.comp_virial.eq.1) then
-            call calc_phi_dphi(r,phi,dphi)       ! compute pair potential
-                                                 !   and it derivative
-            dEidr = 0.5_cd*dphi
-          else
-            call calc_phi(r,phi)                 ! compute just pair potential
-          endif
-
-          ! contribution to energy
+        if ( i.lt.j ) then                         ! Effective half list
+          ! compute relative position vector
           !
-          if (comp_particleEnergy.eq.1) then
-            particleEnergy(i) = particleEnergy(i) + 0.5_cd*phi   ! accumulate energy
-          endif
-          if (comp_energy.eq.1) then
-            energy = energy + 0.5_cd*phi         ! add half v to total energy
-          endif
+          Rij(:) = coor(:,j) - coor(:,i)           ! distance vector between i j
 
-          ! contribution to virial tensor, virial(i,j)=r(i)*r(j)*(dV/dr)/r
+          ! compute energy and forces
           !
-          if (comp_virial.eq.1) then
-            virial(1) = virial(1) + Rij(1)*Rij(1)*dEidr/r
-            virial(2) = virial(2) + Rij(2)*Rij(2)*dEidr/r
-            virial(3) = virial(3) + Rij(3)*Rij(3)*dEidr/r
-            virial(4) = virial(4) + Rij(2)*Rij(3)*dEidr/r
-            virial(5) = virial(5) + Rij(1)*Rij(3)*dEidr/r
-            virial(6) = virial(6) + Rij(1)*Rij(2)*dEidr/r
-          endif
+          Rsqij = dot_product(Rij,Rij)             ! compute square distance
+          if ( Rsqij .lt. model_cutsq ) then       ! particles are interacting?
+            r = sqrt(Rsqij)                        ! compute distance
+            if (comp_force.eq.1.or.comp_virial.eq.1) then
+              call calc_phi_dphi(r,phi,dphi)       ! compute pair potential
+                                                   !   and it derivative
+              if (particleContributing(j).eq.1) then
+                dEidr = dphi
+              else
+                dEidr = 0.5_cd*dphi
+              endif
+            else
+              call calc_phi(r,phi)                 ! compute just pair potential
+            endif
 
-          ! contribution to forces
-          !
-          if (comp_force.eq.1) then
-            force(:,i) = force(:,i) + dEidr*Rij/r ! accumulate force on atom i
-            force(:,j) = force(:,j) - dEidr*Rij/r ! accumulate force on atom j
-          endif
+            ! contribution to energy
+            !
+            if (comp_particleEnergy.eq.1) then
+              particleEnergy(i) = particleEnergy(i) + 0.5_cd*phi
+              if (particleContributing(j).eq.1) then
+                particleEnergy(j) = particleEnergy(j) + 0.5_cd*phi
+              endif
+            endif
 
-        endif ! Check on cutoff
+            if (comp_energy.eq.1) then
+              if (particleContributing(j).eq.1) then
+                energy = energy + phi              ! add v to total energy
+              else
+                energy = energy + 0.5_cd*phi       ! add half v to total energy
+              endif
+            endif
+
+            ! contribution to virial tensor, virial(i,j)=r(i)*r(j)*(dV/dr)/r
+            !
+            if (comp_virial.eq.1) then
+              virial(1) = virial(1) + Rij(1)*Rij(1)*dEidr/r
+              virial(2) = virial(2) + Rij(2)*Rij(2)*dEidr/r
+              virial(3) = virial(3) + Rij(3)*Rij(3)*dEidr/r
+              virial(4) = virial(4) + Rij(2)*Rij(3)*dEidr/r
+              virial(5) = virial(5) + Rij(1)*Rij(3)*dEidr/r
+              virial(6) = virial(6) + Rij(1)*Rij(2)*dEidr/r
+            endif
+
+            ! contribution to forces
+            !
+            if (comp_force.eq.1) then
+              force(:,i) = force(:,i) + dEidr*Rij/r ! accumulate force on atom i
+              force(:,j) = force(:,j) - dEidr*Rij/r ! accumulate force on atom j
+            endif
+
+          endif ! Check on cutoff
+        endif ! if ( i.lt.j )
      enddo  ! Loop over neighbors of atom i
     endif ! Check on whether loop is contributing
   enddo  ! infinite do loop (terminated by exit statements above)
@@ -431,8 +447,9 @@ subroutine refresh(model_refresh_handle, ierr) bind(c)
   LOG_INFORMATION()
   call kim_model_refresh_set_influence_distance_pointer( &
     model_refresh_handle, buf%influence_distance)
-  call kim_model_refresh_set_neighbor_list_cutoffs_pointer( &
-    model_refresh_handle, 1, buf%cutoff)
+  call kim_model_refresh_set_neighbor_list_pointers( &
+    model_refresh_handle, 1, buf%cutoff, &
+    buf%padding_neighbor_hints, buf%half_list_hints)
 
   ierr = 0  ! everything is good
 
@@ -612,14 +629,16 @@ subroutine create(model_create_handle, requested_length_unit, &
   ! set buffer values
   buf%influence_distance = model_cutoff
   buf%cutoff(1) = model_cutoff
+  buf%padding_neighbor_hints(1) = 1
+  buf%half_list_hints(1) = 1
 
   ! register influence distance
   call kim_model_create_set_influence_distance_pointer( &
     model_create_handle, buf%influence_distance)
 
   ! register cutoff
-  call kim_model_create_set_neighbor_list_cutoffs_pointer(model_create_handle, &
-    1, buf%cutoff)
+  call kim_model_create_set_neighbor_list_pointers(model_create_handle, &
+    1, buf%cutoff, buf%padding_neighbor_hints, buf%half_list_hints)
 
   if (ierr /= 0) then
     ierr = 1
