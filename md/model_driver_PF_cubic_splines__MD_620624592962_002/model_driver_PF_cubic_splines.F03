@@ -65,6 +65,9 @@ type, bind(c) :: buffer_type
   integer(c_int) :: nknotv,nknotp,interpolate_num
   logical(c_bool) :: linear_interpolate
   type(c_ptr) :: vknotcoeff, vknotpoint, pknotcoeff, pknotpoint
+
+  integer(c_int) :: padding_neighbor_hints(1)
+  integer(c_int) :: half_list_hints(1)
 end type buffer_type
 
 ! Below are the definitions and values of all Model parameters
@@ -525,19 +528,27 @@ subroutine Compute_Energy_Forces(model_compute_handle, &
 
         j = nei1part(jj)                         ! get neighbor ID
 
-        ! compute relative position vector
-        !
-        Rij(:) = coor(:,j) - coor(:,i)           ! distance vector between i j
+        if ( i.lt.j ) then                       ! effective half list
+          ! compute relative position vector
+          !
+          Rij(:) = coor(:,j) - coor(:,i)           ! distance vector between i j
 
-        ! compute contribution to electron density
-        !
-        Rsqij = dot_product(Rij,Rij)             ! compute square distance
-        if ( Rsqij .lt. buf%cutsq(1) ) then      ! particles are interacting?
-          r = sqrt(Rsqij)                        ! compute distance
-          call calc_g(r,buf,g)                   ! compute electron density
-          rho(i) = rho(i) + g                    ! accumulate electron density
-        endif
+          ! compute contribution to electron density
+          !
+          Rsqij = dot_product(Rij,Rij)             ! compute square distance
+          if ( Rsqij .lt. buf%cutsq(1) ) then      ! particles are interacting?
+            r = sqrt(Rsqij)                        ! compute distance
+            call calc_g(r,buf,g)                   ! compute electron density
+            rho(i) = rho(i) + g                    ! accumulate electron density
+            if (particleContributing(j).eq.1) then
+              rho(j) = rho(j) + g                  ! this Model only supports a
+                                                   ! single species, so we can
+                                                   ! just add the same density
+                                                   ! onto atom j
+            endif
+          endif
 
+        endif ! if ( i.lt.j )
       enddo  ! loop on jj
     endif ! Check on whether particle is contributing
   enddo  ! infinite do loop (terminated by exit statements above)
@@ -592,62 +603,75 @@ subroutine Compute_Energy_Forces(model_compute_handle, &
 
         j = nei1part(jj)                       ! get neighbor ID
 
-        ! compute relative position vector
-        !
-        Rij(:) = coor(:,j) - coor(:,i)         ! distance vector between i j
-
-        ! compute energy and forces
-        !
-        Rsqij = dot_product(Rij,Rij)           ! compute square distance
-        if ( Rsqij .lt. buf%cutsq(1) ) then    ! particles are interacting?
-
-          r = sqrt(Rsqij)                      ! compute distance
-          if (comp_force.eq.1.or.comp_virial.eq.1) then
-            call calc_phi_dphi(r,buf,phi,dphi) ! compute pair potential
-                                               !   and it derivative
-            call calc_dg(r,buf,dg)             ! compute elect dens first deriv
-            dphii  = 0.5_cd*dphi
-            dphij  = 0.0_cd
-            dUi    = derU(i)*dg
-            dUj    = 0.0_cd
-            dphieff = dphii + dphij + dUi + dUj
-          else
-            call calc_phi(r,buf,phi)           ! compute just pair potential
-          endif
-          Ei = 0.5_cd*phi
-          Ej = 0.0_cd
-
-          ! contribution to energy
+        if ( i.lt.j ) then                       ! effective half list
+          ! compute relative position vector
           !
-          if (comp_particleEnergy.eq.1) then
-            particleEnergy(i) = particleEnergy(i) + Ei          ! accumulate energy Ei
-            particleEnergy(j) = particleEnergy(j) + Ej          ! accumulate energy Ej
-          endif
-          if (comp_energy.eq.1) then
-            energy = energy + Ei                  ! accumulate energy
-            energy = energy + Ej                  ! accumulate energy
-          endif
+          Rij(:) = coor(:,j) - coor(:,i)         ! distance vector between i j
 
-          ! contribution to virial tensor
+          ! compute energy and forces
           !
-          if (comp_virial.eq.1) then
-            virial(1) = virial(1) + Rij(1)*Rij(1)*dphieff/r
-            virial(2) = virial(2) + Rij(2)*Rij(2)*dphieff/r
-            virial(3) = virial(3) + Rij(3)*Rij(3)*dphieff/r
-            virial(4) = virial(4) + Rij(2)*Rij(3)*dphieff/r
-            virial(5) = virial(5) + Rij(1)*Rij(3)*dphieff/r
-            virial(6) = virial(6) + Rij(1)*Rij(2)*dphieff/r
+          Rsqij = dot_product(Rij,Rij)           ! compute square distance
+          if ( Rsqij .lt. buf%cutsq(1) ) then    ! particles are interacting?
+
+            r = sqrt(Rsqij)                      ! compute distance
+            if (comp_force.eq.1.or.comp_virial.eq.1) then
+              call calc_phi_dphi(r,buf,phi,dphi) ! compute pair potential
+                                                 !   and it derivative
+              call calc_dg(r,buf,dg)             ! compute elect dens first deriv
+              if (particleContributing(j).eq.1) then
+                dphii  = 0.5_cd*dphi
+                dphij  = 0.5_cd*dphi
+                dUi    = derU(i)*dg
+                dUj    = derU(j)*dg
+              else
+                dphii  = 0.5_cd*dphi
+                dphij  = 0.0_cd
+                dUi    = derU(i)*dg
+                dUj    = 0.0_cd
+              endif
+              dphieff = dphii + dphij + dUi + dUj
+            else
+              call calc_phi(r,buf,phi)           ! compute just pair potential
+            endif
+
+            Ei = 0.5_cd*phi
+            if (particleContributing(j).eq.1) then
+              Ej = 0.5_cd*phi
+            else
+              Ej = 0.0_cd
+            endif
+
+            ! contribution to energy
+            !
+            if (comp_particleEnergy.eq.1) then
+              particleEnergy(i) = particleEnergy(i) + Ei          ! accumulate energy Ei
+              particleEnergy(j) = particleEnergy(j) + Ej          ! accumulate energy Ej
+            endif
+            if (comp_energy.eq.1) then
+              energy = energy + Ei                  ! accumulate energy
+              energy = energy + Ej                  ! accumulate energy
+            endif
+
+            ! contribution to virial tensor
+            !
+            if (comp_virial.eq.1) then
+              virial(1) = virial(1) + Rij(1)*Rij(1)*dphieff/r
+              virial(2) = virial(2) + Rij(2)*Rij(2)*dphieff/r
+              virial(3) = virial(3) + Rij(3)*Rij(3)*dphieff/r
+              virial(4) = virial(4) + Rij(2)*Rij(3)*dphieff/r
+              virial(5) = virial(5) + Rij(1)*Rij(3)*dphieff/r
+              virial(6) = virial(6) + Rij(1)*Rij(2)*dphieff/r
+            endif
+
+            ! contribution to forces
+            !
+            if (comp_force.eq.1) then                        ! Ei contribution
+              force(:,i) = force(:,i) + dphieff*Rij/r ! accumulate force on atom i
+              force(:,j) = force(:,j) - dphieff*Rij/r ! accumulate force on atom j
+            endif
+
           endif
-
-          ! contribution to forces
-          !
-          if (comp_force.eq.1) then                        ! Ei contribution
-            force(:,i) = force(:,i) + dphieff*Rij/r ! accumulate force on atom i
-            force(:,j) = force(:,j) - dphieff*Rij/r ! accumulate force on atom j
-          endif
-
-        endif
-
+        endif ! if ( i.lt.j )
       enddo  ! loop on jj
     endif ! Check on whether particle is contributing
   enddo  ! infinite do loop (terminated by exit statements above)
@@ -684,8 +708,8 @@ subroutine refresh(model_refresh_handle, ierr) bind(c)
 
   call kim_model_refresh_set_influence_distance_pointer(model_refresh_handle, &
     buf%influence_distance)
-  call kim_model_refresh_set_neighbor_list_cutoffs_pointer(model_refresh_handle, &
-    1, buf%cutoff)
+  call kim_model_refresh_set_neighbor_list_pointers(model_refresh_handle, &
+    1, buf%cutoff, buf%padding_neighbor_hints, buf%half_list_hints)
 
   ierr = 0
   return
@@ -987,12 +1011,15 @@ subroutine create(model_driver_create_handle, requested_length_unit, &
   ! Also set influence distance and cutsq
   buf%influence_distance = buf%cutoff(1)
   buf%cutsq(1) = buf%cutoff(1)*buf%cutoff(1)
+  buf%padding_neighbor_hints(1) = 1
+  buf%half_list_hints(1) = 1
 
   ! Store model cutoff in KIM object
   call kim_model_driver_create_set_influence_distance_pointer( &
     model_driver_create_handle, buf%influence_distance)
-  call kim_model_driver_create_set_neighbor_list_cutoffs_pointer( &
-    model_driver_create_handle, 1, buf%cutoff)
+  call kim_model_driver_create_set_neighbor_list_pointers( &
+    model_driver_create_handle, 1, buf%cutoff, &
+    buf%padding_neighbor_hints, buf%half_list_hints)
 
   ! Register buffer in KIM API object
   call kim_model_driver_create_set_model_buffer_pointer( &
