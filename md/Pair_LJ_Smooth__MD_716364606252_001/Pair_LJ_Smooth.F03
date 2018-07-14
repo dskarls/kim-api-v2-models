@@ -80,6 +80,8 @@ type BUFFER_TYPE
   real(c_double) :: A
   real(c_double) :: B
   real(c_double) :: C
+  integer(c_int) :: padding_neighbor_hints(1)
+  integer(c_int) :: half_list_hints(1)
 endtype BUFFER_TYPE
 
 
@@ -389,91 +391,109 @@ subroutine Compute_Energy_Forces(model_compute_handle, &
 
         j = nei1part(jj)                           ! get neighbor ID
 
-        ! compute relative position vector
-        !
-        Rij(:) = coor(:,j) - coor(:,i)             ! distance vector between i j
-
-        ! compute energy and forces
-        !
-        Rsqij = dot_product(Rij,Rij)               ! compute square distance
-        if ( Rsqij .lt. buf%cutsq(1) ) then        ! particles are interacting?
-          r = sqrt(Rsqij)                          ! compute distance
-          if (comp_process_d2Edr2.eq.1) then
-            call calc_phi_dphi_d2phi(buf%eps(1),    &
-                                     buf%sigma(1),  &
-                                     buf%A,         &
-                                     buf%B,         &
-                                     buf%C,         &
-                                     buf%cutoff(1), &
-                                     r,phi,dphi,d2phi) ! compute pair potential
-                                                       !   and its derivatives
-            dEidr  = 0.5_cd*dphi
-            d2Eidr = 0.5_cd*d2phi
-          elseif (comp_force.eq.1.or.comp_process_dEdr.eq.1) then
-            call calc_phi_dphi(buf%eps(1),    &
-                               buf%sigma(1),  &
-                               buf%A,         &
-                               buf%B,         &
-                               buf%C,         &
-                               buf%cutoff(1), &
-                               r,phi,dphi)        ! compute pair potential
-                                                  !   and it derivative
-            dEidr = 0.5_cd*dphi
-          else
-            call calc_phi(buf%eps(1),    &
-                          buf%sigma(1),  &
-                          buf%A,         &
-                          buf%B,         &
-                          buf%C,         &
-                          buf%cutoff(1), &
-                          r,phi)                  ! compute just pair potential
-          endif
-
-          ! contribution to energy
+        if ( i.lt.j ) then                         ! Effective half list
+          ! compute relative position vector
           !
-          if (comp_particleEnergy.eq.1) then
-              particleEnergy(i) = particleEnergy(i) + 0.5_cd*phi   ! accumulate energy
-          endif
+          Rij(:) = coor(:,j) - coor(:,i)           ! distance vector between i j
 
-          if (comp_energy.eq.1) then
-            energy = energy + 0.5_cd*phi         ! add half v to total energy
-          endif
-
-          ! contribution to process_dEdr
+          ! compute energy and forces
           !
-          if (comp_process_dEdr.eq.1) then
-            call kim_model_compute_arguments_process_dedr_term( &
-              model_compute_arguments_handle, deidr, r, c_loc(Rij(1)), i, j, ierr)
-          endif
+          Rsqij = dot_product(Rij,Rij)             ! compute square distance
+          if ( Rsqij .lt. buf%cutsq(1) ) then      ! particles are interacting?
+            r = sqrt(Rsqij)                        ! compute distance
+            if (comp_process_d2Edr2.eq.1) then
+              call calc_phi_dphi_d2phi(buf%eps(1),    &
+                                       buf%sigma(1),  &
+                                       buf%A,         &
+                                       buf%B,         &
+                                       buf%C,         &
+                                       buf%cutoff(1), &
+                                       r,phi,dphi,d2phi) ! compute pair potential
+                                                         !   and its derivatives
+              if (particleContributing(j).eq.1) then
+                dEidr  = dphi
+                d2Eidr = d2phi
+              else
+                dEidr  = 0.5_cd*dphi
+                d2Eidr = 0.5_cd*d2phi
+              endif
+            elseif (comp_force.eq.1.or.comp_process_dEdr.eq.1) then
+              call calc_phi_dphi(buf%eps(1),    &
+                                 buf%sigma(1),  &
+                                 buf%A,         &
+                                 buf%B,         &
+                                 buf%C,         &
+                                 buf%cutoff(1), &
+                                 r,phi,dphi)       ! compute pair potential
+                                                   !    and it derivative
+              if (particleContributing(j).eq.1) then
+                dEidr = dphi
+              else
+                dEidr = 0.5_cd*dphi
+              endif
+            else
+              call calc_phi(buf%eps(1),    &
+                            buf%sigma(1),  &
+                            buf%A,         &
+                            buf%B,         &
+                            buf%C,         &
+                            buf%cutoff(1), &
+                            r,phi)                 ! compute just pair potential
+            endif
 
-          ! contribution to process_d2Edr2
-          if (comp_process_d2Edr2.eq.1) then
-            r_pairs(1) = r
-            r_pairs(2) = r
-            Rij_pairs(:,1) = Rij
-            Rij_pairs(:,2) = Rij
-            i_pairs(1) = i
-            i_pairs(2) = i
-            j_pairs(1) = j
-            j_pairs(2) = j
+            ! contribution to energy
+            !
+            if (comp_particleEnergy.eq.1) then
+              particleEnergy(i) = particleEnergy(i) + 0.5_cd*phi     ! accumulate energy
+              if (particleContributing(j).eq.1) then
+                particleEnergy(j) = particleEnergy(j) + 0.5_cd*phi   ! accumulate energy
+              endif
+            endif
 
-            call kim_model_compute_arguments_process_d2edr2_term( &
-              model_compute_arguments_handle, d2eidr, &
-              c_loc(r_pairs(1)),     &
-              c_loc(Rij_pairs(1,1)), &
-              c_loc(i_pairs(1)),     &
-              c_loc(j_pairs(1)), ierr)
+            if (comp_energy.eq.1) then
+              if (particleContributing(j).eq.1) then
+                energy = energy + phi              ! add v to total energy
+              else
+                energy = energy + 0.5_cd*phi       ! add half v to total energy
+              endif
+            endif
 
-          endif
+            ! contribution to process_dEdr
+            !
+            if (comp_process_dEdr.eq.1) then
+              call kim_model_compute_arguments_process_dedr_term( &
+                model_compute_arguments_handle, deidr, r, c_loc(Rij(1)), i, j, ierr)
+            endif
 
-          ! contribution to forces
-          !
-          if (comp_force.eq.1) then
-            force(:,i) = force(:,i) + dEidr*Rij/r ! accumulate force on atom i
-            force(:,j) = force(:,j) - dEidr*Rij/r ! accumulate force on atom j
-          endif
+            ! contribution to process_d2Edr2
+            if (comp_process_d2Edr2.eq.1) then
+              r_pairs(1) = r
+              r_pairs(2) = r
+              Rij_pairs(:,1) = Rij
+              Rij_pairs(:,2) = Rij
+              i_pairs(1) = i
+              i_pairs(2) = i
+              j_pairs(1) = j
+              j_pairs(2) = j
 
-        endif ! Check on whether particle jj is interacting with particle i
+              call kim_model_compute_arguments_process_d2edr2_term( &
+                model_compute_arguments_handle, d2eidr, &
+                c_loc(r_pairs(1)),     &
+                c_loc(Rij_pairs(1,1)), &
+                c_loc(i_pairs(1)),     &
+                c_loc(j_pairs(1)), ierr)
+
+            endif
+
+            ! contribution to forces
+            !
+            if (comp_force.eq.1) then
+              force(:,i) = force(:,i) + dEidr*Rij/r ! accumulate force on atom i
+              force(:,j) = force(:,j) - dEidr*Rij/r ! accumulate force on atom j
+            endif
+
+          endif ! Check on whether particle jj is interacting with particle i
+        endif ! if ( i.lt.j )
       enddo  ! loop on jj
     endif ! Check on whether particle i is contributing
   enddo  ! infinite do loop (terminated by exit statements above)
@@ -517,8 +537,8 @@ subroutine refresh(model_refresh_handle, ierr) bind(c)
 
   call kim_model_refresh_set_influence_distance_pointer(model_refresh_handle, &
     buf%influence_distance)
-  call kim_model_refresh_set_neighbor_list_cutoffs_pointer(model_refresh_handle, &
-    1, buf%cutoff)
+  call kim_model_refresh_set_neighbor_list_pointers(model_refresh_handle, &
+    1, buf%cutoff, buf%padding_neighbor_hints, buf%half_list_hints)
 
   ! Set new values in KIM object and buffer
   !
@@ -808,11 +828,15 @@ subroutine create(model_driver_create_handle, requested_length_unit, &
   buf%B = 0._cd
   buf%C = -energy_at_cutoff-buf%A*(in_cutoff**2)
 
+  buf%padding_neighbor_hints(1) = 1
+  buf%half_list_hints(1) = 1
+
   ! Store model cutoff in KIM object
   call kim_model_driver_create_set_influence_distance_pointer( &
     model_driver_create_handle, buf%influence_distance)
-  call kim_model_driver_create_set_neighbor_list_cutoffs_pointer( &
-    model_driver_create_handle, 1, buf%cutoff)
+  call kim_model_driver_create_set_neighbor_list_pointers( &
+    model_driver_create_handle, 1, buf%cutoff, &
+    buf%padding_neighbor_hints, buf%half_list_hints)
 
   ! Register buffer in KIM API object
   call kim_model_driver_create_set_model_buffer_pointer( &
