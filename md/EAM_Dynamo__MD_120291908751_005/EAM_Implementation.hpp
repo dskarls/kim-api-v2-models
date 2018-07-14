@@ -774,7 +774,7 @@ int EAM_Implementation::Compute(
         break; // Stop loop over i
       }
     }
-    printf("isHalf = %d\n", isHalf); // @@ DELETE THIS
+
     // Setup loop over contributing particles
     for (i = 0; i < cachedNumberOfParticles_; ++i)
     {
