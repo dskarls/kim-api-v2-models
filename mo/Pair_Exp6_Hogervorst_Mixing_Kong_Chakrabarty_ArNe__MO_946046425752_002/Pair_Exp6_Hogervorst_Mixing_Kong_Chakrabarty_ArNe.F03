@@ -276,8 +276,13 @@ subroutine Compute_Energy_Forces(model_compute_handle, &
              endif
 
              if (comp_force.eq.1) then
-                force(:,i) = force(:,i) + dphi*Rij/r
-                force(:,j) = force(:,j) - dphi*Rij/r
+               if (particleContributing(j).eq.1) then
+                 force(:,i) = force(:,i) + dphi*Rij/r
+                 force(:,j) = force(:,j) - dphi*Rij/r
+               else
+                 force(:,i) = force(:,i) + 0.5*dphi*Rij/r
+                 force(:,j) = force(:,j) - 0.5*dphi*Rij/r
+               endif
              endif
 
           endif
