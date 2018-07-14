@@ -91,6 +91,8 @@ type, bind(c) :: buffer_type
   real(c_double) :: influence_distance
   real(c_double) :: cutoff(1)
   real(c_double) :: cutsq(1)
+  integer(c_int) :: padding_neighbor_hints(1)
+  integer(c_int) :: half_list_hints(1)
 end type buffer_type
 
 contains
@@ -252,23 +254,33 @@ subroutine Compute_Energy_Forces(model_compute_handle, &
 
         j = nei1part(jj) ! Get index of neighbor
 
-        Rij(:) = coor(:,j) - coor(:,i)
-        Rsqij = dot_product(Rij,Rij)
+        if ( i.lt.j ) then
+          Rij(:) = coor(:,j) - coor(:,i)
+          Rsqij = dot_product(Rij,Rij)
 
-        if ( Rsqij.lt.buf%cutsq(1) ) then
-           r = sqrt(Rsqij)
-           if (particleSpeciesCodes(i).eq.1 .and. particleSpeciesCodes(j).eq.1) then
-              call calc_phi_dphi(r,phi,dphi,eps11,rm11,alf11,buf%cutoff(1))
-           elseif (particleSpeciesCodes(i).eq.2 .and. particleSpeciesCodes(j).eq.2) then
-              call calc_phi_dphi(r,phi,dphi,eps22,rm22,alf22,buf%cutoff(1))
-           else
-              call calc_phi_dphi(r,phi,dphi,eps12,rm12,alf12,buf%cutoff(1))
-           endif
-           if (comp_energy.eq.1) energy = energy + phi
-           if (comp_force.eq.1) then
-              force(:,i) = force(:,i) + dphi*Rij/r
-              force(:,j) = force(:,j) - dphi*Rij/r
-           endif
+          if ( Rsqij.lt.buf%cutsq(1) ) then
+             r = sqrt(Rsqij)
+             if (particleSpeciesCodes(i).eq.1 .and. particleSpeciesCodes(j).eq.1) then
+                call calc_phi_dphi(r,phi,dphi,eps11,rm11,alf11,buf%cutoff(1))
+             elseif (particleSpeciesCodes(i).eq.2 .and. particleSpeciesCodes(j).eq.2) then
+                call calc_phi_dphi(r,phi,dphi,eps22,rm22,alf22,buf%cutoff(1))
+             else
+                call calc_phi_dphi(r,phi,dphi,eps12,rm12,alf12,buf%cutoff(1))
+             endif
+             if (comp_energy.eq.1) then
+               if (particleContributing(j) == 1) then
+                 energy = energy + phi
+               else
+                 energy = energy + 0.5_cd*phi
+               endif
+             endif
+
+             if (comp_force.eq.1) then
+                force(:,i) = force(:,i) + dphi*Rij/r
+                force(:,j) = force(:,j) - dphi*Rij/r
+             endif
+
+          endif
         endif
      enddo ! End loop over neighbors of atom i
     endif ! Check on whether particle is contributing
@@ -331,8 +343,8 @@ subroutine refresh(model_refresh_handle, ierr) bind(c)
   LOG_INFORMATION()
   call kim_model_refresh_set_influence_distance_pointer( &
     model_refresh_handle, buf%influence_distance)
-  call kim_model_refresh_set_neighbor_list_cutoffs_pointer( &
-    model_refresh_handle, 1, buf%cutoff)
+  call kim_model_refresh_set_neighbor_list_pointers( &
+    model_refresh_handle, 1, buf%cutoff, buf%padding_neighbor_hints, buf%half_list_hints)
 
   ierr = 0  ! everything is good
 end subroutine refresh
@@ -501,14 +513,16 @@ subroutine create(model_create_handle, requested_length_unit, &
   buf%influence_distance = cutoff
   buf%cutoff(1) = cutoff
   buf%cutsq(1) = cutoff*cutoff
+  buf%padding_neighbor_hints(1) = 1
+  buf%half_list_hints(1) = 1
 
   ! register influence distance
   call kim_model_create_set_influence_distance_pointer( &
     model_create_handle, buf%influence_distance)
 
   ! register cutoff
-  call kim_model_create_set_neighbor_list_cutoffs_pointer(model_create_handle, &
-    1, buf%cutoff)
+  call kim_model_create_set_neighbor_list_pointers(model_create_handle, &
+    1, buf%cutoff, buf%padding_neighbor_hints, buf%half_list_hints)
 
   if (ierr /= 0) then
     ierr = 1
