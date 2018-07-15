@@ -116,6 +116,9 @@ struct model_buffer{
   double u2;
   double u3;
   double u4;
+
+  int paddingNeighborHints;
+  int halfListHints;
 };
 
 /* ######## Function Prototypes ######## */
@@ -155,7 +158,6 @@ static int refresh(KIM_ModelRefresh * const modelRefresh);
 static int compute(KIM_ModelCompute const * const modelCompute,
                    KIM_ModelComputeArguments const * const modelComputeArguments){
   /* Potential parameters */
-  double cutoff;
   double A;
   double B;
   double rh;
@@ -233,7 +235,7 @@ static int compute(KIM_ModelCompute const * const modelCompute,
   KIM_ModelCompute_GetModelBufferPointer(modelCompute, (void **) &buffer);
 
   /* Unpack parameters from buffer */
-  a = buffer -> cutoff;
+  a = buffer->cutoff;
   A = buffer->A;
   B = buffer->B;
   rh = buffer->rh;
@@ -345,264 +347,266 @@ static int compute(KIM_ModelCompute const * const modelCompute,
   /* --- Level 1: Outer loop over atoms --- */
   for(i = 0; i < *numAtoms; i++){
 
-    /* Get neighbor list for atom i */
-    ier = KIM_ModelComputeArguments_GetNeighborList(modelComputeArguments,
-        0, i, &numNeigh, &neighListOfCurrentAtom);
-    if(ier){
-      LOG_ERROR("Could not access neighbor list");
-      ier = TRUE;
-      return ier;
-    }
-
-    /* Reset coordination Z and neighbor numbers */
-    Z = 0.0;
-    n2 = 0;
-    n3 = 0;
-    nz = 0;
-
-    for(dummycount = 0; dummycount < MAX_NBRS; dummycount++){
-      numz[dummycount]=0;
-    }
-
-    /* --- Level 2: Prepass loop over neighbors of atom i --- */
-    for (jj = 0; jj < numNeigh; ++jj){
-      j = neighListOfCurrentAtom[jj]; /* get neighbor ID */
-
-      if(j != i){
-        dx = coords[j*DIM+0]-coords[i*DIM+0];
-        dy = coords[j*DIM+1]-coords[i*DIM+1];
-        dz = coords[j*DIM+2]-coords[i*DIM+2];
-
-        if(dx < a){
-          if(dy < a){
-            if(dz < a){
-              rsqr = dx*dx + dy*dy + dz*dz;
-              if(rsqr < asqr){
-                num2[n2] = j;
-                r = sqrt(rsqr);
-                rinv=1.0/r;
-                dx *= rinv;
-                dy *= rinv;
-                dz *= rinv;
-                rmainv=1.0/(r - a);
-                s2[n2].t0 = A*exp(sig*rmainv);
-                s2[n2].t1 = pow(B*rinv,rh);
-                s2[n2].t2 = rh*rinv;
-                s2[n2].t3 = sig*rmainv*rmainv;
-                s2[n2].dx = dx;
-                s2[n2].dy = dy;
-                s2[n2].dz = dz;
-                s2[n2].r = r;
-                n2++;
-
-                /* Also compute the radial part of the 3-body energy term */
-                if(r < a){
-                  num3[n3] = j;
-                  rmbinv = 1.0/(r - a);
-                  temp1 = gam*rmbinv;
-                  temp0 = exp(temp1);
-                  s3[n3].g = temp0;
-                  s3[n3].dg = -rmbinv*temp1*temp0;
-                  s3[n3].dx = dx;
-                  s3[n3].dy = dy;
-                  s3[n3].dz = dz;
-                  s3[n3].rinv = rinv;
-                  s3[n3].r = r;
-                  n3++;
-
-                  /* Coordination and neighbor function c < r < a */
-                  if(r < b){
-                    if(r <= c){
-                      Z += 1.0;
-                    }else{
-                      xinv = bmc/(r - c);
-                      xinv3 = xinv*xinv*xinv;
-                      den = 1.0/(1 - xinv3);
-                      temp1 = alp*den;
-                      fZ = exp(temp1);
-                      Z += fZ;
-                      numz[nz] = j;
-                      sz[nz].df = fZ*temp1*den*3.0*xinv3*xinv*cmbinv;   /* df/dr */
-                      sz[nz].dx = dx;
-                      sz[nz].dy = dy;
-                      sz[nz].dz = dz;
-                      sz[nz].r = r;
-                      nz++;
-                    }
-                  } /* End if-statement of r < b */
-                } /* End if-statement r < a */
-              }/*  End if-statement rsqrt < asqr */
-            } /* End if-statement dz < a */
-          } /* End if-statement dy < a */
-        } /* End if-statement dx < a */
-      } /* End if-statement j!=i */
-    } /*  End loop over j */
-
-    dVdZ_sum=0.0;
-    temp0 = bet*Z;
-    pZ = exp(-temp0*Z);
-    dp = -2.0*temp0*pZ; /* derivative of bond order */
-
-    /* --- Level 2: Second loop over pairs to get the final 2-body energy --- */
-    for(j2=0; j2 < n2; j2++){
-      temp0 = s2[j2].t1 - pZ;
-
-      /* Two-body energy */
-      V2 += temp0*s2[j2].t0;
-
-      /* Two-body forces */
-      if(compute_forces){
-        dV2j = - (s2[j2].t0) * ((s2[j2].t1)*(s2[j2].t2) + temp0 * (s2[j2].t3)); /* dV2/dr */
-        dV2ijx = dV2j * s2[j2].dx; /* x component of force on atom i */
-        dV2ijy = dV2j * s2[j2].dy; /* y component of force on atom i */
-        dV2ijz = dV2j * s2[j2].dz; /* z component of force on atom i */
-
-        forces[i*DIM+0] += dV2ijx;
-        forces[i*DIM+1] += dV2ijy;
-        forces[i*DIM+2] += dV2ijz;
-
-        j = num2[j2];
-        forces[j*DIM+0] -= dV2ijx;
-        forces[j*DIM+1] -= dV2ijy;
-        forces[j*DIM+2] -= dV2ijz;
-
-        /* Accumulation of pair coordination forces */
-        dV2dZ = - dp * s2[j2].t0;
-        dVdZ_sum += dV2dZ;
+    if (particleContributing[i]){
+      /* Get neighbor list for atom i */
+      ier = KIM_ModelComputeArguments_GetNeighborList(modelComputeArguments,
+          0, i, &numNeigh, &neighListOfCurrentAtom);
+      if(ier){
+        LOG_ERROR("Could not access neighbor list");
+        ier = TRUE;
+        return ier;
       }
 
-      /* Two-body contribution to virial */
-      if(compute_virial){
-        virial[0] += s2[j2].r * dV2ijx * s2[j2].dx;
-        virial[1] += s2[j2].r * dV2ijy * s2[j2].dy;
-        virial[2] += s2[j2].r * dV2ijz * s2[j2].dz;
-        virial[3] += s2[j2].r * dV2ijy * s2[j2].dz;
-        virial[4] += s2[j2].r * dV2ijz * s2[j2].dx;
-        virial[5] += s2[j2].r * dV2ijx * s2[j2].dy;
+      /* Reset coordination Z and neighbor numbers */
+      Z = 0.0;
+      n2 = 0;
+      n3 = 0;
+      nz = 0;
+
+      for(dummycount = 0; dummycount < MAX_NBRS; dummycount++){
+        numz[dummycount]=0;
       }
-    } /* End loop over j2 */
 
-    /* Coordination-dependence of three-body interactions */
-    winv = Qort*exp(-muhalf*Z); /* inverse width of angular function */
-    dwinv = -muhalf*winv;       /* its derivative */
-    temp0 = exp(-u4*Z);
-    tau = u1+u2*temp0*(u3-temp0); /* -cosine of angular minimum */
-    dtau = u5*temp0*(2*temp0-u3); /* its derivative */
+      /* --- Level 2: Prepass loop over neighbors of atom i --- */
+      for (jj = 0; jj < numNeigh; ++jj){
+        j = neighListOfCurrentAtom[jj]; /* get neighbor ID */
 
-    /* --- Level 2: First loop for three-body interactions --- */
-    for(j3 = 0; j3 < (n3 - 1); j3++){
-      j = num3[j3];
+        if(j != i){
+          dx = coords[j*DIM+0]-coords[i*DIM+0];
+          dy = coords[j*DIM+1]-coords[i*DIM+1];
+          dz = coords[j*DIM+2]-coords[i*DIM+2];
 
-      /* --- Level 3: Second loop for three-body interactions --- */
-      for(nk = j3 + 1; nk < n3; nk++){
-        k = num3[nk];
+          if(dx < a){
+            if(dy < a){
+              if(dz < a){
+                rsqr = dx*dx + dy*dy + dz*dz;
+                if(rsqr < asqr){
+                  num2[n2] = j;
+                  r = sqrt(rsqr);
+                  rinv=1.0/r;
+                  dx *= rinv;
+                  dy *= rinv;
+                  dz *= rinv;
+                  rmainv=1.0/(r - a);
+                  s2[n2].t0 = A*exp(sig*rmainv);
+                  s2[n2].t1 = pow(B*rinv,rh);
+                  s2[n2].t2 = rh*rinv;
+                  s2[n2].t3 = sig*rmainv*rmainv;
+                  s2[n2].dx = dx;
+                  s2[n2].dy = dy;
+                  s2[n2].dz = dz;
+                  s2[n2].r = r;
+                  n2++;
 
-        /* Angular function h(l,Z) */
-        lcos = s3[j3].dx * s3[nk].dx + s3[j3].dy * s3[nk].dy + s3[j3].dz * s3[nk].dz;
-        x = (lcos + tau)*winv;
-        temp0 = exp(-x*x);
+                  /* Also compute the radial part of the 3-body energy term */
+                  if(r < a){
+                    num3[n3] = j;
+                    rmbinv = 1.0/(r - a);
+                    temp1 = gam*rmbinv;
+                    temp0 = exp(temp1);
+                    s3[n3].g = temp0;
+                    s3[n3].dg = -rmbinv*temp1*temp0;
+                    s3[n3].dx = dx;
+                    s3[n3].dy = dy;
+                    s3[n3].dz = dz;
+                    s3[n3].rinv = rinv;
+                    s3[n3].r = r;
+                    n3++;
 
-        H = lam*(1 - temp0 + eta*x*x);
-        dHdx = 2*lam*x*(temp0 + eta);
-        dhdl = dHdx*winv;
+                    /* Coordination and neighbor function c < r < a */
+                    if(r < b){
+                      if(r <= c){
+                        Z += 1.0;
+                      }else{
+                        xinv = bmc/(r - c);
+                        xinv3 = xinv*xinv*xinv;
+                        den = 1.0/(1 - xinv3);
+                        temp1 = alp*den;
+                        fZ = exp(temp1);
+                        Z += fZ;
+                        numz[nz] = j;
+                        sz[nz].df = fZ*temp1*den*3.0*xinv3*xinv*cmbinv;   /* df/dr */
+                        sz[nz].dx = dx;
+                        sz[nz].dy = dy;
+                        sz[nz].dz = dz;
+                        sz[nz].r = r;
+                        nz++;
+                      }
+                    } /* End if-statement of r < b */
+                  } /* End if-statement r < a */
+                }/*  End if-statement rsqrt < asqr */
+              } /* End if-statement dz < a */
+            } /* End if-statement dy < a */
+          } /* End if-statement dx < a */
+        } /* End if-statement j!=i */
+      } /*  End loop over j */
 
-        /* Three-body energy */
-        temp1 = s3[j3].g * s3[nk].g;
-        V3 += temp1*H;
+      dVdZ_sum=0.0;
+      temp0 = bet*Z;
+      pZ = exp(-temp0*Z);
+      dp = -2.0*temp0*pZ; /* derivative of bond order */
 
+      /* --- Level 2: Second loop over pairs to get the final 2-body energy --- */
+      for(j2=0; j2 < n2; j2++){
+        temp0 = s2[j2].t1 - pZ;
+
+        /* Two-body energy */
+        V2 += temp0*s2[j2].t0;
+
+        /* Two-body forces */
         if(compute_forces){
-          /* (-) radial force on atom j */
-          dV3rij = s3[j3].dg * s3[nk].g * H;
-          dV3rijx = dV3rij * s3[j3].dx;
-          dV3rijy = dV3rij * s3[j3].dy;
-          dV3rijz = dV3rij * s3[j3].dz;
-          fjx = dV3rijx;
-          fjy = dV3rijy;
-          fjz = dV3rijz;
+          dV2j = - (s2[j2].t0) * ((s2[j2].t1)*(s2[j2].t2) + temp0 * (s2[j2].t3)); /* dV2/dr */
+          dV2ijx = dV2j * s2[j2].dx; /* x component of force on atom i */
+          dV2ijy = dV2j * s2[j2].dy; /* y component of force on atom i */
+          dV2ijz = dV2j * s2[j2].dz; /* z component of force on atom i */
 
-          /* (-) radial force on atom k */
-          dV3rik = s3[j3].g * s3[nk].dg * H;
-          dV3rikx = dV3rik * s3[nk].dx;
-          dV3riky = dV3rik * s3[nk].dy;
-          dV3rikz = dV3rik * s3[nk].dz;
-          fkx = dV3rikx;
-          fky = dV3riky;
-          fkz = dV3rikz;
+          forces[i*DIM+0] += dV2ijx;
+          forces[i*DIM+1] += dV2ijy;
+          forces[i*DIM+2] += dV2ijz;
 
-          /* (-) angular force on j */
-          dV3l = temp1*dhdl;
-          dV3ljx = dV3l * (s3[nk].dx - lcos * s3[j3].dx) * s3[j3].rinv;
-          dV3ljy = dV3l * (s3[nk].dy - lcos * s3[j3].dy) * s3[j3].rinv;
-          dV3ljz = dV3l * (s3[nk].dz - lcos * s3[j3].dz) * s3[j3].rinv;
-          fjx += dV3ljx;
-          fjy += dV3ljy;
-          fjz += dV3ljz;
+          j = num2[j2];
+          forces[j*DIM+0] -= dV2ijx;
+          forces[j*DIM+1] -= dV2ijy;
+          forces[j*DIM+2] -= dV2ijz;
 
-          /* (-) angular force on k */
-          dV3lkx = dV3l * (s3[j3].dx - lcos * s3[nk].dx) * s3[nk].rinv;
-          dV3lky = dV3l * (s3[j3].dy - lcos * s3[nk].dy) * s3[nk].rinv;
-          dV3lkz = dV3l * (s3[j3].dz - lcos * s3[nk].dz) * s3[nk].rinv;
-          fkx += dV3lkx;
-          fky += dV3lky;
-          fkz += dV3lkz;
-
-          /* Apply radial + angular forces to i, j, k */
-          forces[j*DIM+0] -= fjx;
-          forces[j*DIM+1] -= fjy;
-          forces[j*DIM+2] -= fjz;
-          forces[k*DIM+0] -= fkx;
-          forces[k*DIM+1] -= fky;
-          forces[k*DIM+2] -= fkz;
-          forces[i*DIM+0] += fjx + fkx;
-          forces[i*DIM+1] += fjy + fky;
-          forces[i*DIM+2] += fjz + fkz;
+          /* Accumulation of pair coordination forces */
+          dV2dZ = - dp * s2[j2].t0;
+          dVdZ_sum += dV2dZ;
         }
 
-        /* dV3/dR contributions to virial */
+        /* Two-body contribution to virial */
         if(compute_virial){
-          virial[0] += s3[j3].r * (fjx*s3[j3].dx) + s3[nk].r * (fkx*s3[nk].dx);
-          virial[1] += s3[j3].r * (fjy*s3[j3].dy) + s3[nk].r * (fky*s3[nk].dy);
-          virial[2] += s3[j3].r * (fjz*s3[j3].dz) + s3[nk].r * (fkz*s3[nk].dz);
-          virial[3] += s3[j3].r * (fjy*s3[j3].dz) + s3[nk].r * (fky*s3[nk].dz);
-          virial[4] += s3[j3].r * (fjz*s3[j3].dx) + s3[nk].r * (fkz*s3[nk].dx);
-          virial[5] += s3[j3].r * (fjx*s3[j3].dy) + s3[nk].r * (fkx*s3[nk].dy);
+          virial[0] += s2[j2].r * dV2ijx * s2[j2].dx;
+          virial[1] += s2[j2].r * dV2ijy * s2[j2].dy;
+          virial[2] += s2[j2].r * dV2ijz * s2[j2].dz;
+          virial[3] += s2[j2].r * dV2ijy * s2[j2].dz;
+          virial[4] += s2[j2].r * dV2ijz * s2[j2].dx;
+          virial[5] += s2[j2].r * dV2ijx * s2[j2].dy;
         }
+      } /* End loop over j2 */
 
-        dxdZ = dwinv*(lcos + tau) + winv*dtau;
-        dV3dZ = temp1*dHdx*dxdZ;
+      /* Coordination-dependence of three-body interactions */
+      winv = Qort*exp(-muhalf*Z); /* inverse width of angular function */
+      dwinv = -muhalf*winv;       /* its derivative */
+      temp0 = exp(-u4*Z);
+      tau = u1+u2*temp0*(u3-temp0); /* -cosine of angular minimum */
+      dtau = u5*temp0*(2*temp0-u3); /* its derivative */
 
-        /* Accumulation of 3-body coordination forces */
-        dVdZ_sum += dV3dZ;
-      } /* End loop over k */
-    } /* End loop over j3 */
+      /* --- Level 2: First loop for three-body interactions --- */
+      for(j3 = 0; j3 < (n3 - 1); j3++){
+        j = num3[j3];
+
+        /* --- Level 3: Second loop for three-body interactions --- */
+        for(nk = j3 + 1; nk < n3; nk++){
+          k = num3[nk];
+
+          /* Angular function h(l,Z) */
+          lcos = s3[j3].dx * s3[nk].dx + s3[j3].dy * s3[nk].dy + s3[j3].dz * s3[nk].dz;
+          x = (lcos + tau)*winv;
+          temp0 = exp(-x*x);
+
+          H = lam*(1 - temp0 + eta*x*x);
+          dHdx = 2*lam*x*(temp0 + eta);
+          dhdl = dHdx*winv;
+
+          /* Three-body energy */
+          temp1 = s3[j3].g * s3[nk].g;
+          V3 += temp1*H;
+
+          if(compute_forces){
+            /* (-) radial force on atom j */
+            dV3rij = s3[j3].dg * s3[nk].g * H;
+            dV3rijx = dV3rij * s3[j3].dx;
+            dV3rijy = dV3rij * s3[j3].dy;
+            dV3rijz = dV3rij * s3[j3].dz;
+            fjx = dV3rijx;
+            fjy = dV3rijy;
+            fjz = dV3rijz;
+
+            /* (-) radial force on atom k */
+            dV3rik = s3[j3].g * s3[nk].dg * H;
+            dV3rikx = dV3rik * s3[nk].dx;
+            dV3riky = dV3rik * s3[nk].dy;
+            dV3rikz = dV3rik * s3[nk].dz;
+            fkx = dV3rikx;
+            fky = dV3riky;
+            fkz = dV3rikz;
+
+            /* (-) angular force on j */
+            dV3l = temp1*dhdl;
+            dV3ljx = dV3l * (s3[nk].dx - lcos * s3[j3].dx) * s3[j3].rinv;
+            dV3ljy = dV3l * (s3[nk].dy - lcos * s3[j3].dy) * s3[j3].rinv;
+            dV3ljz = dV3l * (s3[nk].dz - lcos * s3[j3].dz) * s3[j3].rinv;
+            fjx += dV3ljx;
+            fjy += dV3ljy;
+            fjz += dV3ljz;
+
+            /* (-) angular force on k */
+            dV3lkx = dV3l * (s3[j3].dx - lcos * s3[nk].dx) * s3[nk].rinv;
+            dV3lky = dV3l * (s3[j3].dy - lcos * s3[nk].dy) * s3[nk].rinv;
+            dV3lkz = dV3l * (s3[j3].dz - lcos * s3[nk].dz) * s3[nk].rinv;
+            fkx += dV3lkx;
+            fky += dV3lky;
+            fkz += dV3lkz;
+
+            /* Apply radial + angular forces to i, j, k */
+            forces[j*DIM+0] -= fjx;
+            forces[j*DIM+1] -= fjy;
+            forces[j*DIM+2] -= fjz;
+            forces[k*DIM+0] -= fkx;
+            forces[k*DIM+1] -= fky;
+            forces[k*DIM+2] -= fkz;
+            forces[i*DIM+0] += fjx + fkx;
+            forces[i*DIM+1] += fjy + fky;
+            forces[i*DIM+2] += fjz + fkz;
+          }
+
+          /* dV3/dR contributions to virial */
+          if(compute_virial){
+            virial[0] += s3[j3].r * (fjx*s3[j3].dx) + s3[nk].r * (fkx*s3[nk].dx);
+            virial[1] += s3[j3].r * (fjy*s3[j3].dy) + s3[nk].r * (fky*s3[nk].dy);
+            virial[2] += s3[j3].r * (fjz*s3[j3].dz) + s3[nk].r * (fkz*s3[nk].dz);
+            virial[3] += s3[j3].r * (fjy*s3[j3].dz) + s3[nk].r * (fky*s3[nk].dz);
+            virial[4] += s3[j3].r * (fjz*s3[j3].dx) + s3[nk].r * (fkz*s3[nk].dx);
+            virial[5] += s3[j3].r * (fjx*s3[j3].dy) + s3[nk].r * (fkx*s3[nk].dy);
+          }
+
+          dxdZ = dwinv*(lcos + tau) + winv*dtau;
+          dV3dZ = temp1*dHdx*dxdZ;
+
+          /* Accumulation of 3-body coordination forces */
+          dVdZ_sum += dV3dZ;
+        } /* End loop over k */
+      } /* End loop over j3 */
 
 
-    /* --- Level 2: Loop to apply coordination forces --- */
-    if(compute_forces){
-      for(nl = 0; nl < nz; nl++){
-        dEdrl = dVdZ_sum * sz[nl].df;
-        dEdrlx = (dEdrl * sz[nl].dx);
-        dEdrly = (dEdrl * sz[nl].dy);
-        dEdrlz = (dEdrl * sz[nl].dz);
-        forces[i*DIM+0] += dEdrlx;
-        forces[i*DIM+1] += dEdrly;
-        forces[i*DIM+2] += dEdrlz;
-        l = numz[nl];
-        forces[l*DIM+0] -= dEdrlx;
-        forces[l*DIM+1] -= dEdrly;
-        forces[l*DIM+2] -= dEdrlz;
+      /* --- Level 2: Loop to apply coordination forces --- */
+      if(compute_forces){
+        for(nl = 0; nl < nz; nl++){
+          dEdrl = dVdZ_sum * sz[nl].df;
+          dEdrlx = (dEdrl * sz[nl].dx);
+          dEdrly = (dEdrl * sz[nl].dy);
+          dEdrlz = (dEdrl * sz[nl].dz);
+          forces[i*DIM+0] += dEdrlx;
+          forces[i*DIM+1] += dEdrly;
+          forces[i*DIM+2] += dEdrlz;
+          l = numz[nl];
+          forces[l*DIM+0] -= dEdrlx;
+          forces[l*DIM+1] -= dEdrly;
+          forces[l*DIM+2] -= dEdrlz;
 
-        /* dE/dZ*dZ/dr contributions to virial */
-        if(compute_virial){ /*  Recall that, above, we set compute_forces to 1 if compute_virial is 1 so this nested if-statement is ok */
-          virial[0] += sz[nl].r * (dEdrlx * sz[nl].dx);
-          virial[1] += sz[nl].r * (dEdrly * sz[nl].dy);
-          virial[2] += sz[nl].r * (dEdrlz * sz[nl].dz);
-          virial[3] += sz[nl].r * (dEdrly * sz[nl].dz);
-          virial[4] += sz[nl].r * (dEdrlz * sz[nl].dx);
-          virial[5] += sz[nl].r * (dEdrlx * sz[nl].dy);
+          /* dE/dZ*dZ/dr contributions to virial */
+          if(compute_virial){ /*  Recall that, above, we set compute_forces to 1 if compute_virial is 1 so this nested if-statement is ok */
+            virial[0] += sz[nl].r * (dEdrlx * sz[nl].dx);
+            virial[1] += sz[nl].r * (dEdrly * sz[nl].dy);
+            virial[2] += sz[nl].r * (dEdrlz * sz[nl].dz);
+            virial[3] += sz[nl].r * (dEdrly * sz[nl].dz);
+            virial[4] += sz[nl].r * (dEdrlz * sz[nl].dx);
+            virial[5] += sz[nl].r * (dEdrlx * sz[nl].dy);
+          }
         }
       }
-    }
+    } /* Check on whether particle i is contributing */
   } /* End loop over i */
 
   if(compute_energy){
@@ -840,13 +844,21 @@ int model_driver_create(KIM_ModelDriverCreate *const modelDriverCreate,
   buffer->u3 = u3;
   buffer->u4 = u4;
 
+  /* Request that simulator omit neighbors of padding atoms */
+  buffer->paddingNeighborHints = 1;
+
+  /* Request a full list rather than a half list (still more efficient due to
+   * the particular looping structure adopted from Bazant here) */
+  buffer->halfListHints = 0;
+
   /* Register influence distance pointer */
   LOG_INFORMATION("Registering influence distance pointer");
   KIM_ModelDriverCreate_SetInfluenceDistancePointer(modelDriverCreate, &(buffer->influenceDistance));
 
   /* Register cutoff pointer */
   LOG_INFORMATION("Registering cutoff pointer");
-  KIM_ModelDriverCreate_SetNeighborListCutoffsPointer(modelDriverCreate, 1, &(buffer->cutoff));
+  KIM_ModelDriverCreate_SetNeighborListPointers(modelDriverCreate, 1, &(buffer->cutoff),
+      &(buffer->paddingNeighborHints), &(buffer->halfListHints));
 
   /* Register Model parameters */
   LOG_INFORMATION("Registering Model parameters");
@@ -892,8 +904,9 @@ static int refresh(KIM_ModelRefresh * const modelRefresh){
   LOG_INFORMATION("Resetting influence distance and cutoff");
   KIM_ModelRefresh_SetInfluenceDistancePointer(
       modelRefresh, &(buffer->influenceDistance));
-  KIM_ModelRefresh_SetNeighborListCutoffsPointer(
-      modelRefresh, 1, &(buffer->influenceDistance));
+  KIM_ModelRefresh_SetNeighborListPointers(
+      modelRefresh, 1, &(buffer->influenceDistance),
+      &(buffer->paddingNeighborHints), &(buffer->halfListHints));
 
   return FALSE;
 }
