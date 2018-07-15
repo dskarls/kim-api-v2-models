@@ -234,6 +234,10 @@ typedef struct {
   pot_table_t pair_pot;
   pot_table_t transfer_pot;
   pot_table_t embed_pot;
+
+  int paddingNeighborHints;
+  int halfListHints;
+
 } model_buffer;
 
 /* function prototypes for initialization and computes */

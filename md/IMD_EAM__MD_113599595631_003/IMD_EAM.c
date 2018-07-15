@@ -236,62 +236,110 @@ static int compute(KIM_ModelCompute const * const modelCompute,
       {
         j = neighListOfCurrentAtom[jj];
 
-        /* set up particle types and cols */
-        jt = particleSpeciesCodes[j];
-        col1 = it * ntypes + jt;
-        col2 = jt * ntypes + it;
-
-        /* calculate distance */
-        r2 = 0.0;
-        for (l = 0; l < DIM; l++)
+        /* effective half list */
+        if (i < j)
         {
-          Rij[l] = coords[j * DIM + l] - coords[i * DIM + l];
-          r2 += Rij[l] * Rij[l];
-        }
-        R = sqrt(r2);
+          /* set up particle types and cols */
+          jt = particleSpeciesCodes[j];
+          col1 = it * ntypes + jt;
+          col2 = jt * ntypes + it;
 
-        /* check if we are within the cutoff radius */
-        if (r2 <= buffer->pair_pot.end[col1])
-        {
-          /* calculate pair potential and the derivative at r2 */
-          PAIR_INT(phi, dphi, buffer->pair_pot, col1, inc, r2, is_short);
-          if (is_short) {
-            short_dist_warning(0, i, j, particleSpeciesCodes, Rij, R);
-            is_short = 0;
+          /* calculate distance */
+          r2 = 0.0;
+          for (l = 0; l < DIM; l++)
+          {
+            Rij[l] = coords[j * DIM + l] - coords[i * DIM + l];
+            r2 += Rij[l] * Rij[l];
           }
+          R = sqrt(r2);
 
-          /* we have a full neighbor list, so we only contribute 0.5 */
-          phi *= 0.5;
-          dphi *= 0.5;
+          /* check if we are within the cutoff radius */
+          if (r2 <= buffer->pair_pot.end[col1])
+          {
+            /* calculate pair potential and the derivative at r2 */
+            PAIR_INT(phi, dphi, buffer->pair_pot, col1, inc, r2, is_short);
+            if (is_short) {
+              short_dist_warning(0, i, j, particleSpeciesCodes, Rij, R);
+              is_short = 0;
+            }
 
-          if (comp_force){
-            for (l = 0; l < DIM; l++) {
-              force[i * DIM + l] += Rij[l] * dphi;
-              force[j * DIM + l] -= Rij[l] * dphi;
+            if (!particleContributing[j])
+            {
+              dphi *= 0.5;
+            }
+
+            if (comp_force){
+              for (l = 0; l < DIM; l++) {
+                force[i * DIM + l] += Rij[l] * dphi;
+                force[j * DIM + l] -= Rij[l] * dphi;
+              }
+            }
+
+            if (comp_energy)
+            {
+              if (particleContributing[j])
+              {
+                *energy += phi;
+              }
+              else
+              {
+                *energy += 0.5*phi;
+              }
+            }
+
+            if (comp_particleEnergy)
+            {
+              particleEnergy[i] += 0.5*phi;
+              if (particleContributing[j])
+              {
+                particleEnergy[j] += 0.5*phi;
+              }
+            }
+
+            if (comp_process_dEdr)
+            {
+              dphi *= R;
+              ier = KIM_ModelComputeArguments_ProcessDEDrTerm(
+                      modelComputeArguments, dphi, R, pRij, i, j);
             }
           }
 
-          if (comp_energy) *energy += phi;
-          if (comp_particleEnergy) particleEnergy[i] += phi;
-
-          if (comp_process_dEdr)
-          {
-            dphi *= R;
-            ier = KIM_ModelComputeArguments_ProcessDEDrTerm(
-                    modelComputeArguments, dphi, R, pRij, i, j);
+          /* calculate contribution to density */
+          if (r2 < buffer->transfer_pot.end[col1]) {
+            VAL_FUNC(rho, buffer->transfer_pot, col1, inc, r2, is_short);
+            if (is_short)
+            {
+              short_dist_warning(1, i, j, particleSpeciesCodes, Rij, R);
+              is_short = 0;
+            }
+            rho_val[i] += rho;
           }
-        }
 
-        /* calculate contribution to density */
-        if (r2 < buffer->transfer_pot.end[col1]) {
-          VAL_FUNC(rho, buffer->transfer_pot, col1, inc, r2, is_short);
-          if (is_short)
+          /* Also add density onto atom j if it is contributing */
+          if (particleContributing[j])
           {
-            short_dist_warning(1, i, j, particleSpeciesCodes, Rij, R);
-            is_short = 0;
+            if (jt == it)
+            {
+              if (r2 < buffer->transfer_pot.end[col2])
+              {
+                rho_val[j] += rho;
+              }
+            }
+            else
+            {
+              if (r2 < buffer->transfer_pot.end[col2])
+              {
+                VAL_FUNC(rho, buffer->transfer_pot, col2, inc, r2, is_short);
+                if (is_short)
+                {
+                  short_dist_warning(1, i, j, particleSpeciesCodes, Rij, R);
+                  is_short = 0;
+                }
+                rho_val[j] += rho;
+              }
+            }
           }
-          rho_val[i] += rho;
-        }
+        } /* if (i < j) */
       } /* loop over neighbors */
 
       /* calculate the embedding energies */
@@ -325,61 +373,72 @@ static int compute(KIM_ModelCompute const * const modelCompute,
       {
         j = neighListOfCurrentAtom[jj];
 
-        /* set up particle types and cols */
-        jt = particleSpeciesCodes[j];
-        col1 = jt * ntypes + it;
-        col2 = it * ntypes + jt;
-
-        /* calculate distance */
-        r2 = 0.0;
-        for (l = 0; l < DIM; l++)
+        /* effective half list */
+        if (i < j)
         {
-          Rij[l] = coords[j * DIM + l] - coords[i * DIM + l];
-          r2 += (Rij[l] * Rij[l]);
-        }
-        R = sqrt(r2);
+          /* set up particle types and cols */
+          jt = particleSpeciesCodes[j];
+          col1 = jt * ntypes + it;
+          col2 = it * ntypes + jt;
 
-        /* check if we are within the cutoff radius */
-        if ((r2 < buffer->transfer_pot.end[col1]) || (r2 < buffer->transfer_pot.end[col2]))
-        {
-          /* calculate derivative of the density function for both atoms */
-          DERIV_FUNC(rho_i_prime, buffer->transfer_pot, col1, inc, r2, is_short);
-          if (is_short) {
-            short_dist_warning(2, i, j, particleSpeciesCodes, Rij, R);
-            is_short = 0;
-          }
-          if (col1 == col2) {
-            rho_j_prime = rho_i_prime;
-          }
-          else
+          /* calculate distance */
+          r2 = 0.0;
+          for (l = 0; l < DIM; l++)
           {
-            DERIV_FUNC(rho_j_prime, buffer->transfer_pot, col2, inc, r2, is_short);
-            if (is_short)
-            {
+            Rij[l] = coords[j * DIM + l] - coords[i * DIM + l];
+            r2 += (Rij[l] * Rij[l]);
+          }
+          R = sqrt(r2);
+
+          /* check if we are within the cutoff radius */
+          if ((r2 < buffer->transfer_pot.end[col1]) || (r2 < buffer->transfer_pot.end[col2]))
+          {
+            /* calculate derivative of the density function for both atoms */
+            DERIV_FUNC(rho_i_prime, buffer->transfer_pot, col1, inc, r2, is_short);
+            if (is_short) {
               short_dist_warning(2, i, j, particleSpeciesCodes, Rij, R);
               is_short = 0;
             }
-          }
-
-          /* combine all contributions, dF_val[] is too big by a factor of 2 */
-          dphi = 0.5 * dF_val[i] * rho_j_prime;
-
-          if (comp_force)
-          {
-            for (l = 0; l < DIM; l++)
-            {
-              force[i * DIM + l] += Rij[l] * dphi;
-              force[j * DIM + l] -= Rij[l] * dphi;
+            if (col1 == col2) {
+              rho_j_prime = rho_i_prime;
             }
-          }
+            else
+            {
+              DERIV_FUNC(rho_j_prime, buffer->transfer_pot, col2, inc, r2, is_short);
+              if (is_short)
+              {
+                short_dist_warning(2, i, j, particleSpeciesCodes, Rij, R);
+                is_short = 0;
+              }
+            }
 
-          if (comp_process_dEdr)
-          {
-            dphi *= R;
-            ier = KIM_ModelComputeArguments_ProcessDEDrTerm(
-                    modelComputeArguments, dphi, R, pRij, i, j);
-          }
-        } /* check on cutoff distance */
+            /* combine all contributions */
+            if (particleContributing[j])
+            {
+              dphi = 0.5 * (dF_val[i] * rho_j_prime + dF_val[j] * rho_i_prime);
+            }
+            else
+            {
+              dphi = 0.5 * dF_val[i] * rho_j_prime;
+            }
+
+            if (comp_force)
+            {
+              for (l = 0; l < DIM; l++)
+              {
+                force[i * DIM + l] += Rij[l] * dphi;
+                force[j * DIM + l] -= Rij[l] * dphi;
+              }
+            }
+
+            if (comp_process_dEdr)
+            {
+              dphi *= R;
+              ier = KIM_ModelComputeArguments_ProcessDEDrTerm(
+                      modelComputeArguments, dphi, R, pRij, i, j);
+            }
+          } /* check on cutoff distance */
+        } /* if (i < j) */
       } /* loop over neighbors */
     } /* check on whether atom i is contributing */
   } /* loop over atoms */
@@ -810,8 +869,11 @@ static int refresh(KIM_ModelRefresh * const modelRefresh)
   LOG_INFORMATION("Resetting influence distance and cutoffs");
   KIM_ModelRefresh_SetInfluenceDistancePointer(
       modelRefresh, &(buffer->influenceDistance));
-  KIM_ModelRefresh_SetNeighborListCutoffsPointer(modelRefresh, 1,
-                                                 &(buffer->cutoff));
+  KIM_ModelRefresh_SetNeighborListPointers(
+      modelRefresh, 1,
+      &(buffer->cutoff),
+      &(buffer->paddingNeighborHints),
+      &(buffer->halfListHints));
 
   /* No errors */
   return FALSE;
@@ -1135,9 +1197,11 @@ int create(
   KIM_ModelDriverCreate_SetInfluenceDistancePointer(
       modelDriverCreate,
       &(buffer->influenceDistance));
-  KIM_ModelDriverCreate_SetNeighborListCutoffsPointer(
+  KIM_ModelDriverCreate_SetNeighborListPointers(
       modelDriverCreate, 1,
-      &(buffer->influenceDistance));
+      &(buffer->influenceDistance),
+      &(buffer->paddingNeighborHints),
+      &(buffer->halfListHints));
 
   /* allocate the arrays for the density and embedding values */
   buffer->rho_val = (double *)malloc(1 * sizeof(double));
@@ -1149,6 +1213,12 @@ int create(
   }
   /* Initial value for table_len (set in compute function) */
   buffer->table_len = 1;
+
+  /* Request omission of neighbors of padding atoms if possible */
+  buffer->paddingNeighborHints = 1;
+
+  /* Request half list if possible */
+  buffer->halfListHints = 1;
 
   /* No errors */
   ier = FALSE;
