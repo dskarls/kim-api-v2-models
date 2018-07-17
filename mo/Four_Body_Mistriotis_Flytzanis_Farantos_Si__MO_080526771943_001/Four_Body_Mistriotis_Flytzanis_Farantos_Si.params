@@ -1,0 +1,85 @@
+# Number of Species
+1
+Si
+
+# Si-Si-Si-Si interaction1
+7.041365010799137
+0.60107948999545
+4
+0
+1.80
+1.727861771058315
+20.302375809935207
+1.145530046298506
+2.0951
+2.315
+5.0
+-0.3333333333333333
+
+# Above values correspond to the following parameters line by line
+#   Line 1: Any comments
+#   Line 2: nSpecies, where nSpecies is the number of species and can be either 1 or 2
+#   Line 3: chemical symbols of the species (separated by a space if nSpecies=2)
+#   Line 4: Any comments, e.g. parameters for nInteractions below starting with 1st, or blank space. More blank lines may follow.
+#   Line 5: A
+#   Line 6: B
+#   Line 7: p
+#   Line 8: q
+#   Line 9: a
+#   Line 10: lambda
+#   Line 11: lambda_2
+#   Line 12: gamma
+#   Line 13: sigma in Angstrom
+#   Line 14: epsilon in ev
+#   Line 15: Q
+#   Line 16: costheta_0
+
+# If nSpecies = 1, then ignore additional lines. Otherwise
+# continue listing the parameters for 2nd interaction
+#   Line 19: A
+#   Line 20: B
+#   Line 21: p
+#   Line 22: q
+#   Line 23: a
+#   Line 24: lambda
+#   Line 25: lambda_2
+#   Line 26: gamma
+#   Line 27: sigma in Angstrom
+#   Line 28: epsilon in ev
+#   Line 29: Q
+#   Line 30: costheta_0
+
+# If nSpecies = 2, then continue listing the parameters for all
+# interactions from 3rd to 16th.
+
+# Note that the overall order in which parameters are given in
+# the event that nSpecies = 2 must be as follows, where "A"
+# represents the first species given on line 3 and "B" represents
+# the second species given on line 3:
+
+# A - A - A - A
+# A - A - A - B
+# A - A - B - A
+# A - A - B - B
+# A - B - A - A
+# A - B - A - B
+# A - B - B - A
+# A - B - B - B
+# B - A - A - A
+# B - A - A - B
+# B - A - B - A
+# B - A - B - B
+# B - B - A - A
+# B - B - A - B
+# B - B - B - A
+# B - B - B - B
+
+#Any additional lines will be silently ignored.
+
+#References:
+1. Mistriotis et al, Physical Review B 39, 1212 (1989)
+2. Ellad B. Tadmor and Ronald E. Miller, Modeling Materials:
+   Continuum, Atomistic and Multiscale Techniques, Cambridge University Press, 2011
+3. All parameters in Ref 1 are adjusted for epsilon = 2.315 eV.
+#
+
