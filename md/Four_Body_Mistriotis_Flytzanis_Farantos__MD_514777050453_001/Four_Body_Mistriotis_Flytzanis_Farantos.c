@@ -412,9 +412,10 @@ static void calc_phi_dphi_three(double* a, double* lambda, double* gamma,
 
   dphi has three components as derivatives of phi w.r.t. r_ij, r_ik, r_jk
 
-  d2phi as symmetric Hessian matrix of phi has six components: [0]=(ij,ij), [3]=(ij,ik), [4]=(ij,jk)
-                                                                            [1]=(ik,ik), [5]=(ik,jk)
-                                                                                         [2]=(jk,jk)
+  d2phi as symmetric Hessian matrix of phi has six components:
+    [0]=(ij,ij), [3]=(ij,ik), [4]=(ij,jk)
+                 [1]=(ik,ik), [5]=(ik,jk)
+                              [2]=(jk,jk)
 */
 static void calc_phi_d2phi_three(double* a, double* lambda, double* gamma,
                                  double* sigma, double* epsilon, double* Q,
@@ -569,41 +570,46 @@ static void calc_phi_four(double* a, double* lambda_2, double* gamma,
                           double* costhetat, double rij, double rik, double ril,
                           double rjk, double rjl, double rkl, double* phi)
 {
-   /* local variables */
-   double c1;
+  /* local variables */
+  double c1;
 
-   double rij_cap;
-   double rik_cap;
-   double ril_cap;
+  double rij_cap;
+  double rik_cap;
+  double ril_cap;
 
-   double costhetajik, costhetajil, costhetakil;
+  double costhetajik, costhetajil, costhetakil;
 
-   double diff_costhetajik, diff_costhetajil, diff_costhetakil;
+  double diff_costhetajik, diff_costhetajil, diff_costhetakil;
 
-   double exp_ij_ik_il;
+  double exp_ij_ik_il;
 
-   c1 = *lambda_2 * *epsilon;
+  c1 = *lambda_2 * *epsilon;
 
-   rij_cap = rij/(*sigma);
-   rik_cap = rik/(*sigma);
-   ril_cap = ril/(*sigma);
+  rij_cap = rij/(*sigma);
+  rik_cap = rik/(*sigma);
+  ril_cap = ril/(*sigma);
 
-   costhetajik = (pow(rij,2) + pow(rik,2) - pow(rjk,2))/(2*rij*rik);
-   costhetajil = (pow(rij,2) + pow(ril,2) - pow(rjl,2))/(2*rij*ril);
-   costhetakil = (pow(ril,2) + pow(rik,2) - pow(rkl,2))/(2*ril*rik);
+  costhetajik = (pow(rij,2) + pow(rik,2) - pow(rjk,2))/(2*rij*rik);
+  costhetajil = (pow(rij,2) + pow(ril,2) - pow(rjl,2))/(2*rij*ril);
+  costhetakil = (pow(ril,2) + pow(rik,2) - pow(rkl,2))/(2*ril*rik);
 
-   /* Difference of two cosines */
-   diff_costhetajik = costhetajik - *costhetat; diff_costhetajil = costhetajil - *costhetat; diff_costhetakil = costhetakil - *costhetat;
+  /* Difference of two cosines */
+  diff_costhetajik = costhetajik - *costhetat; diff_costhetajil
+                   = costhetajil - *costhetat; diff_costhetakil
+                   = costhetakil - *costhetat;
 
-   /* Variables for simplifying terms */
-   exp_ij_ik_il = exp((*gamma) * (1/(rij_cap - *a) + 1/(rik_cap - *a) + 1/(ril_cap - *a)));
+  /* Variables for simplifying terms */
+  exp_ij_ik_il = exp((*gamma) * (1/(rij_cap - *a)
+                 + 1/(rik_cap - *a) + 1/(ril_cap - *a)));
 
-   if ((rij_cap < *a) && (rik_cap < *a) && (ril_cap < *a))
-   {
-     *phi  = c1 * exp_ij_ik_il * (1 - exp(- *Q *(pow(diff_costhetajik,2) + pow(diff_costhetajil,2) + pow(diff_costhetakil,2))));
-   }
+  if ((rij_cap < *a) && (rik_cap < *a) && (ril_cap < *a))
+  {
+    *phi  = c1 * exp_ij_ik_il * (1 - exp(- *Q *(pow(diff_costhetajik,2)
+                                   + pow(diff_costhetajil,2)
+                                   + pow(diff_costhetakil,2))));
+  }
 
-   return;
+  return;
 }
 
 /* Calculate four-body term phi_four(r_ij, r_ik, r_il, r_jk, r_jl, r_kl) and its 1st derivative
@@ -660,20 +666,30 @@ static void calc_phi_dphi_four(double* a, double* lambda_2, double* gamma,
                    = costhetakil - *costhetat;
 
   /* 1st derivative of cosines */
-  d_costhetajik[0] = (*sigma)*(pow(rij,2) - pow(rik,2) + pow(rjk,2))/(2*rij*rij*rik); /* w.r.t. ij */
-  d_costhetajik[1] = (*sigma)*(pow(rik,2) - pow(rij,2) + pow(rjk,2))/(2*rij*rik*rik); /* w.r.t. ik */
-  d_costhetajik[2] = -(*sigma)*rjk/(rij*rik); /* w.r.t. jk */
+  /* w.r.t. ij */
+  d_costhetajik[0] = (*sigma)*(pow(rij,2) - pow(rik,2) + pow(rjk,2))/(2*rij*rij*rik);
+  /* w.r.t. ik */
+  d_costhetajik[1] = (*sigma)*(pow(rik,2) - pow(rij,2) + pow(rjk,2))/(2*rij*rik*rik);
+  /* w.r.t. jk */
+  d_costhetajik[2] = -(*sigma)*rjk/(rij*rik);
 
-  d_costhetajil[0] = (*sigma)*(pow(rij,2) - pow(ril,2) + pow(rjl,2))/(2*rij*rij*ril); /* w.r.t. ij */
-  d_costhetajil[1] = (*sigma)*(pow(ril,2) - pow(rij,2) + pow(rjl,2))/(2*rij*ril*ril); /* w.r.t. il */
-  d_costhetajil[2] = -(*sigma)*rjl/(rij*ril); /* w.r.t. jl */
+  /* w.r.t. ij */
+  d_costhetajil[0] = (*sigma)*(pow(rij,2) - pow(ril,2) + pow(rjl,2))/(2*rij*rij*ril);
+  /* w.r.t. il */
+  d_costhetajil[1] = (*sigma)*(pow(ril,2) - pow(rij,2) + pow(rjl,2))/(2*rij*ril*ril);
+  /* w.r.t. jl */
+  d_costhetajil[2] = -(*sigma)*rjl/(rij*ril);
 
-  d_costhetakil[0] = (*sigma)*(pow(rik,2) - pow(ril,2) + pow(rkl,2))/(2*rik*rik*ril); /* w.r.t. ik */
-  d_costhetakil[1] = (*sigma)*(pow(ril,2) - pow(rik,2) + pow(rkl,2))/(2*rik*ril*ril); /* w.r.t. il */
-  d_costhetakil[2] = -(*sigma)*rkl/(rik*ril); /* w.r.t. kl */
+  /* w.r.t. ik */
+  d_costhetakil[0] = (*sigma)*(pow(rik,2) - pow(ril,2) + pow(rkl,2))/(2*rik*rik*ril);
+  /* w.r.t. il */
+  d_costhetakil[1] = (*sigma)*(pow(ril,2) - pow(rik,2) + pow(rkl,2))/(2*rik*ril*ril);
+  /* w.r.t. kl */
+  d_costhetakil[2] = -(*sigma)*rkl/(rik*ril);
 
   /* Variables for simplifying terms */
-  exp_ij_ik_il = exp((*gamma) * (1/(rij_cap - *a) + 1/(rik_cap - *a) + 1/(ril_cap - *a)));
+  exp_ij_ik_il = exp((*gamma) * (1/(rij_cap - *a) + 1/(rik_cap - *a)
+                 + 1/(ril_cap - *a)));
 
   d_ij = -(*gamma)*pow((rij_cap - *a),-2);
   d_ik = -(*gamma)*pow((rik_cap - *a),-2);
@@ -682,22 +698,32 @@ static void calc_phi_dphi_four(double* a, double* lambda_2, double* gamma,
 
   if ((rij_cap < *a) && (rik_cap < *a) && (ril_cap < *a))
   {
-    g1  =  pow(diff_costhetajik,2) + pow(diff_costhetajil,2) + pow(diff_costhetakil,2);
+    g1  =  pow(diff_costhetajik,2) + pow(diff_costhetajil,2)
+           + pow(diff_costhetakil,2);
     g2  =  exp(- *Q * g1);
     g3  =  1 - g2;
     g4  =  2 * *Q * g2;
 
     *phi  = c1 * exp_ij_ik_il * g3;
 
-    dphi[0] = c2 * exp_ij_ik_il *  (g3 * d_ij + g4 * (diff_costhetajik * d_costhetajik[0]
-                                                + diff_costhetajil * d_costhetajil[0])); /* w.r.t. ij */
-    dphi[1] = c2 * exp_ij_ik_il *  (g3 * d_ik + g4 * (diff_costhetajik * d_costhetajik[1]
-                                                + diff_costhetakil * d_costhetakil[0])); /* w.r.t. ik */
-    dphi[2] = c2 * exp_ij_ik_il *  (g3 * d_il + g4 * (diff_costhetajil * d_costhetajil[1]
-                                                + diff_costhetakil * d_costhetakil[1])); /* w.r.t. il */
-    dphi[3] = c2 * exp_ij_ik_il *  (g4 * (diff_costhetajik * d_costhetajik[2]));         /* w.r.t. jk */
-    dphi[4] = c2 * exp_ij_ik_il *  (g4 * (diff_costhetajil * d_costhetajil[2]));         /* w.r.t. jl */
-    dphi[5] = c2 * exp_ij_ik_il *  (g4 * (diff_costhetakil * d_costhetakil[2]));         /* w.r.t. kl */
+    /* w.r.t. ij */
+    dphi[0] = c2 * exp_ij_ik_il * (g3 * d_ij
+                                   + g4 * (diff_costhetajik * d_costhetajik[0]
+                                   + diff_costhetajil * d_costhetajil[0]));
+    /* w.r.t. ik */
+    dphi[1] = c2 * exp_ij_ik_il * (g3 * d_ik
+                                   + g4 * (diff_costhetajik * d_costhetajik[1]
+                                   + diff_costhetakil * d_costhetakil[0]));
+    /* w.r.t. il */
+    dphi[2] = c2 * exp_ij_ik_il *  (g3 * d_il
+                                    + g4 * (diff_costhetajil * d_costhetajil[1]
+                                    + diff_costhetakil * d_costhetakil[1]));
+    /* w.r.t. jk */
+    dphi[3] = c2 * exp_ij_ik_il *  (g4 * (diff_costhetajik * d_costhetajik[2]));
+    /* w.r.t. jl */
+    dphi[4] = c2 * exp_ij_ik_il *  (g4 * (diff_costhetajil * d_costhetajil[2]));
+    /* w.r.t. kl */
+    dphi[5] = c2 * exp_ij_ik_il *  (g4 * (diff_costhetakil * d_costhetakil[2]));
   }
 
   free(d_costhetajik);
@@ -726,219 +752,313 @@ static void calc_phi_d2phi_four(double* a, double* lambda_2, double* gamma,
                                 double ril, double rjk, double rjl, double rkl,
                                 double* phi, double* dphi, double* d2phi)
 {
-    /* local variables */
-   double c1;
-   double c2;
-   double c3;
+  /* local variables */
+  double c1;
+  double c2;
+  double c3;
 
-   double rij_cap;
-   double rik_cap;
-   double ril_cap;
+  double rij_cap;
+  double rik_cap;
+  double ril_cap;
 
-   double costhetajik, costhetajil, costhetakil;
+  double costhetajik, costhetajil, costhetakil;
 
-   double diff_costhetajik, diff_costhetajil, diff_costhetakil;
+  double diff_costhetajik, diff_costhetajil, diff_costhetakil;
 
-   /* 1st derivate of cosines w.r.t. ij, ik, il, jk, jl, kl in array order*/
-   double* d_costhetajik = (double *) malloc(3*sizeof(double));
-   double* d_costhetajil = (double *) malloc(3*sizeof(double));
-   double* d_costhetakil = (double *) malloc(3*sizeof(double));
+  /* 1st derivate of cosines w.r.t. ij, ik, il, jk, jl, kl in array order*/
+  double* d_costhetajik = (double *) malloc(3*sizeof(double));
+  double* d_costhetajil = (double *) malloc(3*sizeof(double));
+  double* d_costhetakil = (double *) malloc(3*sizeof(double));
 
-   /* Hessian of cosines in the given array order*/
-   double* d2_costhetajik = (double *) malloc(6*sizeof(double));
-   /* [0] = (ij,ij), [1] = (ik,ik), [2] = (jk,jk), [3] = (ij,ik),
-      [4] = (ij,jk), [5] = (ik,jk) */
-   double* d2_costhetajil = (double *) malloc(6*sizeof(double));
-   double* d2_costhetakil = (double *) malloc(6*sizeof(double));
+  /* Hessian of cosines in the given array order*/
+  double* d2_costhetajik = (double *) malloc(6*sizeof(double));
+  /* [0] = (ij,ij), [1] = (ik,ik), [2] = (jk,jk), [3] = (ij,ik),
+     [4] = (ij,jk), [5] = (ik,jk) */
+  double* d2_costhetajil = (double *) malloc(6*sizeof(double));
+  double* d2_costhetakil = (double *) malloc(6*sizeof(double));
 
-   double exp_ij_ik_il;
+  double exp_ij_ik_il;
 
-   double d_ij;
-   double d_ik;
-   double d_il;
+  double d_ij;
+  double d_ik;
+  double d_il;
 
-   double d_ij_2;
-   double d_ik_2;
-   double d_il_2;
+  double d_ij_2;
+  double d_ik_2;
+  double d_il_2;
 
-   double dd_ij;
-   double dd_ik;
-   double dd_il;
+  double dd_ij;
+  double dd_ik;
+  double dd_il;
 
-   double g1, g2, g3, g4, g5, powQ;
+  double g1, g2, g3, g4, g5, powQ;
 
-   double* dg1 = (double *) malloc(6*sizeof(double));
-   double* dg2 = (double *) malloc(6*sizeof(double));
+  double* dg1 = (double *) malloc(6*sizeof(double));
+  double* dg2 = (double *) malloc(6*sizeof(double));
 
-   int i;
+  int i;
 
-   c1 = *lambda_2 * *epsilon;
-   c2 = c1 / *sigma;
-   c3 = c2 / *sigma;
+  c1 = *lambda_2 * *epsilon;
+  c2 = c1 / *sigma;
+  c3 = c2 / *sigma;
 
-   rij_cap = rij/(*sigma);
-   rik_cap = rik/(*sigma);
-   ril_cap = ril/(*sigma);
+  rij_cap = rij/(*sigma);
+  rik_cap = rik/(*sigma);
+  ril_cap = ril/(*sigma);
 
-   costhetajik = (pow(rij,2) + pow(rik,2) - pow(rjk,2))/(2*rij*rik);
-   costhetajil = (pow(rij,2) + pow(ril,2) - pow(rjl,2))/(2*rij*ril);
-   costhetakil = (pow(ril,2) + pow(rik,2) - pow(rkl,2))/(2*ril*rik);
+  costhetajik = (pow(rij,2) + pow(rik,2) - pow(rjk,2))/(2*rij*rik);
+  costhetajil = (pow(rij,2) + pow(ril,2) - pow(rjl,2))/(2*rij*ril);
+  costhetakil = (pow(ril,2) + pow(rik,2) - pow(rkl,2))/(2*ril*rik);
 
-   /* Difference of two cosines */
-   diff_costhetajik = costhetajik - *costhetat; diff_costhetajil
-                    = costhetajil - *costhetat; diff_costhetakil
-                    = costhetakil - *costhetat;
+  /* Difference of two cosines */
+  diff_costhetajik = costhetajik - *costhetat; diff_costhetajil
+                   = costhetajil - *costhetat; diff_costhetakil
+                   = costhetakil - *costhetat;
 
-   /* 1st derivative of cosines */
-   /* w.r.t. ij */
-   d_costhetajik[0] = (*sigma)*(pow(rij,2) - pow(rik,2) + pow(rjk,2))/(2*rij*rij*rik);
-   d_costhetajik[1] = (*sigma)*(pow(rik,2) - pow(rij,2) + pow(rjk,2))/(2*rij*rik*rik); /* w.r.t. ik */
-   d_costhetajik[2] = -(*sigma)*rjk/(rij*rik); /* w.r.t. jk */
+  /* 1st derivative of cosines */
+  /* w.r.t. ij */
+  d_costhetajik[0] = (*sigma)*(pow(rij,2) - pow(rik,2) + pow(rjk,2))/(2*rij*rij*rik);
+  /* w.r.t. ik */
+  d_costhetajik[1] = (*sigma)*(pow(rik,2) - pow(rij,2) + pow(rjk,2))/(2*rij*rik*rik);
+  /* w.r.t. jk */
+  d_costhetajik[2] = -(*sigma)*rjk/(rij*rik);
+  /* w.r.t. ij */
+  d_costhetajil[0] = (*sigma)*(pow(rij,2) - pow(ril,2) + pow(rjl,2))/(2*rij*rij*ril);
+  /* w.r.t. il */
+  d_costhetajil[1] = (*sigma)*(pow(ril,2) - pow(rij,2) + pow(rjl,2))/(2*rij*ril*ril);
+  /* w.r.t. jl */
+  d_costhetajil[2] = -(*sigma)*rjl/(rij*ril);
 
-   d_costhetajil[0] = (*sigma)*(pow(rij,2) - pow(ril,2) + pow(rjl,2))/(2*rij*rij*ril); /* w.r.t. ij */
-   d_costhetajil[1] = (*sigma)*(pow(ril,2) - pow(rij,2) + pow(rjl,2))/(2*rij*ril*ril); /* w.r.t. il */
-   d_costhetajil[2] = -(*sigma)*rjl/(rij*ril); /* w.r.t. jl */
+  /* w.r.t. ik */
+  d_costhetakil[0] = (*sigma)*(pow(rik,2) - pow(ril,2) + pow(rkl,2))/(2*rik*rik*ril);
+  /* w.r.t. il */
+  d_costhetakil[1] = (*sigma)*(pow(ril,2) - pow(rik,2) + pow(rkl,2))/(2*rik*ril*ril);
+  /* w.r.t. kl */
+  d_costhetakil[2] = -(*sigma)*rkl/(rik*ril);
 
-   d_costhetakil[0] = (*sigma)*(pow(rik,2) - pow(ril,2) + pow(rkl,2))/(2*rik*rik*ril); /* w.r.t. ik */
-   d_costhetakil[1] = (*sigma)*(pow(ril,2) - pow(rik,2) + pow(rkl,2))/(2*rik*ril*ril); /* w.r.t. il */
-   d_costhetakil[2] = -(*sigma)*rkl/(rik*ril); /* w.r.t. kl */
+  /* Hessian matrix of cosines */
+  /* w.r.t. ij,ij */
+  d2_costhetajik[0] = (*sigma * *sigma)*(pow(rik,2) - pow(rjk,2))/(pow(rij,3)*rik);
+  /* w.r.t. ij,ik */
+  d2_costhetajik[1] = -(*sigma * *sigma)*(pow(rij,2)
+                      + pow(rik,2) + pow(rjk,2))/(2*pow(rij,2)*pow(rik,2));
+  /* w.r.t. ij,jk */
+  d2_costhetajik[2] = (*sigma * *sigma)*rjk/(pow(rij,2)*rik);
+  /* w.r.t. ik,ik */
+  d2_costhetajik[3] = (*sigma * *sigma)*(pow(rij,2) - pow(rjk,2))/(rij*pow(rik,3));
+  /* w.r.t. ik,jk */
+  d2_costhetajik[4] = (*sigma * *sigma)*rjk/(pow(rik,2)*rij);
+  /* w.r.t. jk,jk */
+  d2_costhetajik[5] = -(*sigma * *sigma)/(rij*rik);
 
-   /* Hessian matrix of cosines */
-   d2_costhetajik[0] = (*sigma * *sigma)*(pow(rik,2) - pow(rjk,2))/(pow(rij,3)*rik);                         /* w.r.t. ij,ij */
-   d2_costhetajik[1] = -(*sigma * *sigma)*(pow(rij,2) + pow(rik,2) + pow(rjk,2))/(2*pow(rij,2)*pow(rik,2));  /* w.r.t. ij,ik */
-   d2_costhetajik[2] = (*sigma * *sigma)*rjk/(pow(rij,2)*rik);                                               /* w.r.t. ij,jk */
-   d2_costhetajik[3] = (*sigma * *sigma)*(pow(rij,2) - pow(rjk,2))/(rij*pow(rik,3));                         /* w.r.t. ik,ik */
-   d2_costhetajik[4] = (*sigma * *sigma)*rjk/(pow(rik,2)*rij);                                               /* w.r.t. ik,jk */
-   d2_costhetajik[5] = -(*sigma * *sigma)/(rij*rik);                                                         /* w.r.t. jk,jk */
+  /* w.r.t. ij,ij */
+  d2_costhetajil[0] = (*sigma * *sigma)*(pow(ril,2) - pow(rjl,2))/(pow(rij,3)*ril);
+  /* w.r.t. ij,il */
+  d2_costhetajil[1] = -(*sigma * *sigma)*(pow(rij,2)
+                      + pow(ril,2) + pow(rjl,2))/(2*pow(rij,2)*pow(ril,2));
+  /* w.r.t. ij,jl */
+  d2_costhetajil[2] = (*sigma * *sigma)*rjl/(pow(rij,2)*ril);
+  /* w.r.t. il,il */
+  d2_costhetajil[3] = (*sigma * *sigma)*(pow(rij,2) - pow(rjl,2))/(rij*pow(ril,3));
+  /* w.r.t. il,jl */
+  d2_costhetajil[4] = (*sigma * *sigma)*rjl/(pow(ril,2)*rij);
+  /* w.r.t. jl,jl */
+  d2_costhetajil[5] = -(*sigma * *sigma)/(rij*ril);
 
-   d2_costhetajil[0] = (*sigma * *sigma)*(pow(ril,2) - pow(rjl,2))/(pow(rij,3)*ril);                         /* w.r.t. ij,ij */
-   d2_costhetajil[1] = -(*sigma * *sigma)*(pow(rij,2) + pow(ril,2) + pow(rjl,2))/(2*pow(rij,2)*pow(ril,2));  /* w.r.t. ij,il */
-   d2_costhetajil[2] = (*sigma * *sigma)*rjl/(pow(rij,2)*ril);                                               /* w.r.t. ij,jl */
-   d2_costhetajil[3] = (*sigma * *sigma)*(pow(rij,2) - pow(rjl,2))/(rij*pow(ril,3));                         /* w.r.t. il,il */
-   d2_costhetajil[4] = (*sigma * *sigma)*rjl/(pow(ril,2)*rij);                                               /* w.r.t. il,jl */
-   d2_costhetajil[5] = -(*sigma * *sigma)/(rij*ril);                                                         /* w.r.t. jl,jl */
+  /* w.r.t. ik,ik */
+  d2_costhetakil[0] = (*sigma * *sigma)*(pow(ril,2) - pow(rkl,2))/(pow(rik,3)*ril);
+  /* w.r.t. ik,il */
+  d2_costhetakil[1] = -(*sigma * *sigma)*(pow(rik,2)
+                      + pow(ril,2) + pow(rkl,2))/(2*pow(rik,2)*pow(ril,2));
+  /* w.r.t. ik,kl */
+  d2_costhetakil[2] = (*sigma * *sigma)*rkl/(pow(rik,2)*ril);
+  /* w.r.t. il,il */
+  d2_costhetakil[3] = (*sigma * *sigma)*(pow(rik,2) - pow(rkl,2))/(rik*pow(ril,3));
+  /* w.r.t. il,kl */
+  d2_costhetakil[4] = (*sigma * *sigma)*rkl/(pow(ril,2)*rik);
+  /* w.r.t. kl,kl */
+  d2_costhetakil[5] = -(*sigma * *sigma)/(rik*ril);
 
-   d2_costhetakil[0] = (*sigma * *sigma)*(pow(ril,2) - pow(rkl,2))/(pow(rik,3)*ril);                         /* w.r.t. ik,ik */
-   d2_costhetakil[1] = -(*sigma * *sigma)*(pow(rik,2) + pow(ril,2) + pow(rkl,2))/(2*pow(rik,2)*pow(ril,2));  /* w.r.t. ik,il */
-   d2_costhetakil[2] = (*sigma * *sigma)*rkl/(pow(rik,2)*ril);                                               /* w.r.t. ik,kl */
-   d2_costhetakil[3] = (*sigma * *sigma)*(pow(rik,2) - pow(rkl,2))/(rik*pow(ril,3));                         /* w.r.t. il,il */
-   d2_costhetakil[4] = (*sigma * *sigma)*rkl/(pow(ril,2)*rik);                                               /* w.r.t. il,kl */
-   d2_costhetakil[5] = -(*sigma * *sigma)/(rik*ril);                                                         /* w.r.t. kl,kl */
+  /* Variables for simplifying terms */
+  exp_ij_ik_il = exp((*gamma) * (1/(rij_cap - *a) + 1/(rik_cap - *a)
+                 + 1/(ril_cap - *a)));
 
-   /* Variables for simplifying terms */
-   exp_ij_ik_il = exp((*gamma) * (1/(rij_cap - *a) + 1/(rik_cap - *a) + 1/(ril_cap - *a)));
+  d_ij = -(*gamma)*pow((rij_cap - *a),-2);
+  d_ik = -(*gamma)*pow((rik_cap - *a),-2);
+  d_il = -(*gamma)*pow((ril_cap - *a),-2);
 
-   d_ij = -(*gamma)*pow((rij_cap - *a),-2);
-   d_ik = -(*gamma)*pow((rik_cap - *a),-2);
-   d_il = -(*gamma)*pow((ril_cap - *a),-2);
+  d_ij_2 = d_ij * d_ij;
+  d_ik_2 = d_ik * d_ik;
+  d_il_2 = d_il * d_il;
 
-   d_ij_2 = d_ij * d_ij;
-   d_ik_2 = d_ik * d_ik;
-   d_il_2 = d_il * d_il;
+  dd_ij = (2 * *gamma)*pow((rij_cap - *a),-3);
+  dd_ik = (2 * *gamma)*pow((rik_cap - *a),-3);
+  dd_il = (2 * *gamma)*pow((ril_cap - *a),-3);
 
-   dd_ij = (2 * *gamma)*pow((rij_cap - *a),-3);
-   dd_ik = (2 * *gamma)*pow((rik_cap - *a),-3);
-   dd_il = (2 * *gamma)*pow((ril_cap - *a),-3);
+  *phi = 0.0;
 
-   *phi = 0.0;
+  for(i = 0; i < 6; i++) dphi[i] = 0.0;
+  for(i = 0; i < 21; i++) d2phi[i] = 0.0;
 
-   for(i = 0; i < 6; i++) dphi[i] = 0.0;
-   for(i = 0; i < 21; i++) d2phi[i] = 0.0;
+  powQ = 4 * *Q * *Q;
 
-   powQ = 4 * *Q * *Q;
+  if ((rij_cap < *a) && (rik_cap < *a) && (ril_cap < *a))
+  {
+    g1  =  pow(diff_costhetajik,2) + pow(diff_costhetajil,2) + pow(diff_costhetakil,2);
+    g2  =  exp(- *Q * g1);
+    g3  =  1 - g2;
+    g4  =  2 * *Q * g2;
+    g5  =  powQ * g2;
 
-   if ((rij_cap < *a) && (rik_cap < *a) && (ril_cap < *a))
-   {
-     g1  =  pow(diff_costhetajik,2) + pow(diff_costhetajil,2) + pow(diff_costhetakil,2);
-     g2  =  exp(- *Q * g1);
-     g3  =  1 - g2;
-     g4  =  2 * *Q * g2;
-     g5  =  powQ * g2;
+    dg1[0]  =  diff_costhetajik * d_costhetajik[0]
+               + diff_costhetajil * d_costhetajil[0];
+    dg1[1]  =  diff_costhetajik * d_costhetajik[1]
+               + diff_costhetakil * d_costhetakil[0];
+    dg1[2]  =  diff_costhetajil * d_costhetajil[1]
+               + diff_costhetakil * d_costhetakil[1];
+    dg1[3]  =  diff_costhetajik * d_costhetajik[2];
+    dg1[4]  =  diff_costhetajil * d_costhetajil[2];
+    dg1[5]  =  diff_costhetakil * d_costhetakil[2];
 
-     dg1[0]  =  diff_costhetajik * d_costhetajik[0] + diff_costhetajil * d_costhetajil[0];
-     dg1[1]  =  diff_costhetajik * d_costhetajik[1] + diff_costhetakil * d_costhetakil[0];
-     dg1[2]  =  diff_costhetajil * d_costhetajil[1] + diff_costhetakil * d_costhetakil[1];
-     dg1[3]  =  diff_costhetajik * d_costhetajik[2];
-     dg1[4]  =  diff_costhetajil * d_costhetajil[2];
-     dg1[5]  =  diff_costhetakil * d_costhetakil[2];
+    *phi  += exp_ij_ik_il * g3;
 
-     *phi  += exp_ij_ik_il * g3;
+    /* 1st derivative */
+    /* w.r.t. ij */
+    dphi[0] += exp_ij_ik_il *  (g3 * d_ij + g4 * dg1[0]);
+    /* w.r.t. ik */
+    dphi[1] += exp_ij_ik_il *  (g3 * d_ik + g4 * dg1[1]);
+    /* w.r.t. il */
+    dphi[2] += exp_ij_ik_il *  (g3 * d_il + g4 * dg1[2]);
+    /* w.r.t. jk */
+    dphi[3] += exp_ij_ik_il *  g4 * dg1[3];
+    /* w.r.t. jl */
+    dphi[4] += exp_ij_ik_il *  g4 * dg1[4];
+    /* w.r.t. kl */
+    dphi[5] += exp_ij_ik_il *  g4 * dg1[5];
 
-     /* 1st derivative */
-     dphi[0] += exp_ij_ik_il *  (g3 * d_ij + g4 * dg1[0]); /* w.r.t. ij */
-     dphi[1] += exp_ij_ik_il *  (g3 * d_ik + g4 * dg1[1]); /* w.r.t. ik */
-     dphi[2] += exp_ij_ik_il *  (g3 * d_il + g4 * dg1[2]); /* w.r.t. il */
-     dphi[3] += exp_ij_ik_il *  g4 * dg1[3];               /* w.r.t. jk */
-     dphi[4] += exp_ij_ik_il *  g4 * dg1[4];               /* w.r.t. jl */
-     dphi[5] += exp_ij_ik_il *  g4 * dg1[5];               /* w.r.t. kl */
+    /* Hessian */
+    dg2[0]  =  diff_costhetajik * d2_costhetajik[0]
+               + diff_costhetajil * d2_costhetajil[0]
+               + pow(d_costhetajik[0],2) + pow(d_costhetajil[0],2);
+    dg2[1]  =  diff_costhetajik * d2_costhetajik[1]
+               + d_costhetajik[0] * d_costhetajik[1];
+    dg2[2]  =  diff_costhetajil * d2_costhetajil[1]
+               + d_costhetajil[0] * d_costhetajil[1];
+    dg2[3]  =  diff_costhetajik * d2_costhetajik[2]
+               + d_costhetajik[0] * d_costhetajik[2];
+    dg2[4]  =  diff_costhetajil * d2_costhetajil[2]
+               + d_costhetajil[0] * d_costhetajil[2];
 
-     /* Hessian */
-     dg2[0]  =  diff_costhetajik * d2_costhetajik[0] + diff_costhetajil * d2_costhetajil[0] + pow(d_costhetajik[0],2) + pow(d_costhetajil[0],2);
-     dg2[1]  =  diff_costhetajik * d2_costhetajik[1] + d_costhetajik[0] * d_costhetajik[1];
-     dg2[2]  =  diff_costhetajil * d2_costhetajil[1] + d_costhetajil[0] * d_costhetajil[1];
-     dg2[3]  =  diff_costhetajik * d2_costhetajik[2] + d_costhetajik[0] * d_costhetajik[2];
-     dg2[4]  =  diff_costhetajil * d2_costhetajil[2] + d_costhetajil[0] * d_costhetajil[2];
+    /* w.r.t. (ij,ij) */
+    d2phi[0] += exp_ij_ik_il * ((g3 * (d_ij_2 + dd_ij))
+                + (2 * g4 * d_ij * dg1[0]) - (g5 * pow(dg1[0],2))
+                + (g4 * dg2[0]));
+    /* w.r.t. (ij,ik) */
+    d2phi[6] += exp_ij_ik_il * ((g3 * d_ij * d_ik)
+                + g4 * (d_ik * dg1[0] + d_ij * dg1[1])
+                - (g5 * dg1[0] * dg1[1]) + (g4 * dg2[1]));
+    /* w.r.t. (ij,il) */
+    d2phi[11] += exp_ij_ik_il * ((g3 * d_ij * d_il)
+                 + g4 * (d_il * dg1[0] + d_ij * dg1[2])
+                 - (g5 * dg1[0] * dg1[2]) + (g4 * dg2[2]));
+    /* w.r.t. (ij,jk) */
+    d2phi[15] += exp_ij_ik_il * ((g4 * d_ij * dg1[3])
+                 - (g5 * dg1[0] * dg1[3]) + (g4 * dg2[3]));
+    /* w.r.t. (ij,jl) */
+    d2phi[18] += exp_ij_ik_il * ((g4 * d_ij * dg1[4])
+                 - (g5 * dg1[0] * dg1[4]) + (g4 * dg2[4]));
+    /* w.r.t. (ij,kl) */
+    d2phi[20] += exp_ij_ik_il * ((g4 * d_ij * dg1[5])
+                 - (g5 * dg1[0] * dg1[5]));
 
-     d2phi[0] += exp_ij_ik_il * ((g3 * (d_ij_2 + dd_ij)) + (2 * g4 * d_ij * dg1[0]) - (g5 * pow(dg1[0],2)) + (g4 * dg2[0]));          /* w.r.t. (ij,ij) */
-     d2phi[6] += exp_ij_ik_il * ((g3 * d_ij * d_ik) + g4 * (d_ik * dg1[0] + d_ij * dg1[1]) - (g5 * dg1[0] * dg1[1]) + (g4 * dg2[1])); /* w.r.t. (ij,ik) */
-     d2phi[11] += exp_ij_ik_il * ((g3 * d_ij * d_il) + g4 * (d_il * dg1[0] + d_ij * dg1[2]) - (g5 * dg1[0] * dg1[2]) + (g4 * dg2[2])); /* w.r.t. (ij,il) */
-     d2phi[15] += exp_ij_ik_il * ((g4 * d_ij * dg1[3]) - (g5 * dg1[0] * dg1[3]) + (g4 * dg2[3]));                                      /* w.r.t. (ij,jk) */
-     d2phi[18] += exp_ij_ik_il * ((g4 * d_ij * dg1[4]) - (g5 * dg1[0] * dg1[4]) + (g4 * dg2[4]));                                      /* w.r.t. (ij,jl) */
-     d2phi[20] += exp_ij_ik_il * ((g4 * d_ij * dg1[5]) - (g5 * dg1[0] * dg1[5]));                                                      /* w.r.t. (ij,kl) */
+    dg2[0]  =  diff_costhetajik * d2_costhetajik[3]
+               + diff_costhetakil * d2_costhetakil[0]
+               + pow(d_costhetajik[1],2) + pow(d_costhetakil[0],2);
+    dg2[1]  =  diff_costhetakil * d2_costhetakil[1]
+               + d_costhetakil[0] * d_costhetakil[1];
+    dg2[2]  =  diff_costhetajik * d2_costhetajik[4]
+               + d_costhetajik[1] * d_costhetajik[2];
+    dg2[3]  =  diff_costhetakil * d2_costhetakil[2]
+               + d_costhetakil[0] * d_costhetakil[2];
 
-     dg2[0]  =  diff_costhetajik * d2_costhetajik[3] + diff_costhetakil * d2_costhetakil[0] + pow(d_costhetajik[1],2) + pow(d_costhetakil[0],2);
-     dg2[1]  =  diff_costhetakil * d2_costhetakil[1] + d_costhetakil[0] * d_costhetakil[1];
-     dg2[2]  =  diff_costhetajik * d2_costhetajik[4] + d_costhetajik[1] * d_costhetajik[2];
-     dg2[3]  =  diff_costhetakil * d2_costhetakil[2] + d_costhetakil[0] * d_costhetakil[2];
+    /* w.r.t. (ik,ik) */
+    d2phi[1] += exp_ij_ik_il * ((g3 * (d_ik_2 + dd_ik))
+                + (2 * g4 * d_ik * dg1[1])
+                - (g5 * pow(dg1[1],2)) + (g4 * dg2[0]));
+    /* w.r.t. (ik,il) */
+    d2phi[7] += exp_ij_ik_il * ((g3 * d_ik * d_il)
+                + g4 * (d_il * dg1[1] + d_ik * dg1[2])
+                - (g5 * dg1[1] * dg1[2]) + (g4 * dg2[1]));
+    /* w.r.t. (ik,jk) */
+    d2phi[12] += exp_ij_ik_il * ((g4 * d_ik * dg1[3])
+                 - (g5 * dg1[1] * dg1[3]) + (g4 * dg2[2]));
+    /* w.r.t. (ik,jl) */
+    d2phi[16] += exp_ij_ik_il * ((g4 * d_ik * dg1[4])
+                 - (g5 * dg1[1] * dg1[4]));
+    /* w.r.t. (ik,kl) */
+    d2phi[19] += exp_ij_ik_il * ((g4 * d_ik * dg1[5])
+                 - (g5 * dg1[1] * dg1[5]) + (g4 * dg2[3]));
 
-     d2phi[1] += exp_ij_ik_il * ((g3 * (d_ik_2 + dd_ik)) + (2 * g4 * d_ik * dg1[1]) - (g5 * pow(dg1[1],2)) + (g4 * dg2[0]));          /* w.r.t. (ik,ik) */
-     d2phi[7] += exp_ij_ik_il * ((g3 * d_ik * d_il) + g4 * (d_il * dg1[1] + d_ik * dg1[2]) - (g5 * dg1[1] * dg1[2]) + (g4 * dg2[1])); /* w.r.t. (ik,il) */
-     d2phi[12] += exp_ij_ik_il * ((g4 * d_ik * dg1[3]) - (g5 * dg1[1] * dg1[3]) + (g4 * dg2[2]));                                      /* w.r.t. (ik,jk) */
-     d2phi[16] += exp_ij_ik_il * ((g4 * d_ik * dg1[4]) - (g5 * dg1[1] * dg1[4]));                                                      /* w.r.t. (ik,jl) */
-     d2phi[19] += exp_ij_ik_il * ((g4 * d_ik * dg1[5]) - (g5 * dg1[1] * dg1[5]) + (g4 * dg2[3]));                                     /* w.r.t. (ik,kl) */
+    dg2[0]  =  diff_costhetajil * d2_costhetajil[3]
+               + diff_costhetakil * d2_costhetakil[3]
+               + pow(d_costhetajil[1],2) + pow(d_costhetakil[1],2);
+    dg2[1]  =  diff_costhetajil * d2_costhetajil[4]
+               + d_costhetajil[1] * d_costhetajil[2];
+    dg2[2]  =  diff_costhetakil * d2_costhetakil[4]
+               + d_costhetakil[1] * d_costhetakil[2];
 
-     dg2[0]  =  diff_costhetajil * d2_costhetajil[3] + diff_costhetakil * d2_costhetakil[3] + pow(d_costhetajil[1],2) + pow(d_costhetakil[1],2);
-     dg2[1]  =  diff_costhetajil * d2_costhetajil[4] + d_costhetajil[1] * d_costhetajil[2];
-     dg2[2]  =  diff_costhetakil * d2_costhetakil[4] + d_costhetakil[1] * d_costhetakil[2];
+    /* w.r.t. (il,il) */
+    d2phi[2] += exp_ij_ik_il * ((g3 * (d_il_2 + dd_il))
+                + (2 * g4 * d_il * dg1[2])
+                - (g5 * pow(dg1[2],2)) + (g4 * dg2[0]));
+    /* w.r.t. (il,jk) */
+    d2phi[8] += exp_ij_ik_il * ((g4 * d_il * dg1[3]) - (g5 * dg1[2] * dg1[3]));
+    /* w.r.t. (il,jl) */
+    d2phi[13] += exp_ij_ik_il * ((g4 * d_il * dg1[4]) - (g5 * dg1[2] * dg1[4])
+                + (g4 * dg2[1]));
+    /* w.r.t. (il,kl) */
+    d2phi[17] += exp_ij_ik_il * ((g4 * d_il * dg1[5]) - (g5 * dg1[2] * dg1[5])
+                 + (g4 * dg2[2]));
 
-     d2phi[2] += exp_ij_ik_il * ((g3 * (d_il_2 + dd_il)) + (2 * g4 * d_il * dg1[2]) - (g5 * pow(dg1[2],2)) + (g4 * dg2[0]));         /* w.r.t. (il,il) */
-     d2phi[8] += exp_ij_ik_il * ((g4 * d_il * dg1[3]) - (g5 * dg1[2] * dg1[3]));                                                     /* w.r.t. (il,jk) */
-     d2phi[13] += exp_ij_ik_il * ((g4 * d_il * dg1[4]) - (g5 * dg1[2] * dg1[4]) + (g4 * dg2[1]));                                     /* w.r.t. (il,jl) */
-     d2phi[17] += exp_ij_ik_il * ((g4 * d_il * dg1[5]) - (g5 * dg1[2] * dg1[5]) + (g4 * dg2[2]));                                     /* w.r.t. (il,kl) */
+    dg2[0]  =  diff_costhetajik * d2_costhetajik[5] +  pow(d_costhetajik[2],2);
 
-     dg2[0]  =  diff_costhetajik * d2_costhetajik[5] +  pow(d_costhetajik[2],2);
+    /* w.r.t. (jk,jk) */
+    d2phi[3] += exp_ij_ik_il * (- (g5 * pow(dg1[3],2)) + (g4 * dg2[0]));
+    /* w.r.t. (jk,jl) */
+    d2phi[9] += exp_ij_ik_il * (- g5 * dg1[3] * dg1[4]);
+    /* w.r.t. (jk,kl) */
+    d2phi[14] += exp_ij_ik_il * (- g5 * dg1[3] * dg1[5]);
 
-     d2phi[3] += exp_ij_ik_il * (- (g5 * pow(dg1[3],2)) + (g4 * dg2[0]));                                                            /* w.r.t. (jk,jk) */
-     d2phi[9] += exp_ij_ik_il * (- g5 * dg1[3] * dg1[4]);                                                                            /* w.r.t. (jk,jl) */
-     d2phi[14] += exp_ij_ik_il * (- g5 * dg1[3] * dg1[5]);                                                                            /* w.r.t. (jk,kl) */
+    dg2[0]  =  diff_costhetajil * d2_costhetajil[5] +  pow(d_costhetajil[2],2);
 
-     dg2[0]  =  diff_costhetajil * d2_costhetajil[5] +  pow(d_costhetajil[2],2);
+    /* w.r.t. (jl,jl) */
+    d2phi[4] += exp_ij_ik_il * (- (g5 * pow(dg1[4],2)) + (g4 * dg2[0]));
+    /* w.r.t. (jl,kl) */
+    d2phi[10] += exp_ij_ik_il * (- g5 * dg1[4] * dg1[5]);
 
-     d2phi[4] += exp_ij_ik_il * (- (g5 * pow(dg1[4],2)) + (g4 * dg2[0]));                                                            /* w.r.t. (jl,jl) */
-     d2phi[10] += exp_ij_ik_il * (- g5 * dg1[4] * dg1[5]);                                                                            /* w.r.t. (jl,kl) */
+    dg2[0]  =  diff_costhetakil * d2_costhetakil[5] +  pow(d_costhetakil[2],2);
 
-     dg2[0]  =  diff_costhetakil * d2_costhetakil[5] +  pow(d_costhetakil[2],2);
+    /* w.r.t. (kl,kl) */
+    d2phi[5] += exp_ij_ik_il * (- (g5 * pow(dg1[5],2)) + (g4 * dg2[0]));
+  }
 
-     d2phi[5] += exp_ij_ik_il * (- (g5 * pow(dg1[5],2)) + (g4 * dg2[0]));                                                            /* w.r.t. (kl,kl) */
-   }
+  *phi  *= c1;
 
-   *phi  *= c1;
+  for(i = 0; i < 6; i++) dphi[i] *= c2;
+  for(i = 0; i < 21; i++) d2phi[i] *= c3;
 
-   for(i = 0; i < 6; i++) dphi[i] *= c2;
-   for(i = 0; i < 21; i++) d2phi[i] *= c3;
+  free(d_costhetajik);
+  free(d_costhetajil);
+  free(d_costhetakil);
 
-    free(d_costhetajik);
-    free(d_costhetajil);
-    free(d_costhetakil);
+  free(d2_costhetajik);
+  free(d2_costhetajil);
+  free(d2_costhetakil);
 
-    free(d2_costhetajik);
-    free(d2_costhetajil);
-    free(d2_costhetakil);
+  free(dg1);
+  free(dg2);
 
-    free(dg1);
-    free(dg2);
-
-   return;
+  return;
 }
 
 /* compute function */
