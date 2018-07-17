@@ -1,0 +1,21 @@
+1
+
+Si  Si  15.2848479197914  0.6022245584  4  0  2.0951  45.5322  2.51412  -0.3333333333333333  3.77118
+
+
+#
+# First line: number of species
+#
+# Second line: species1 species2 A B p q sigma lambda gamma costheta_0 cutoff
+#
+#   species1 and species are valid KIM API particle species string
+#   A and lambda in [eV]
+#   sigma, gamma, and cutoff in [Angstrom]
+#   others are unitless
+#
+
+#
+# Parameters taken from:
+# F. H. Stillinger and T. A. Weber, "Computer simulation of local order in
+# condensed phases of silicon", Phys. Rev. B, vol. 31, 5262-5271, 1985
+#

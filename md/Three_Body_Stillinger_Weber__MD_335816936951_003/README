@@ -1,0 +1,118 @@
+#
+# CDDL HEADER START
+#
+# The contents of this file are subject to the terms of the Common Development
+# and Distribution License Version 1.0 (the "License").
+#
+# You can obtain a copy of the license at
+# http://www.opensource.org/licenses/CDDL-1.0.  See the License for the
+# specific language governing permissions and limitations under the License.
+#
+# When distributing Covered Code, include this CDDL HEADER in each file and
+# include the License file in a prominent location with the name LICENSE.CDDL.
+# If applicable, add the following below this CDDL HEADER, with the fields
+# enclosed by brackets "[]" replaced with your own identifying information:
+#
+# Portions Copyright (c) [yyyy] [name of copyright owner]. All rights reserved.
+#
+# CDDL HEADER END
+#
+
+#
+# Copyright (c) 2018, Regents of the University of Minnesota.
+#
+# Contributors:
+#    Mingjian Wen
+#
+
+
+This directory (Three_Body_Stillinger_Weber__MD_335816936951_003) contains
+Stillinger-Weber (SW) potential Model Driver for multiple species.
+
+1. Use of a subset of all the supported species is valid.  For example, if the
+   model supports 3 species A, B, and C as listed in the parameter file, the use
+   of a single species A (or B or C) or two species A and B (or A and C, or B and C)
+   are valid.
+
+2. The functional form has been rewritten from the standard SW functional form
+   so as to separate the parameters to avoid inconvenience of using this Model
+   Driver. The variable 'epsilon' in the standard SW potential is a dummy variable,
+   so it is combined with 'A' and 'lambda'. The 'cutoff' of the standard SW potential
+   is determined implicitly by 'cutoff' = 'a*sigma', where 'a' and 'sigma' are
+   potential parameters. In this Model Driver, the 'cutoff' is defined explicitly.
+   The benefit is that if 'sigma' is updated there is no needed to update 'cutoff'.
+   Above all, compared to the standard SW potential, the following redefinitions
+   have been made:
+
+   A      := A*epsilon
+   lambda := lambda*epsilon
+   gamma  := gamma*sigma
+   cutoff := a*sigma
+
+   Besides, the three-body parameter 'lambda' follows the below mixing rule:
+   lambda_ijk = sqrt(lambda_ij*lambda_ik)
+
+   Finally, it is assumed that the angle 'thetea0' is the same for all three-body
+   interactions.
+
+   Consequently, the SW Driver for multiple species can be written as:
+
+   E = sum_{i,j>i} phi_2(rij) + sum_{i, j!=i, k>j} phi_3(rij, rik, theta)
+
+   phi_2(rij) = Aij*(Bij(rij/sigma_ij)^(-p) - (rij/sigma_ij)^(-q))
+                * exp(sigma_ij/(rij - cutoff_ij))
+
+   phi_3(rij,rik,theta) = sqrt(lambda_ij*lambda_ik)(cos[theta] - cos[theta0])^2
+                          * exp(gamma_ij/(rij - cutoff_ij) + gamma_ik/(rik - cutoff_ik))
+
+
+3. One parameter file is needed, and it follows the format:
+
+   first line: number of species
+
+   Then each line lists two species and 9 parameters for the interaction between the
+   two species:
+
+      species1 species2 A B p q sigma lambda gamma costheta_0 cutoff
+
+   where, species1 and species2 are valid KIM API particle species string;
+   A and lambda in [eV];
+   sigma, gamma, and cutoff in [Angstrom];
+   others are unitless.
+
+
+References:
+
+1. F. H. Stillinger and T. A. Weber, "Computer simulation of local order in
+   condensed phases of silicon", Phys. Rev. B, vol. 31, 5262-5271, 1985.
+
+2. Ellad B. Tadmor and Ronald E. Miller, Modeling Materials: Continuum, Atomistic
+   and Multiscale Techniques, Cambridge University Press, 2011.
+
+3. X. W. Zhou, D. K. Ward, and J. E. Martin, et al, "Stillinger-Weber potential
+   for the II-VI elements Zn-Cd-Hg-S-Se-Te" Phys. Rev. B, 88, 085309, 2013.
+
+
+The following files are in this directory:
+
+StillingerWeberImplementation.hpp
+StillingerWeberImplementation.cpp
+    Stillinger-Weber potential implementation.
+
+StillingerWeber.hpp
+StillingerWeber.cpp
+    Wrapper class of implementation.
+
+helper.hpp
+helper.cpp
+CreateDispatch.sh
+    Helper functions.
+
+LICENSE.CDDL
+    The Common Development and Distribution License (CDDL) Version 1.0 file
+
+Makefile
+    makefile to compile and build executables with GNU or Intel compilers
+
+README
+    This file

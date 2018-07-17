@@ -1,0 +1,33 @@
+{
+  "title" "A three-body Stillinger-Weber (SW) Model (Parameterization) for Silicon"
+  "extended-id"  "Three_Body_Stillinger_Weber_Si__MO_405512056662_004"
+  "model-driver" "Three_Body_Stillinger_Weber__MD_335816936951_003"
+  "species" ["Si"]
+  "author" "Amit K Singh"
+  "description" "This is a three-body Stillinger-Weber potential. The cohesive energy of silicon calculated through this model is 4.3364 eV. This is an exact replica of the model \"Three_Body_Stillinger_Weber_Si__MO_405512056662_001\" except that the second to last entry in the parameter file has been corrected from \"-0.3333333\" to \"-0.3333333333333333\" in order to maintain double precision accuracy of -1/3. This version update is to make this Model compatible with the Model Driver update to support multiple species. The functional form of the SW potential is written somewhat differently with a redefinition of of some parameters (e.g. A := A*epsilon).\n\nThis Model corresponds to the Si.sw parameter file distributed with the LAMMPS package except that Si.sw uses epsilon=2.1683 and the KIM model uses 2.1682 (converted more precisely from 50 kcal/mol given in the SW paper). However, given the low accuracy of the source data, either is acceptable. Due to this difference, the Si.sw file from LAMMPS and the KIM model give slightly different results scaled by 2.1683/2.1682."
+  "source-citations" [{"title" "Computer simulation of local order in condensed phases of silicon"
+                       "author" "Stillinger, Frank H. and Weber, Thomas A."
+                       "journal" "Physical Review B"
+                       "volume" "31"
+                       "issue" "8"
+                       "pages" "5262--5271"
+                       "year" "1985"
+                       "month" "Apr"
+                       "publisher" "American Physical Society"
+                       "doi" "10.1103/PhysRevB.31.5262"
+                       "url" "https://link.aps.org/doi/10.1103/PhysRevB.31.5262"
+                       "recordtype" "article"
+                       "recordkey" "MO_405512056662_003a"}
+                      {"title" "Modeling Materials: {C}ontinuum, Atomistic and Multiscale Techniques"
+                       "author" "Tadmor, Ellad B. and Miller, Ronald E."
+                       "year" "2011"
+                       "publisher" "Cambridge University Press"
+                       "doi" "10.1017/CBO9781139003582"
+                       "recordtype" "book"
+                       "recordkey" "MO_405512056662_003b"}]
+  "contributor-id" "5d8c9931-da7e-48ed-86a5-0da65b7c3f13"
+  "maintainer-id" "5d8c9931-da7e-48ed-86a5-0da65b7c3f13"
+  "publication-year" "2018"
+  "kim-api-version" "2.0"
+  "domain" "openkim.org"
+}

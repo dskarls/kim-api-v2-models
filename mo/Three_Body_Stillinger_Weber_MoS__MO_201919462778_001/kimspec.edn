@@ -1,0 +1,23 @@
+{
+  "title" "A three-body Stillinger-Weber Model (Parameterization) for monolayer MoS2"
+  "extended-id" "Three_Body_Stillinger_Weber_MoS__MO_201919462778_001"
+  "model-driver" "Three_Body_Stillinger_Weber_MX2__MD_242389978788_001"
+  "species" ["Mo" "S"]
+  "description" "This is a three-body Stillinger-Weber potential model for monolayer MoS2. This Model is intended to calculate lattice constants, cohesive energy, elastic constants, linear thermal expansion coefficient and several other material properties. Note that three-body interactions are only considered for certain atom groups, and please see the README of the associated Model Driver for details."
+  "author" "Mingjian Wen"
+  "source-citations" [{"author" "Wen, Mingjian and Shirodkar, Sharmila N. and Plech{\\'a}{\\v c}, Petr and Kaxiras, Efthimios and Elliott, Ryan S. and Tadmor, Ellad B."
+                       "title" "A force-matching {S}tillinger-{W}eber potential for {Mo}$S_2$: {P}arameterization and {F}isher information theory based sensitivity analysis"
+                       "journal" "Journal of Applied Physics"
+                       "volume" "122"
+                       "number" "24"
+                       "pages" "244301"
+                       "year" "2017"
+                       "doi" "10.1063/1.5007842"
+                       "recordtype" "article"
+                       "recordkey" "MO_201919462778_000a"}]
+  "contributor-id" "5ca58a6a-aa46-4e5a-a2e1-b3fc6bc2efa6"
+  "maintainer-id" "5ca58a6a-aa46-4e5a-a2e1-b3fc6bc2efa6"
+  "kim-api-version" "1.6"
+  "publication-year" "2017"
+  "domain" "openkim.org"
+}
