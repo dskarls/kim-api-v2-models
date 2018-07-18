@@ -1,0 +1,64 @@
+[
+  {
+    "extended-id" "Pair_Morse_Smoothed__MD_093895395358_001"
+    "event-type" "metadata-update"
+    "user-id" "9313f316-330f-4608-8924-dc943dbfac79"
+    "timestamp" "2018-06-05 12:00:00"
+    "comments" "Update source-citations in kimspec.edn"
+    "checksums" {
+      "kimspec.edn" "5e965cd16c5cf8ed78b08a8bb01bf0c044a1f37e"
+      "LICENSE.CDDL" "2382bf0bfe2f0fea89ac14061953f605c09f8489"
+      "Makefile" "5c9d054e8da780f526053c95898559517ba0cfb4"
+      "Pair_Morse_Smoothed.c" "83f18a375fac998cc2a05038bc45545fde00c59c"
+      "Pair_Morse_Smoothed.kim.tpl" "9b80216ac266a795d65a2d5447c4cca68b3aa7d1"
+      "README" "ba77c1ac0de2b399e444b53284a08620231c032e"
+    }
+  }
+  {
+    "extended-id" "Pair_Morse_Smoothed__MD_093895395358_001"
+    "event-type" "metadata-update"
+    "user-id" "b645a915-d1fa-4155-a3da-65469f990011"
+    "timestamp" "2016-08-15 12:00:00"
+    "comments" "Update kimspec.edn"
+    "checksums" {
+      "LICENSE.CDDL" "2382bf0bfe2f0fea89ac14061953f605c09f8489"
+      "Makefile" "5c9d054e8da780f526053c95898559517ba0cfb4"
+      "Pair_Morse_Smoothed.c" "83f18a375fac998cc2a05038bc45545fde00c59c"
+      "Pair_Morse_Smoothed.kim.tpl" "9b80216ac266a795d65a2d5447c4cca68b3aa7d1"
+      "README" "ba77c1ac0de2b399e444b53284a08620231c032e"
+      "kimspec.edn" "5ea9146f571c3ac0185796996c6d429f3df3a5f6"
+    }
+  }
+
+  {
+    "extended-id" "Pair_Morse_Smoothed__MD_093895395358_001"
+    "event-type" "revised-version-creation"
+    "user-id" "b645a915-d1fa-4155-a3da-65469f990011"
+    "timestamp" "2015-01-14 14:02:30"
+    "comments" "Renamed files to add 'Cutoff'"
+    "checksums" {
+      "LICENSE.CDDL" "2382bf0bfe2f0fea89ac14061953f605c09f8489"
+      "Makefile" "5c9d054e8da780f526053c95898559517ba0cfb4"
+      "Pair_Morse_Smoothed.c" "83f18a375fac998cc2a05038bc45545fde00c59c"
+      "Pair_Morse_Smoothed.kim.tpl" "9b80216ac266a795d65a2d5447c4cca68b3aa7d1"
+      "README" "ba77c1ac0de2b399e444b53284a08620231c032e"
+      "kimspec.edn" "cc5c47ebbbf8765effd5419714c8165910a7d48d"
+    }
+  }
+
+  {
+    "extended-id" "Pair_Morse_Smoothed__MD_093895395358_000"
+    "event-type" "initial-creation"
+    "user-id" "b645a915-d1fa-4155-a3da-65469f990011"
+    "timestamp" "2015-01-09 10:25:57"
+    "comments" ""
+    "checksums" {
+      "LICENSE.CDDL" "2382bf0bfe2f0fea89ac14061953f605c09f8489"
+      "Makefile" "ab0053db4484a3a2bd23dfd17c5ce9992fc64d92"
+      "Pair_Morse_Smoothed_Cutoff.c" "dbfcf4746b1aa4cee71958c49b9e4efb53dd9be2"
+      "Pair_Morse_Smoothed_Cutoff.kim.tpl" "9b80216ac266a795d65a2d5447c4cca68b3aa7d1"
+      "README" "a2fc7d322d36482c168b52b2704fee3360238378"
+      "kimspec.edn" "ffaaa53e2e502bbb9d5e6277cc084795a784a943"
+    }
+  }
+]

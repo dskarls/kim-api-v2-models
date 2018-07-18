@@ -1,0 +1,22 @@
+{"author" "Mingjian Wen"
+ "contributor-id" "5ca58a6a-aa46-4e5a-a2e1-b3fc6bc2efa6"
+ "description" "This is a model of modified Morse potential for copper (Cu).  phi(r)=(D_0)/(2B-1) * [ e^(-2A*sqrt(B)(r-r_0)) - 2B e^(-A(r-r_0)/sqrt(B)) ].\nThe modification was introduced to improve agreement with experimental values for thermal expansion of face-centered cubic (fcc) crystals. This is accomplished by adjusting phi'', because it is largely responsible for the slope of thermal expansion as a function of temperature. D_0 and A are identical to the standard Morse potential when r=r_0. B is determined by the requirement that the thermal expansion should fit the experimental results near Debye temperature. The standard Morse potential is recovered for B = 1. The cutoff is set to a large value -- 1000 angstrom."
+ "domain" "openkim.org"
+ "extended-id" "Pair_Morse_Modified_MacDonaldMacDonald_Cu__MO_034823476734_000"
+ "kim-api-version" "1.6"
+ "maintainer-id" "5ca58a6a-aa46-4e5a-a2e1-b3fc6bc2efa6"
+ "publication-year" "2015"
+ "source-citations" [{"author" "MacDonald, Rosemary A. and MacDonald, William M."
+                      "doi" "10.1103/PhysRevB.24.1715"
+                      "issue" "4"
+                      "journal" "Physical Review B"
+                      "month" "Aug"
+                      "pages" "1715--1724"
+                      "publisher" "American Physical Society"
+                      "recordkey" "MO_034823476734_000a"
+                      "recordtype" "article"
+                      "title" "Thermodynamic properties of fcc metals at high temperatures"
+                      "volume" "24"
+                      "year" "1981"}]
+ "species" ["Cu"]
+ "title" "Modified Morse pair potential for copper due to MacDonald and MacDonald"}
