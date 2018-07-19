@@ -1,0 +1,45 @@
+[
+  {
+    "extended-id" "Pair_Morse_Smoothed90_Jelinek_Ar__MO_908645784389_000"
+    "event-type" "metadata-update"
+    "user-id" "9313f316-330f-4608-8924-dc943dbfac79"
+    "timestamp" "2018-06-05 12:00:00"
+    "comments" "Update source-citations in kimspec.edn"
+    "checksums" {
+      "kimspec.edn" "b4728b8d49d14df8feb5c08ef0ed1eea8538dbcf"
+      "LICENSE.CDDL" "2382bf0bfe2f0fea89ac14061953f605c09f8489"
+      "Makefile" "85e775981d78b50337e8fd294acc7586494520a2"
+      "Pair_Morse_Smoothed90_Jelinek_Ar.params" "b3a37d78b1762514b64d3b54a3619d8ad2cd52d7"
+      "README" "bd72588e187d14c066c8a70ac7e4182a5dc0cb86"
+    }
+  }
+  {
+    "extended-id" "Pair_Morse_Smoothed90_Jelinek_Ar__MO_908645784389_000"
+    "event-type" "metadata-update"
+    "user-id" "b645a915-d1fa-4155-a3da-65469f990011"
+    "timestamp" "2016-08-15 12:00:00"
+    "comments" "Update kimspec.edn"
+    "checksums" {
+      "LICENSE.CDDL" "2382bf0bfe2f0fea89ac14061953f605c09f8489"
+      "Makefile" "85e775981d78b50337e8fd294acc7586494520a2"
+      "Pair_Morse_Smoothed90_Jelinek_Ar.params" "b3a37d78b1762514b64d3b54a3619d8ad2cd52d7"
+      "README" "bd72588e187d14c066c8a70ac7e4182a5dc0cb86"
+      "kimspec.edn" "7e7fa6117df2473bedf84e563705acfc3e404332"
+    }
+  }
+
+  {
+    "extended-id" "Pair_Morse_Smoothed90_Jelinek_Ar__MO_908645784389_000"
+    "event-type" "initial-creation"
+    "user-id" "b645a915-d1fa-4155-a3da-65469f990011"
+    "timestamp" "2015-02-01 16:44:07"
+    "comments" ""
+    "checksums" {
+      "LICENSE.CDDL" "2382bf0bfe2f0fea89ac14061953f605c09f8489"
+      "Makefile" "85e775981d78b50337e8fd294acc7586494520a2"
+      "Pair_Morse_Smoothed90_Jelinek_Ar.params" "b3a37d78b1762514b64d3b54a3619d8ad2cd52d7"
+      "README" "bd72588e187d14c066c8a70ac7e4182a5dc0cb86"
+      "kimspec.edn" "8709c3f89f163ea87f62f7b47fa681176a9de4a0"
+    }
+  }
+]

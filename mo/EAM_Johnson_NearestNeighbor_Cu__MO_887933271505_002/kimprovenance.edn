@@ -1,0 +1,64 @@
+[
+  {
+    "extended-id" "EAM_Johnson_NearestNeighbor_Cu__MO_887933271505_001"
+    "event-type" "metadata-update"
+    "user-id" "9313f316-330f-4608-8924-dc943dbfac79"
+    "timestamp" "2018-06-11 12:00:00"
+    "comments" "Update source-citations in kimspec.edn"
+    "checksums" {
+      "EAM_Johnson_NearestNeighbor_Cu.kim" "c601001dac851914bed899408648d1e12cd7fa70"
+      "EAM_Johnson_NearestNeighbor_Cu__MO_887933271505.c" "9a3db3527a124c5f4e44cc040996fa70a44a2649"
+      "kimspec.edn" "fbf8d5c5f29224666f5b4208e46a0ba5bc7a6232"
+      "LICENSE.CDDL" "ab021ec11127dedf19c4219e70c9ad22318b7ab7"
+      "Makefile" "dc6920661417bc2a6b2aa7f340cec3b7005978a4"
+      "README" "c6ddabac504911a64ca059aa6238c836747c5afd"
+    }
+  }
+  {
+    "extended-id" "EAM_Johnson_NearestNeighbor_Cu__MO_887933271505_001"
+    "event-type" "metadata-update"
+    "user-id" "b645a915-d1fa-4155-a3da-65469f990011"
+    "timestamp" "2016-08-15 12:00:00"
+    "comments" "Update kimspec.edn"
+    "checksums" {
+      "EAM_Johnson_NearestNeighbor_Cu.kim" "c601001dac851914bed899408648d1e12cd7fa70"
+      "EAM_Johnson_NearestNeighbor_Cu__MO_887933271505.c" "9a3db3527a124c5f4e44cc040996fa70a44a2649"
+      "LICENSE.CDDL" "ab021ec11127dedf19c4219e70c9ad22318b7ab7"
+      "Makefile" "dc6920661417bc2a6b2aa7f340cec3b7005978a4"
+      "README" "c6ddabac504911a64ca059aa6238c836747c5afd"
+      "kimspec.edn" "4b4bb827eb6c884d08ea3e5c672ebf7614a6f81e"
+    }
+  }
+
+  {
+    "extended-id" "EAM_Johnson_NearestNeighbor_Cu__MO_887933271505_001"
+    "event-type" "revised-version-creation"
+    "user-id" "b645a915-d1fa-4155-a3da-65469f990011"
+    "timestamp" "2014-07-23 10:33:41"
+    "comments" "Upgrade from openkim-api-v1.5 to kim-api-v1.6."
+    "checksums" {
+      "EAM_Johnson_NearestNeighbor_Cu.kim" "c601001dac851914bed899408648d1e12cd7fa70"
+      "EAM_Johnson_NearestNeighbor_Cu__MO_887933271505.c" "9a3db3527a124c5f4e44cc040996fa70a44a2649"
+      "LICENSE.CDDL" "ab021ec11127dedf19c4219e70c9ad22318b7ab7"
+      "Makefile" "dc6920661417bc2a6b2aa7f340cec3b7005978a4"
+      "README" "c6ddabac504911a64ca059aa6238c836747c5afd"
+      "kimspec.edn" "14ac5139ddca2cd5e4b0ab4ee62b0b5ebb2a4a6a"
+    }
+  }
+
+  {
+    "extended-id" "EAM_Johnson_NearestNeighbor_Cu__MO_887933271505_000"
+    "event-type" "initial-creation"
+    "user-id" "b645a915-d1fa-4155-a3da-65469f990011"
+    "timestamp" "2014-06-25 11:19:24"
+    "comments" ""
+    "checksums" {
+      "EAM_Johnson_NearestNeighbor_Cu__MO_887933271505_000.c" "055c9b8960abc8fe6c9655475714077f9a074540"
+      "EAM_Johnson_NearestNeighbor_Cu__MO_887933271505_000.kim" "0f313fbe62d59f57953ffaaee3f1519acba3d7c4"
+      "LICENSE.CDDL" "ab021ec11127dedf19c4219e70c9ad22318b7ab7"
+      "Makefile" "2d758c3ea51bb5f956c6418e5411fb1bc0586864"
+      "README" "cb007a3059694d02e2b852e86385918bd62d9c76"
+      "kimspec.edn" "193f8a3430dc756294b9d79c9a336fff153c6cd9"
+    }
+  }
+]

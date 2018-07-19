@@ -1,0 +1,48 @@
+[
+  {
+    "extended-id" "Pair_Morse_Sigmoid__MD_199191711608_000"
+    "event-type" "metadata-update"
+    "user-id" "9313f316-330f-4608-8924-dc943dbfac79"
+    "timestamp" "2018-06-05 12:00:00"
+    "comments" "Update source-citations in kimspec.edn"
+    "checksums" {
+      "kimspec.edn" "16ecc6444dacd301340cbe086bc4e875e4afdc8e"
+      "LICENSE.CDDL" "2382bf0bfe2f0fea89ac14061953f605c09f8489"
+      "Makefile" "5b22cc0eadf54fd287d27460c6370b0f97e02106"
+      "Pair_Morse_Sigmoid.c" "ef6be9cce242b7c129d1b309227e51ed10372f89"
+      "Pair_Morse_Sigmoid.kim.tpl" "45807aaf642a6ba59db852cf306dd7b558c8d9f9"
+      "README" "059575b67ccfc043655d46fef773bfa4c30b35ef"
+    }
+  }
+  {
+    "extended-id" "Pair_Morse_Sigmoid__MD_199191711608_000"
+    "event-type" "metadata-update"
+    "user-id" "ea8e6409-6510-463e-99c8-bebd0947f897"
+    "timestamp" "2016-08-15 12:00:00"
+    "comments" "Update kimspec.edn"
+    "checksums" {
+      "LICENSE.CDDL" "2382bf0bfe2f0fea89ac14061953f605c09f8489"
+      "Makefile" "5b22cc0eadf54fd287d27460c6370b0f97e02106"
+      "Pair_Morse_Sigmoid.c" "ef6be9cce242b7c129d1b309227e51ed10372f89"
+      "Pair_Morse_Sigmoid.kim.tpl" "45807aaf642a6ba59db852cf306dd7b558c8d9f9"
+      "README" "059575b67ccfc043655d46fef773bfa4c30b35ef"
+      "kimspec.edn" "4fee56b6c795ceb929bca2427c1bda96f285b10b"
+    }
+  }
+
+  {
+    "extended-id" "Pair_Morse_Sigmoid__MD_199191711608_000"
+    "event-type" "initial-creation"
+    "user-id" "ea8e6409-6510-463e-99c8-bebd0947f897"
+    "timestamp" "2015-07-07 21:17:04"
+    "comments" ""
+    "checksums" {
+      "LICENSE.CDDL" "2382bf0bfe2f0fea89ac14061953f605c09f8489"
+      "Makefile" "5b22cc0eadf54fd287d27460c6370b0f97e02106"
+      "Pair_Morse_Sigmoid.c" "ef6be9cce242b7c129d1b309227e51ed10372f89"
+      "Pair_Morse_Sigmoid.kim.tpl" "45807aaf642a6ba59db852cf306dd7b558c8d9f9"
+      "README" "059575b67ccfc043655d46fef773bfa4c30b35ef"
+      "kimspec.edn" "4c164e8ee881bde5afede3244df178fb6b0c702c"
+    }
+  }
+]

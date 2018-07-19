@@ -1,0 +1,45 @@
+[
+  {
+    "extended-id" "Pair_Morse_Sigmoid_Jelinek_Ar__MO_071460865933_000"
+    "event-type" "metadata-update"
+    "user-id" "9313f316-330f-4608-8924-dc943dbfac79"
+    "timestamp" "2018-06-05 12:00:00"
+    "comments" "Update source-citations in kimspec.edn"
+    "checksums" {
+      "kimspec.edn" "4435418da17e8e40d06037082bfb186407e764ef"
+      "LICENSE.CDDL" "2382bf0bfe2f0fea89ac14061953f605c09f8489"
+      "Makefile" "645536f432bfb8e76ccf05fad5fd66aa731164d1"
+      "Pair_Morse_Sigmoid_Jelinek_Ar.params" "007ba0b8023cb9c23dd10ec85814cf8c4a97a1ec"
+      "README" "0aef7ab455e2c62e505ab4a784781605d5a27014"
+    }
+  }
+  {
+    "extended-id" "Pair_Morse_Sigmoid_Jelinek_Ar__MO_071460865933_000"
+    "event-type" "metadata-update"
+    "user-id" "ea8e6409-6510-463e-99c8-bebd0947f897"
+    "timestamp" "2016-08-15 12:00:00"
+    "comments" "Update kimspec.edn"
+    "checksums" {
+      "LICENSE.CDDL" "2382bf0bfe2f0fea89ac14061953f605c09f8489"
+      "Makefile" "645536f432bfb8e76ccf05fad5fd66aa731164d1"
+      "Pair_Morse_Sigmoid_Jelinek_Ar.params" "007ba0b8023cb9c23dd10ec85814cf8c4a97a1ec"
+      "README" "0aef7ab455e2c62e505ab4a784781605d5a27014"
+      "kimspec.edn" "df52d39b3bc8350cad96ad811f939b7730118fdc"
+    }
+  }
+
+  {
+    "extended-id" "Pair_Morse_Sigmoid_Jelinek_Ar__MO_071460865933_000"
+    "event-type" "initial-creation"
+    "user-id" "ea8e6409-6510-463e-99c8-bebd0947f897"
+    "timestamp" "2015-07-07 21:17:02"
+    "comments" ""
+    "checksums" {
+      "LICENSE.CDDL" "2382bf0bfe2f0fea89ac14061953f605c09f8489"
+      "Makefile" "645536f432bfb8e76ccf05fad5fd66aa731164d1"
+      "Pair_Morse_Sigmoid_Jelinek_Ar.params" "007ba0b8023cb9c23dd10ec85814cf8c4a97a1ec"
+      "README" "0aef7ab455e2c62e505ab4a784781605d5a27014"
+      "kimspec.edn" "78aa6a774431963bf8295358ee7c17c08b01ccd5"
+    }
+  }
+]

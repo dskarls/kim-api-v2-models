@@ -1,0 +1,48 @@
+[
+  {
+    "extended-id" "Pair_Morse_Modified_MacDonaldMacDonald_Cu__MO_034823476734_000"
+    "event-type" "metadata-update"
+    "user-id" "9313f316-330f-4608-8924-dc943dbfac79"
+    "timestamp" "2018-06-11 12:00:00"
+    "comments" "Update source-citations in kimspec.edn"
+    "checksums" {
+      "kimspec.edn" "85e4052b0e7096a5f5b9bb5daf4dfe58b727ff1a"
+      "LICENSE.CDDL" "2382bf0bfe2f0fea89ac14061953f605c09f8489"
+      "Makefile" "75d18f772386d6adee6b96af97e1dc37307b0fe5"
+      "Pair_Morse_Modified_MacDonaldMacDonald_Cu.c" "c8ba5a3642ab72ab83dead1556ce5e04f8749a1e"
+      "Pair_Morse_Modified_MacDonaldMacDonald_Cu.kim" "54360cef86d9b997770da84b1e0a384d9c04c78e"
+      "README" "56f88fd6dac59e488d40bb78e142a4965b801a9e"
+    }
+  }
+  {
+    "extended-id" "Pair_Morse_Modified_MacDonaldMacDonald_Cu__MO_034823476734_000"
+    "event-type" "metadata-update"
+    "user-id" "5ca58a6a-aa46-4e5a-a2e1-b3fc6bc2efa6"
+    "timestamp" "2016-08-15 12:00:00"
+    "comments" "Update kimspec.edn"
+    "checksums" {
+      "LICENSE.CDDL" "2382bf0bfe2f0fea89ac14061953f605c09f8489"
+      "Makefile" "75d18f772386d6adee6b96af97e1dc37307b0fe5"
+      "Pair_Morse_Modified_MacDonaldMacDonald_Cu.c" "c8ba5a3642ab72ab83dead1556ce5e04f8749a1e"
+      "Pair_Morse_Modified_MacDonaldMacDonald_Cu.kim" "54360cef86d9b997770da84b1e0a384d9c04c78e"
+      "README" "56f88fd6dac59e488d40bb78e142a4965b801a9e"
+      "kimspec.edn" "42f7f6c6e16f9626ce10e1bd8ea8ec393e9a2940"
+    }
+  }
+
+  {
+    "extended-id" "Pair_Morse_Modified_MacDonaldMacDonald_Cu__MO_034823476734_000"
+    "event-type" "initial-creation"
+    "user-id" "5ca58a6a-aa46-4e5a-a2e1-b3fc6bc2efa6"
+    "timestamp" "2015-04-20 12:19:42"
+    "comments" ""
+    "checksums" {
+      "LICENSE.CDDL" "2382bf0bfe2f0fea89ac14061953f605c09f8489"
+      "Makefile" "75d18f772386d6adee6b96af97e1dc37307b0fe5"
+      "Pair_Morse_Modified_MacDonaldMacDonald_Cu.c" "c8ba5a3642ab72ab83dead1556ce5e04f8749a1e"
+      "Pair_Morse_Modified_MacDonaldMacDonald_Cu.kim" "54360cef86d9b997770da84b1e0a384d9c04c78e"
+      "README" "56f88fd6dac59e488d40bb78e142a4965b801a9e"
+      "kimspec.edn" "7b80d395760fbd56a7025ce4c7667c23a0995d55"
+    }
+  }
+]
