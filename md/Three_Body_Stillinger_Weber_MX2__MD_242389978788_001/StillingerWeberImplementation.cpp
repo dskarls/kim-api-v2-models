@@ -69,7 +69,7 @@ StillingerWeberImplementation::StillingerWeberImplementation(
   cosbeta0_(NULL),
   cutoff_jk_(NULL),
   influenceDistance_(0.0),
-  paddingNeighborHints_(0),
+  paddingNeighborHints_(1),
   halfListHints_(0),
   A_2D_(NULL),
   B_2D_(NULL),
