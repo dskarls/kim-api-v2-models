@@ -325,6 +325,7 @@ int StillingerWeberImplementation::Compute(
   int const* n1atom = NULL;
 
   for (i = 0; i < cachedNumberOfParticles_; ++i) {
+
     if (particleContributing[i]) {
       modelComputeArguments->GetNeighborList(0, i, &numnei, &n1atom);
       int const iSpecies = particleSpeciesCodes[i];
@@ -332,7 +333,6 @@ int StillingerWeberImplementation::Compute(
       // Setup loop over neighbors of current particle
       for (int jj = 0; jj < numnei; ++jj) {
         int const j = n1atom[jj];
-
         int const jSpecies = particleSpeciesCodes[j];
 
         // Compute rij
@@ -343,11 +343,13 @@ int StillingerWeberImplementation::Compute(
 
         // compute distance squared
         double const rij_sq = rij[0] * rij[0] + rij[1] * rij[1] + rij[2] * rij[2];
-        double const rij_mag = sqrt(rij_sq);
 
         if (rij_sq <= cutoffSq_2D_[iSpecies][jSpecies]) {
+          double const rij_mag = sqrt(rij_sq);
+
+          // two-body contributions
+
           if (i < j) {  // effective half list
-            // two-body contributions
             double phi_two = 0.0;
             double dphi_two = 0.0;
             double d2phi_two = 0.0;
@@ -357,13 +359,24 @@ int StillingerWeberImplementation::Compute(
             // Compute two body potenitals and its derivatives
             if (isComputeProcess_d2Edr2 == true) {
               CalcPhiD2phiTwo(iSpecies, jSpecies, rij_mag, phi_two, dphi_two, d2phi_two);
-              dEidr_two = dphi_two;
-              d2Eidr2_two = d2phi_two;
+              if (particleContributing[j] == 1) {
+                dEidr_two = dphi_two;
+                d2Eidr2_two = d2phi_two;
+              }
+              else {
+                dEidr_two = HALF * dphi_two;
+                d2Eidr2_two = HALF * d2phi_two;
+              }
             }
             else if ((isComputeProcess_dEdr == true) || (isComputeForces == true) ||
                      (isComputeVirial == true) || (isComputeParticleVirial == true)) {
               CalcPhiDphiTwo(iSpecies, jSpecies, rij_mag, phi_two, dphi_two);
-              dEidr_two = dphi_two;
+              if (particleContributing[j] == 1) {
+                dEidr_two = dphi_two;
+              }
+              else {
+                dEidr_two = HALF * dphi_two;
+              }
             }
             else if ((isComputeEnergy == true) || (isComputeParticleEnergy == true)) {
               CalcPhiTwo(iSpecies, jSpecies, rij_mag, phi_two);
@@ -371,8 +384,14 @@ int StillingerWeberImplementation::Compute(
 
             // Contribution to energy
             if (isComputeEnergy == true) {
-              *energy += phi_two;
+              if (particleContributing[j] == 1) {
+                *energy += phi_two;
+              }
+              else {
+                *energy += HALF * phi_two;
+              }
             }
+
             // Contribution to forces
             if (isComputeForces == true) {
               for (int dim = 0; dim < DIMENSION; ++dim) {
@@ -384,8 +403,11 @@ int StillingerWeberImplementation::Compute(
 
             // Contribution to particleEnergy
             if (isComputeParticleEnergy == true) {
-              particleEnergy[i] += HALF * phi_two;
-              particleEnergy[j] += HALF * phi_two;
+              double halfphi = HALF * phi_two;
+              particleEnergy[i] += halfphi;
+              if (particleContributing[j] == 1) {
+                particleEnergy[j] += halfphi;
+              }
             }
 
             // Contribution to virial
@@ -437,21 +459,28 @@ int StillingerWeberImplementation::Compute(
 
             // Compute rik and rjk vector
             double rik[DIMENSION];
-            double rjk[DIMENSION];
             for (int dim = 0; dim < DIMENSION; ++dim) {
               rik[dim] = coordinates[k][dim] - coordinates[i][dim];
-              rjk[dim] = coordinates[k][dim] - coordinates[j][dim];
             }
 
             // compute distance squared and distance
             double const rik_sq = rik[0] * rik[0] + rik[1] * rik[1] + rik[2] * rik[2];
-            double const rjk_sq = rjk[0] * rjk[0] + rjk[1] * rjk[1] + rjk[2] * rjk[2];
-            double const rik_mag = sqrt(rik_sq);
-            double const rjk_mag = sqrt(rjk_sq);
 
 
             // compute energy and force
             if (rik_sq <= cutoffSq_2D_[iSpecies][kSpecies]) {
+              double const rik_mag = sqrt(rik_sq);
+
+              // Compute rjk
+              double rjk[DIMENSION];
+              for (int dim = 0; dim < DIMENSION; ++dim) {
+                rjk[dim] = coordinates[k][dim] - coordinates[j][dim];
+              }
+              double const rjk_sq = rjk[0] * rjk[0] + rjk[1] * rjk[1] + rjk[2] * rjk[2];
+              double const rjk_mag = sqrt(rjk_sq);
+
+
+
               // three-body contributions
               double phi_three;
               double dphi_three[3];
