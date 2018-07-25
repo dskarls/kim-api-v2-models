@@ -1,0 +1,177 @@
+[
+  {
+    "extended-id" "EAM_QuinticHermiteSpline__MD_029719603993_002"
+    "event-type" "metadata-update"
+    "user-id" "4d62befd-21c4-42b8-a472-86132e6591f3"
+    "timestamp" "2018-06-18 15:31:02"
+    "comments" "Change 'url' in kimspec to 'doi'"
+    "checksums" {
+      "CreateDispatch.sh" "516d716a0a26401ca99387775d0cc95e6a6eeea4"
+      "EAM.cpp" "4a069d2483b5356cf159a88e5e3aa9b0914f628f"
+      "EAM.hpp" "1af413f1c7d8af40b652d7b80b0bae78f888284e"
+      "EAM.kim.tpl" "300068b3f7e233a1514ec367850890c76390e83d"
+      "EAM_Implementation.cpp" "e7a42c193ad74636871317ca8f118a36647ca632"
+      "EAM_Implementation.hpp" "e284ad045a2e127f8e69d3ebea6ef7c99269fb59"
+      "EAM_QuinticHermiteSpline.cpp" "eddec8ed915e726011f18ac9121a516587359cf5"
+      "EAM_QuinticHermiteSpline.hpp" "75cc06695a1b548e18b020ddd7f4d71585a16030"
+      "LICENSE.CDDL" "2382bf0bfe2f0fea89ac14061953f605c09f8489"
+      "Makefile" "7789399b389199aad2f67f1c9bf44205b811746b"
+      "README" "f41c6696067dda76230b04dcd11c856e84dcd26c"
+      "kimspec.edn" "8e13004da2677f172cb5ea85ba6968624b456592"
+    }
+  }
+
+  {
+    "extended-id" "EAM_QuinticHermiteSpline__MD_029719603993_002"
+    "event-type" "metadata-update"
+    "user-id" "4d62befd-21c4-42b8-a472-86132e6591f3"
+    "timestamp" "2018-06-05 18:26:00"
+    "comments" "Add 'recordtype' and 'recordkey' to source-citations"
+    "checksums" {
+      "CreateDispatch.sh" "516d716a0a26401ca99387775d0cc95e6a6eeea4"
+      "EAM.cpp" "4a069d2483b5356cf159a88e5e3aa9b0914f628f"
+      "EAM.hpp" "1af413f1c7d8af40b652d7b80b0bae78f888284e"
+      "EAM.kim.tpl" "300068b3f7e233a1514ec367850890c76390e83d"
+      "EAM_Implementation.cpp" "e7a42c193ad74636871317ca8f118a36647ca632"
+      "EAM_Implementation.hpp" "e284ad045a2e127f8e69d3ebea6ef7c99269fb59"
+      "EAM_QuinticHermiteSpline.cpp" "eddec8ed915e726011f18ac9121a516587359cf5"
+      "EAM_QuinticHermiteSpline.hpp" "75cc06695a1b548e18b020ddd7f4d71585a16030"
+      "LICENSE.CDDL" "2382bf0bfe2f0fea89ac14061953f605c09f8489"
+      "Makefile" "7789399b389199aad2f67f1c9bf44205b811746b"
+      "README" "f41c6696067dda76230b04dcd11c856e84dcd26c"
+      "kimspec.edn" "f5a000a225a97794f47cfb90c4a86e3fe2a3bf2c"
+    }
+  }
+
+  {
+    "extended-id" "EAM_QuinticHermiteSpline__MD_029719603993_002"
+    "event-type" "metadata-update"
+    "user-id" "4d62befd-21c4-42b8-a472-86132e6591f3"
+    "timestamp" "2018-05-11 15:27:58"
+    "comments" "Convert 'author' key from array to scalar"
+    "checksums" {
+      "CreateDispatch.sh" "516d716a0a26401ca99387775d0cc95e6a6eeea4"
+      "EAM.cpp" "4a069d2483b5356cf159a88e5e3aa9b0914f628f"
+      "EAM.hpp" "1af413f1c7d8af40b652d7b80b0bae78f888284e"
+      "EAM.kim.tpl" "300068b3f7e233a1514ec367850890c76390e83d"
+      "EAM_Implementation.cpp" "e7a42c193ad74636871317ca8f118a36647ca632"
+      "EAM_Implementation.hpp" "e284ad045a2e127f8e69d3ebea6ef7c99269fb59"
+      "EAM_QuinticHermiteSpline.cpp" "eddec8ed915e726011f18ac9121a516587359cf5"
+      "EAM_QuinticHermiteSpline.hpp" "75cc06695a1b548e18b020ddd7f4d71585a16030"
+      "LICENSE.CDDL" "2382bf0bfe2f0fea89ac14061953f605c09f8489"
+      "Makefile" "7789399b389199aad2f67f1c9bf44205b811746b"
+      "README" "f41c6696067dda76230b04dcd11c856e84dcd26c"
+      "kimspec.edn" "61c840f5b500715cf40e98ac3be2cf9b30758c79"
+    }
+  }
+
+  {
+    "extended-id" "EAM_QuinticHermiteSpline__MD_029719603993_002"
+    "event-type" "metadata-update"
+    "user-id" "4d62befd-21c4-42b8-a472-86132e6591f3"
+    "timestamp" "2018-05-07 14:55:01"
+    "comments" "Update description in kimspec.edn"
+    "checksums" {
+      "CreateDispatch.sh" "516d716a0a26401ca99387775d0cc95e6a6eeea4"
+      "EAM.cpp" "4a069d2483b5356cf159a88e5e3aa9b0914f628f"
+      "EAM.hpp" "1af413f1c7d8af40b652d7b80b0bae78f888284e"
+      "EAM.kim.tpl" "300068b3f7e233a1514ec367850890c76390e83d"
+      "EAM_Implementation.cpp" "e7a42c193ad74636871317ca8f118a36647ca632"
+      "EAM_Implementation.hpp" "e284ad045a2e127f8e69d3ebea6ef7c99269fb59"
+      "EAM_QuinticHermiteSpline.cpp" "eddec8ed915e726011f18ac9121a516587359cf5"
+      "EAM_QuinticHermiteSpline.hpp" "75cc06695a1b548e18b020ddd7f4d71585a16030"
+      "LICENSE.CDDL" "2382bf0bfe2f0fea89ac14061953f605c09f8489"
+      "Makefile" "7789399b389199aad2f67f1c9bf44205b811746b"
+      "README" "f41c6696067dda76230b04dcd11c856e84dcd26c"
+      "kimspec.edn" "c906f49a1d12ea5bca85a10b17937076cffd0f2c"
+    }
+  }
+
+  {
+    "extended-id" "EAM_QuinticHermiteSpline__MD_029719603993_002"
+    "event-type" "revised-version-creation"
+    "user-id" "4d62befd-21c4-42b8-a472-86132e6591f3"
+    "timestamp" "2018-05-02 15:42:36"
+    "comments" "Various bug and robustness fixes that were incorporated into EAM_Dynamo__MD_120291908751_003, as well as the fix made in going to EAM_Dynamo__MD_120291908751_004"
+    "checksums" {
+      "CreateDispatch.sh" "516d716a0a26401ca99387775d0cc95e6a6eeea4"
+      "EAM.cpp" "4a069d2483b5356cf159a88e5e3aa9b0914f628f"
+      "EAM.hpp" "1af413f1c7d8af40b652d7b80b0bae78f888284e"
+      "EAM.kim.tpl" "300068b3f7e233a1514ec367850890c76390e83d"
+      "EAM_Implementation.cpp" "e7a42c193ad74636871317ca8f118a36647ca632"
+      "EAM_Implementation.hpp" "e284ad045a2e127f8e69d3ebea6ef7c99269fb59"
+      "EAM_QuinticHermiteSpline.cpp" "eddec8ed915e726011f18ac9121a516587359cf5"
+      "EAM_QuinticHermiteSpline.hpp" "75cc06695a1b548e18b020ddd7f4d71585a16030"
+      "LICENSE.CDDL" "ab021ec11127dedf19c4219e70c9ad22318b7ab7"
+      "Makefile" "7789399b389199aad2f67f1c9bf44205b811746b"
+      "README" "f41c6696067dda76230b04dcd11c856e84dcd26c"
+      "kimspec.edn" "39a2158fd71ca19d9936225cd1c3b69d9be22039"
+    }
+  }
+
+  {
+    "extended-id" "EAM_QuinticHermiteSpline__MD_029719603993_001"
+    "event-type" "metadata-update"
+    "user-id" "5ca58a6a-aa46-4e5a-a2e1-b3fc6bc2efa6"
+    "timestamp" "2016-08-15 12:00:00"
+    "comments" "Update kimspec.edn"
+    "checksums" {
+      "CreateDispatch.sh" "04bfca685c4c5e4adc2f4c4a308a27d162b7d097"
+      "EAM.cpp" "12fd704fa0713496849be58bad3d0f0b230571b0"
+      "EAM.hpp" "7e3206e1e32271c8effea0968e44fc6f1ff1154b"
+      "EAM.kim.tpl" "7e43a19688dbe11b0a24b2ff30fde010bdb987e5"
+      "EAM_Implementation.cpp" "44727250effb1480eec483f5183ef95728ebc7d3"
+      "EAM_Implementation.hpp" "499521dacb99f8210f0b96d7573d993d8efb5c86"
+      "EAM_QuinticHermiteSpline.cpp" "eddec8ed915e726011f18ac9121a516587359cf5"
+      "EAM_QuinticHermiteSpline.hpp" "472cf2b1ff42cc60e3babdb82efc327cf2e80886"
+      "LICENSE.CDDL" "ab021ec11127dedf19c4219e70c9ad22318b7ab7"
+      "Makefile" "0f13f1e60553b5252156eddf474738ac816ab685"
+      "README" "90d3f4e7c5e7ba867fdb6a5191f4c51fa98f550a"
+      "kimspec.edn" "630a87dedaf16b2874ce8ee33261586b8d31ce98"
+    }
+  }
+
+  {
+    "extended-id" "EAM_QuinticHermiteSpline__MD_029719603993_001"
+    "event-type" "revised-version-creation"
+    "user-id" "5ca58a6a-aa46-4e5a-a2e1-b3fc6bc2efa6"
+    "timestamp" "2016-07-19 21:58:20"
+    "comments" "Removed double-parameter publishing. Fixed energy problems with ghost atoms when using NEIGH_PURE_F"
+    "checksums" {
+      "CreateDispatch.sh" "04bfca685c4c5e4adc2f4c4a308a27d162b7d097"
+      "EAM.cpp" "12fd704fa0713496849be58bad3d0f0b230571b0"
+      "EAM.hpp" "7e3206e1e32271c8effea0968e44fc6f1ff1154b"
+      "EAM.kim.tpl" "7e43a19688dbe11b0a24b2ff30fde010bdb987e5"
+      "EAM_Implementation.cpp" "44727250effb1480eec483f5183ef95728ebc7d3"
+      "EAM_Implementation.hpp" "499521dacb99f8210f0b96d7573d993d8efb5c86"
+      "EAM_QuinticHermiteSpline.cpp" "eddec8ed915e726011f18ac9121a516587359cf5"
+      "EAM_QuinticHermiteSpline.hpp" "472cf2b1ff42cc60e3babdb82efc327cf2e80886"
+      "LICENSE.CDDL" "ab021ec11127dedf19c4219e70c9ad22318b7ab7"
+      "Makefile" "0f13f1e60553b5252156eddf474738ac816ab685"
+      "README" "90d3f4e7c5e7ba867fdb6a5191f4c51fa98f550a"
+      "kimspec.edn" "4b679b4f439ece6b8a08b7c87dfdd680a8583229"
+    }
+  }
+
+  {
+    "extended-id" "EAM_QuinticHermiteSpline__MD_029719603993_000"
+    "event-type" "initial-creation"
+    "user-id" "5ca58a6a-aa46-4e5a-a2e1-b3fc6bc2efa6"
+    "timestamp" "2015-04-16 18:17:02"
+    "comments" ""
+    "checksums" {
+      "CreateDispatch.sh" "04bfca685c4c5e4adc2f4c4a308a27d162b7d097"
+      "EAM.cpp" "12fd704fa0713496849be58bad3d0f0b230571b0"
+      "EAM.hpp" "7e3206e1e32271c8effea0968e44fc6f1ff1154b"
+      "EAM.kim.tpl" "b721a2eaacdd9258711844c347f2664a02cce17e"
+      "EAM_Implementation.cpp" "9fba735c98f4457ee247bcbaecffd50b692bdc16"
+      "EAM_Implementation.hpp" "d1412cd370e22d3f2626638f0baee86b1e2317e9"
+      "EAM_QuinticHermiteSpline.cpp" "eddec8ed915e726011f18ac9121a516587359cf5"
+      "EAM_QuinticHermiteSpline.hpp" "472cf2b1ff42cc60e3babdb82efc327cf2e80886"
+      "LICENSE.CDDL" "ab021ec11127dedf19c4219e70c9ad22318b7ab7"
+      "Makefile" "b2662f3305fb6139e807d6224496d19e145d7ea1"
+      "README" "6eda65a906ae0d372c61efb38ced774ed86be4b8"
+      "kimspec.edn" "154c56185e4d40f3f1043a8b7e448956eac8890b"
+    }
+  }
+]
