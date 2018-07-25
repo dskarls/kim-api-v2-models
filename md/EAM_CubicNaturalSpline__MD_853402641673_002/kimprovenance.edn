@@ -1,0 +1,155 @@
+[
+  {
+    "extended-id" "EAM_CubicNaturalSpline__MD_853402641673_001"
+    "event-type" "metadata-update"
+    "user-id" "4d62befd-21c4-42b8-a472-86132e6591f3"
+    "timestamp" "2018-06-18 15:31:02"
+    "comments" "Change 'url' in kimspec to 'doi'"
+    "checksums" {
+      "CreateDispatch.sh" "516d716a0a26401ca99387775d0cc95e6a6eeea4"
+      "EAM.cpp" "4a069d2483b5356cf159a88e5e3aa9b0914f628f"
+      "EAM.hpp" "1af413f1c7d8af40b652d7b80b0bae78f888284e"
+      "EAM.kim.tpl" "300068b3f7e233a1514ec367850890c76390e83d"
+      "EAM_CubicNaturalSpline.cpp" "057d2f3fd39c6a626043343379baa4195696793d"
+      "EAM_CubicNaturalSpline.hpp" "4da2b0d08e779e9998c168f72402a3a782e2450d"
+      "EAM_Implementation.cpp" "e7a42c193ad74636871317ca8f118a36647ca632"
+      "EAM_Implementation.hpp" "e284ad045a2e127f8e69d3ebea6ef7c99269fb59"
+      "LICENSE.CDDL" "2382bf0bfe2f0fea89ac14061953f605c09f8489"
+      "Makefile" "700b1d62a90063276b46e954eeb5be972be460d0"
+      "README" "e304c87a19d2b29896001f000eb3834a8d298a23"
+      "kimspec.edn" "04278c8be02a613e46810b8abee5fe8309425d1b"
+    }
+  }
+
+  {
+    "extended-id" "EAM_CubicNaturalSpline__MD_853402641673_001"
+    "event-type" "metadata-update"
+    "user-id" "4d62befd-21c4-42b8-a472-86132e6591f3"
+    "timestamp" "2018-06-05 18:20:11"
+    "comments" "Add 'recordtype' and 'recordkey' to source-citations"
+    "checksums" {
+      "CreateDispatch.sh" "516d716a0a26401ca99387775d0cc95e6a6eeea4"
+      "EAM.cpp" "4a069d2483b5356cf159a88e5e3aa9b0914f628f"
+      "EAM.hpp" "1af413f1c7d8af40b652d7b80b0bae78f888284e"
+      "EAM.kim.tpl" "300068b3f7e233a1514ec367850890c76390e83d"
+      "EAM_CubicNaturalSpline.cpp" "057d2f3fd39c6a626043343379baa4195696793d"
+      "EAM_CubicNaturalSpline.hpp" "4da2b0d08e779e9998c168f72402a3a782e2450d"
+      "EAM_Implementation.cpp" "e7a42c193ad74636871317ca8f118a36647ca632"
+      "EAM_Implementation.hpp" "e284ad045a2e127f8e69d3ebea6ef7c99269fb59"
+      "LICENSE.CDDL" "2382bf0bfe2f0fea89ac14061953f605c09f8489"
+      "Makefile" "700b1d62a90063276b46e954eeb5be972be460d0"
+      "README" "e304c87a19d2b29896001f000eb3834a8d298a23"
+      "kimspec.edn" "c4a9c9fe6eb76cecb100b2daaf8327482abcbc41"
+    }
+  }
+
+  {
+    "extended-id" "EAM_CubicNaturalSpline__MD_853402641673_001"
+    "event-type" "metadata-update"
+    "user-id" "4d62befd-21c4-42b8-a472-86132e6591f3"
+    "timestamp" "2018-05-11 15:27:58"
+    "comments" "Convert 'author' key from array to scalar"
+    "checksums" {
+      "CreateDispatch.sh" "516d716a0a26401ca99387775d0cc95e6a6eeea4"
+      "EAM.cpp" "4a069d2483b5356cf159a88e5e3aa9b0914f628f"
+      "EAM.hpp" "1af413f1c7d8af40b652d7b80b0bae78f888284e"
+      "EAM.kim.tpl" "300068b3f7e233a1514ec367850890c76390e83d"
+      "EAM_CubicNaturalSpline.cpp" "057d2f3fd39c6a626043343379baa4195696793d"
+      "EAM_CubicNaturalSpline.hpp" "4da2b0d08e779e9998c168f72402a3a782e2450d"
+      "EAM_Implementation.cpp" "e7a42c193ad74636871317ca8f118a36647ca632"
+      "EAM_Implementation.hpp" "e284ad045a2e127f8e69d3ebea6ef7c99269fb59"
+      "LICENSE.CDDL" "2382bf0bfe2f0fea89ac14061953f605c09f8489"
+      "Makefile" "700b1d62a90063276b46e954eeb5be972be460d0"
+      "README" "e304c87a19d2b29896001f000eb3834a8d298a23"
+      "kimspec.edn" "ff3c97cbefde792f573edf480052d6f7eeccd2cf"
+    }
+  }
+
+  {
+    "extended-id" "EAM_CubicNaturalSpline__MD_853402641673_001"
+    "event-type" "metadata-update"
+    "user-id" "4d62befd-21c4-42b8-a472-86132e6591f3"
+    "timestamp" "2018-05-07 14:55:01"
+    "comments" "Update description in kimspec.edn"
+    "checksums" {
+      "CreateDispatch.sh" "516d716a0a26401ca99387775d0cc95e6a6eeea4"
+      "EAM.cpp" "4a069d2483b5356cf159a88e5e3aa9b0914f628f"
+      "EAM.hpp" "1af413f1c7d8af40b652d7b80b0bae78f888284e"
+      "EAM.kim.tpl" "300068b3f7e233a1514ec367850890c76390e83d"
+      "EAM_CubicNaturalSpline.cpp" "057d2f3fd39c6a626043343379baa4195696793d"
+      "EAM_CubicNaturalSpline.hpp" "4da2b0d08e779e9998c168f72402a3a782e2450d"
+      "EAM_Implementation.cpp" "e7a42c193ad74636871317ca8f118a36647ca632"
+      "EAM_Implementation.hpp" "e284ad045a2e127f8e69d3ebea6ef7c99269fb59"
+      "LICENSE.CDDL" "2382bf0bfe2f0fea89ac14061953f605c09f8489"
+      "Makefile" "700b1d62a90063276b46e954eeb5be972be460d0"
+      "README" "e304c87a19d2b29896001f000eb3834a8d298a23"
+      "kimspec.edn" "5133092150ca13dcdfce04b7cda92cb45a369456"
+    }
+  }
+
+  {
+    "extended-id" "EAM_CubicNaturalSpline__MD_853402641673_001"
+    "event-type" "revised-version-creation"
+    "user-id" "4d62befd-21c4-42b8-a472-86132e6591f3"
+    "timestamp" "2018-05-02 15:42:36"
+    "comments" "Various bug and robustness fixes that were incorporated into EAM_Dynamo__MD_120291908751_003, as well as the fix made in going to EAM_Dynamo__MD_120291908751_004"
+    "checksums" {
+      "CreateDispatch.sh" "516d716a0a26401ca99387775d0cc95e6a6eeea4"
+      "EAM.cpp" "4a069d2483b5356cf159a88e5e3aa9b0914f628f"
+      "EAM.hpp" "1af413f1c7d8af40b652d7b80b0bae78f888284e"
+      "EAM.kim.tpl" "300068b3f7e233a1514ec367850890c76390e83d"
+      "EAM_CubicNaturalSpline.cpp" "057d2f3fd39c6a626043343379baa4195696793d"
+      "EAM_CubicNaturalSpline.hpp" "4da2b0d08e779e9998c168f72402a3a782e2450d"
+      "EAM_Implementation.cpp" "e7a42c193ad74636871317ca8f118a36647ca632"
+      "EAM_Implementation.hpp" "e284ad045a2e127f8e69d3ebea6ef7c99269fb59"
+      "LICENSE.CDDL" "ab021ec11127dedf19c4219e70c9ad22318b7ab7"
+      "Makefile" "700b1d62a90063276b46e954eeb5be972be460d0"
+      "README" "e304c87a19d2b29896001f000eb3834a8d298a23"
+      "kimspec.edn" "4b3be3fa9ce8f42d1d3edce06fa48c7f9df20a1b"
+    }
+  }
+
+  {
+    "extended-id" "EAM_CubicNaturalSpline__MD_853402641673_000"
+    "event-type" "metadata-update"
+    "user-id" "b645a915-d1fa-4155-a3da-65469f990011"
+    "timestamp" "2016-08-15 12:00:00"
+    "comments" "Update kimspec.edn"
+    "checksums" {
+      "CreateDispatch.sh" "04bfca685c4c5e4adc2f4c4a308a27d162b7d097"
+      "EAM.cpp" "12fd704fa0713496849be58bad3d0f0b230571b0"
+      "EAM.hpp" "7e3206e1e32271c8effea0968e44fc6f1ff1154b"
+      "EAM.kim.tpl" "7e43a19688dbe11b0a24b2ff30fde010bdb987e5"
+      "EAM_CubicNaturalSpline.cpp" "057d2f3fd39c6a626043343379baa4195696793d"
+      "EAM_CubicNaturalSpline.hpp" "2f0b55172cb1e542dd9291709d778d54484643a2"
+      "EAM_Implementation.cpp" "44727250effb1480eec483f5183ef95728ebc7d3"
+      "EAM_Implementation.hpp" "499521dacb99f8210f0b96d7573d993d8efb5c86"
+      "LICENSE.CDDL" "ab021ec11127dedf19c4219e70c9ad22318b7ab7"
+      "Makefile" "7c920a9c7b4de64658fe10da7d2967e60d0e55bd"
+      "README" "4f9d7c01e87d557eb62281b6761718268f719847"
+      "kimspec.edn" "8ac3a47f757ef55736c4abcbfb432a02cc67cd45"
+    }
+  }
+
+  {
+    "extended-id" "EAM_CubicNaturalSpline__MD_853402641673_000"
+    "event-type" "initial-creation"
+    "user-id" "b645a915-d1fa-4155-a3da-65469f990011"
+    "timestamp" "2016-07-19 21:54:36"
+    "comments" ""
+    "checksums" {
+      "CreateDispatch.sh" "04bfca685c4c5e4adc2f4c4a308a27d162b7d097"
+      "EAM.cpp" "12fd704fa0713496849be58bad3d0f0b230571b0"
+      "EAM.hpp" "7e3206e1e32271c8effea0968e44fc6f1ff1154b"
+      "EAM.kim.tpl" "7e43a19688dbe11b0a24b2ff30fde010bdb987e5"
+      "EAM_CubicNaturalSpline.cpp" "057d2f3fd39c6a626043343379baa4195696793d"
+      "EAM_CubicNaturalSpline.hpp" "2f0b55172cb1e542dd9291709d778d54484643a2"
+      "EAM_Implementation.cpp" "44727250effb1480eec483f5183ef95728ebc7d3"
+      "EAM_Implementation.hpp" "499521dacb99f8210f0b96d7573d993d8efb5c86"
+      "LICENSE.CDDL" "ab021ec11127dedf19c4219e70c9ad22318b7ab7"
+      "Makefile" "7c920a9c7b4de64658fe10da7d2967e60d0e55bd"
+      "README" "4f9d7c01e87d557eb62281b6761718268f719847"
+      "kimspec.edn" "19f573448e092d85e167aba6a63fce48aed3844b"
+    }
+  }
+]
