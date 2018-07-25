@@ -108,6 +108,9 @@ static void calc_phi_d2phi(double* epsilon,
 
 /* Define model_buffer structure */
 struct model_buffer {
+  int paddingNeighborHints;
+  int halfListHints;
+
   int energy_ind;
   int forces_ind;
   int particleEnergy_ind;
@@ -722,6 +725,8 @@ int model_driver_create(KIM_ModelDriverCreate *const modelDriverCreate,
   buffer->Rzero = Rzero;
   buffer->C = C;
   buffer->Pcutoff = cutoff;
+  buffer->paddingNeighborHints = 1;
+  buffer->halfListHints = 1;
 
   /* set value of parameter shift */
   dummy = 0.0;
@@ -740,7 +745,11 @@ int model_driver_create(KIM_ModelDriverCreate *const modelDriverCreate,
 
   /* Register cutoff pointer */
   LOG_INFORMATION("Registering cutoff pointer");
-  KIM_ModelDriverCreate_SetNeighborListCutoffsPointer(modelDriverCreate, 1, &(buffer->Pcutoff));
+  KIM_ModelDriverCreate_SetNeighborListPointers(modelDriverCreate, 1,
+                                                &(buffer->Pcutoff),
+                                                (const int*) &(buffer->paddingNeighborHints),
+                                                (const int*) &(buffer->halfListHints));
+
 
   /* Register Model parameters */
   LOG_INFORMATION("Registering Model parameters");
@@ -788,8 +797,11 @@ static int refresh(KIM_ModelRefresh * const modelRefresh){
   buffer->shift = -buffer->shift;
   KIM_ModelRefresh_SetInfluenceDistancePointer(
       modelRefresh, &(buffer->influenceDistance));
-  KIM_ModelRefresh_SetNeighborListCutoffsPointer(
-      modelRefresh, 1, &(buffer->influenceDistance));
+
+  KIM_ModelRefresh_SetNeighborListPointers(modelRefresh, 1,
+                                              &(buffer->Pcutoff),
+                                              (const int*) &(buffer->paddingNeighborHints),
+                                              (const int*) &(buffer->halfListHints));
 
   return FALSE;
 }

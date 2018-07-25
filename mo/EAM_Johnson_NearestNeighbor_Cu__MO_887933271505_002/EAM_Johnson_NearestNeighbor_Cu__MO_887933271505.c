@@ -72,6 +72,9 @@
 /* Model buffer definition */
 struct buffer
 {
+  int paddingNeighborHints;
+  int halfListHints;
+
   double influenceDistance;
   double cutoff;
 };
@@ -630,7 +633,7 @@ int model_create(KIM_ModelCreate * const modelCreate,
                  KIM_TemperatureUnit const requestedTemperatureUnit,
                  KIM_TimeUnit const requestedTimeUnit)
 {
-buffer * bufferPointer;
+  buffer * bufferPointer;
   int error;
 
   /* set units */
@@ -693,6 +696,8 @@ buffer * bufferPointer;
   /* set buffer values */
   bufferPointer->influenceDistance = MODEL_CUTOFF;
   bufferPointer->cutoff = MODEL_CUTOFF;
+  bufferPointer->paddingNeighborHints = 1;
+  bufferPointer->halfListHints = 1;
 
   /* register influence distance */
   KIM_ModelCreate_SetInfluenceDistancePointer(
@@ -700,8 +705,10 @@ buffer * bufferPointer;
       &(bufferPointer->influenceDistance));
 
   /* register cutoff */
-  KIM_ModelCreate_SetNeighborListCutoffsPointer(modelCreate, 1,
-                                                &(bufferPointer->cutoff));
+  KIM_ModelCreate_SetNeighborListPointers(modelCreate, 1,
+                                                &(bufferPointer->cutoff),
+                                                (const int*) &(bufferPointer->paddingNeighborHints),
+                                                (const int*) &(bufferPointer->halfListHints));
 
   if (error)
   {
@@ -730,8 +737,10 @@ static int model_refresh(KIM_ModelRefresh * const modelRefresh)
   LOG_INFORMATION("Resetting influence distance and cutoffs");
   KIM_ModelRefresh_SetInfluenceDistancePointer(
       modelRefresh, &(bufferPointer->influenceDistance));
-  KIM_ModelRefresh_SetNeighborListCutoffsPointer(modelRefresh, 1,
-                                                 &(bufferPointer->cutoff));
+  KIM_ModelRefresh_SetNeighborListPointers(modelRefresh, 1,
+                                                &(bufferPointer->cutoff),
+                                                (const int*) &(bufferPointer->paddingNeighborHints),
+                                                (const int*) &(bufferPointer->halfListHints));
 
   return FALSE;
 }
