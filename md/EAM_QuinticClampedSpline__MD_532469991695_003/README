@@ -1,0 +1,176 @@
+#
+# CDDL HEADER START
+#
+# The contents of this file are subject to the terms of the Common Development
+# and Distribution License Version 1.0 (the "License").
+#
+# You can obtain a copy of the license at
+# http://www.opensource.org/licenses/CDDL-1.0.  See the License for the
+# specific language governing permissions and limitations under the License.
+#
+# When distributing Covered Code, include this CDDL HEADER in each file and
+# include the License file in a prominent location with the name LICENSE.CDDL.
+# If applicable, add the following below this CDDL HEADER, with the fields
+# enclosed by brackets "[]" replaced with your own identifying information:
+#
+# Portions Copyright (c) [yyyy] [name of copyright owner]. All rights reserved.
+#
+# CDDL HEADER END
+#
+
+#
+# Copyright (c) 2013--2018, Regents of the University of Minnesota.
+# All rights reserved.
+#
+# Contributors:
+#    Ryan S. Elliott
+#
+
+
+This directory (EAM_QuinticClampedSpline__MD_532469991695_003) contains an EAM
+Model Driver which reads Dynamo setfl, funcfl, and setfl Finnis Sinclair table
+files.  The driver is written in C++.  The driver is designed to
+mimic/reproduce the behavior of LAMMPS's eam, eam/alloy, and eam/fs
+pair_styles.  The type of table file provided is automatically detected.
+However, note that the spline algorithms used are quintic clamped splines.
+
+This Model Driver complies with the KIM API 2.0 interface standard and supports
+optional computation of `partialEnergy', `partialForces',
+`partialParticleEnergy', `ProcessDeDrTerm', and `ProcessD2EDr2Term'.  When the
+number of table files provided to the Model Driver is greater than one, the
+Model Driver expects each table file to be a funcfl file.  These are, together,
+are used to define a multi-species Model.  When only one table file is
+provided, the Model Driver determines the type of provided table file by the
+file's contents.
+
+The format of the Dynamo files supported by this Model Driver follows the
+LAMMPS format.  (NOTE an exception: To facilitate auto-detection of table file
+type, all floating point values are expected to be proper floating point
+numbers, with at least a decimal point.  This is required in order to
+distinguish them from integer values.)  The LAMMPS format is described below
+(adapted from the LAMMPS documentation as of 2013-11-19):
+
+This Model Driver computes pairwise interactions for metals and metal alloys
+using embedded-atom method (EAM) potentials (Daw). The total energy Ei of an
+atom I is given by
+
+     E_i = F_\alpha( \sum_{j\neq i} \rho_\beta(r_{ij}))
+           + (1/2)\sum_{j\neq i} \phi_{\alpha \beta}(r_{ij})
+
+
+
+A DYNAMO single-element funcfl file is formatted as follows:
+
+* line 1: comment (ignored)
+* line 2: atomic number, mass, lattice constant, lattice type (e.g. FCC)
+* line 3: Nrho, drho, Nr, dr, cutoff
+
+The mass is in mass units, e.g. mass number or grams/mole for metal units. The
+cubic lattice constant is in Angstroms.  On line 3, Nrho and Nr are the number
+of tabulated values in the subsequent arrays, drho and dr are the spacing in
+density and distance space for the values in those arrays, and the specified
+cutoff becomes the pairwise cutoff for the potential.  The units of dr are
+Angstroms; I'm not sure of the units for drho - some measure of electron
+density.
+
+Following the three header lines are three arrays of tabulated values:
+
+* embedding function F(rho) (Nrho values)
+* effective charge function Z(r) (Nr values)
+* density function rho(r) (Nr values)
+
+The values for each array can be listed as multiple values per line, so long as
+each array starts on a new line.  For example, the individual Z(r) values are
+for r = 0.0,dr,2*dr, ... (Nr-1)*dr.
+
+The units for the embedding function F are eV. The units for the density
+function rho are the same as for drho (see above, electron density).  The units
+for the effective charge Z are "atomic charge" or sqrt(Hartree * Bohr-radii).
+For two interacting atoms i,j this is used to compute the pair potential term
+in the EAM energy expression as r*phi, in units of eV-Angstroms, via the
+formula
+
+r*phi = 27.2 * 0.529 * Zi * Zj
+where 1 Hartree = 27.2 eV and 1 Bohr = 0.529 Angstroms.
+
+
+
+A DYNAMO multi-element setfl file is formatted as follows:
+
+* lines 1,2,3 = comments (ignored)
+* line 4: Nelements Element1 Element2 ... ElementN
+* line 5: Nrho, drho, Nr, dr, cutoff
+
+In a DYNAMO setfl file, line 4 only lists Nelements = the # of elements in the
+setfl file.  The element name (Ni, Cu, etc) of each element must be included on
+the line, in the order the elements appear in the file.
+
+The meaning and units of the values in line 5 is the same as for the funcfl
+file described above.  Note that the cutoff (in Angstroms) is a global value,
+valid for all pairwise interactions for all element pairings.
+
+Following the 5 header lines are Nelements sections, one for each element, each
+with the following format:
+
+* line 1 = atomic number, mass, lattice constant, lattice type (e.g. FCC)
+* embedding function F(rho) (Nrho values)
+* density function rho(r) (Nr values)
+
+The cubic lattice constant is in Angstroms. The F and rho arrays are unique to
+a single element and have the same format and units as in a funcfl file.
+
+Following the Nelements sections, Nr values for each pair potential phi(r)
+array are listed for all i,j element pairs in the same format as other arrays.
+Since these interactions are symmetric (i,j = j,i) only phi arrays with i >= j
+are listed, in the following order: i,j = (1,1), (2,1), (2,2), (3,1), (3,2),
+(3,3), (4,1), ..., (Nelements, Nelements).  Unlike the effective charge array
+Z(r) in funcfl files, the tabulated values for each phi function are listed in
+setfl files directly as r*phi (in units of eV-Angstroms), since they are for
+atom pairs.
+
+
+
+A DYNAMO Finnis Sinclair setfl file is formatted as follows:
+
+In this case the Model Driver computes pairwise interactions for metals and
+metal alloys using a generalized form of EAM potentials due to Finnis and
+Sinclair (Finnis). The total energy Ei of an atom I is given by
+
+     E_i = F_\alpha( \sum_{j\neq i} \rho_{\alpha \beta}(r_{ij}))
+           + (1/2)\sum_{j\neq i} \phi_{\alpha \beta}(r_{ij})
+
+These files include more information than the DYNAMO setfl format files
+described above, in that i,j density functionals for all pairs of elements are
+included as needed by the Finnis/Sinclair formulation of the EAM.
+
+* lines 1,2,3 = comments (ignored)
+* line 4: Nelements Element1 Element2 ... ElementN
+* line 5: Nrho, drho, Nr, dr, cutoff
+
+The 5-line header section is identical to an EAM setfl file.
+
+Following the header are Nelements sections, one for each element I, each with
+the following format:
+
+* line 1 = atomic number, mass, lattice constant, lattice type (e.g. FCC)
+* embedding function F(rho) (Nrho values)
+* density function rho(r) for element I at element 1 (Nr values)
+* density function rho(r) for element I at element 2
+* ...
+* density function rho(r) for element I at element Nelement
+
+The units of these quantities in line 1 are the same as for setfl files. Note
+that the rho(r) arrays in Finnis/Sinclair can be asymmetric (i,j != j,i) so
+there are Nelements^2 of them listed in the file.
+
+Following the Nelements sections, Nr values for each pair potential phi(r)
+array are listed in the same manner (r*phi, units of eV-Angstroms) as in EAM
+setfl files.  Note that in Finnis/Sinclair, the phi(r) arrays are still
+symmetric, so only phi arrays for i >= j are listed.
+
+Quintic spline is used to interpolate the tabulated potential data.
+Quintic spline requires 1st to 4th derivatives to be continuous at each internal
+knots, namely it belongs to C^4. Four BCs are needed to determine the spline.
+They are the first and second derivatives at both ends. Here, the first and second
+derivatives are estimated by four-points forward finite difference method at the
+left end, and by four-points backward finite difference method at the right end.

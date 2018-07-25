@@ -1,0 +1,24 @@
+{
+  "title" "EAM Model Driver with clamped quintic spline interpolation"
+  "extended-id" "EAM_QuinticClampedSpline__MD_532469991695_003"
+  "author" "Mingjian Wen and Ryan S. Elliott"
+  "description" "EAM Model Driver which reads 'Dynamo setfl', 'Dynamo funcfl', and 'Finnis Sinclair setfl' table files for the Embedded-Atom Method (EAM) and Finnis Sinclair potentials (the type of table file is detected automatically).  Written in C++, the driver is designed to mimic the behavior of LAMMPS's eam, eam/alloy, and eam/fs pair_styles, except that (1) it uses quintic clamped splines instead of cubic Hermite splines and (2) rather than perform linear extrapolation in the event that the embedding density is outside of the interpolative regime tabulated in the parameter file for the relevant species, this implementation provided here will simply return an error message and exit.
+
+  This Model Driver complies with the KIM API interface standard, using any NBC and iterator or locator mode, publishes its parameters, and supports optional computation of `energy', `forces', `particleEnergy', `process_dEdr', and `process_d2Edr2'.  Its initialization routine takes a KIM API object pointer, a pointer to a two-dimensional character array (each row of which contains the full path to a parameter file) of the form a[b][c], a pointer to the value of c, and a pointer to the value of b.  When multiple funcfl files are used to define a multispecies Model, the driver expects b > 1.  In all other cases, it expects b = 1, and the format of the provided table file is determined based on its contents."
+  "source-citations" [{"author" "M Wen and S M Whalen and R S Elliott and E B Tadmor"
+                       "title" "Interpolation effects in tabulated interatomic potentials"
+                       "journal" "Modelling and Simulation in Materials Science and Engineering"
+                       "volume" "23"
+                       "number" "7"
+                       "pages" "074008"
+                       "year" "2015"
+                       "doi" "10.1088/0965-0393/23/7/074008"
+                       "recordtype" "article"
+                       "recordkey" "MD_532469991695_002a"}]
+  "contributor-id" "5ca58a6a-aa46-4e5a-a2e1-b3fc6bc2efa6"
+  "maintainer-id" "5ca58a6a-aa46-4e5a-a2e1-b3fc6bc2efa6"
+  "publication-year" "2018"
+  "kim-api-version" "1.6"
+  "executables" ["CreateDispatch.sh"]
+  "domain" "openkim.org"
+}
