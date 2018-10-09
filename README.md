@@ -1,3 +1,5 @@
+# WARNING: This repo is now deprecated and is being retained for provenance purposes --- its deletion is imminent.
+
 # kim-api-v2-models
 Conversion of 1.x-compliant KIM Models to be compliant with KIM API 2.0 (see https://github.com/openkim/kim-api/tree/devel-v2)
 
